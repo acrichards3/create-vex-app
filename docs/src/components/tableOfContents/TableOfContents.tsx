@@ -87,10 +87,7 @@ export const TableOfContents: React.FC = () => {
         let best: IntersectionObserverEntry | null = null;
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          if (
-            best === null ||
-            entry.intersectionRatio > best.intersectionRatio
-          ) {
+          if (best === null || entry.intersectionRatio > best.intersectionRatio) {
             best = entry;
           }
         }
@@ -120,10 +117,7 @@ export const TableOfContents: React.FC = () => {
       headingElements.forEach((element) => {
         observer.unobserve(element);
       });
-      scrollContainer.removeEventListener(
-        "scroll",
-        throttledCheckActiveHeading,
-      );
+      scrollContainer.removeEventListener("scroll", throttledCheckActiveHeading);
       if (scrollTimeout) {
         clearTimeout(scrollTimeout);
       }
@@ -156,8 +150,7 @@ export const TableOfContents: React.FC = () => {
         // containerRect.top is relative to viewport
         // currentScrollTop is the current scroll position
         // So: element position in content = (elementRect.top - containerRect.top) + currentScrollTop
-        const elementPositionInContent =
-          elementRect.top - containerRect.top + currentScrollTop;
+        const elementPositionInContent = elementRect.top - containerRect.top + currentScrollTop;
 
         // Scroll to position with a small offset for spacing
         scrollContainer.scrollTo({
@@ -182,20 +175,12 @@ export const TableOfContents: React.FC = () => {
   return (
     <aside className="hidden xl:flex py-8 w-64 shrink-0 px-4">
       <div className="sticky top-24 flex flex-1 flex-col gap-2 max-h-[calc(100vh-8rem)] overflow-y-auto thin-scrollbar">
-        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">
-          On this page
-        </h3>
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-white">On this page</h3>
         <nav className="flex flex-col gap-1">
           {headings.map((heading, index) => {
             const isActive = activeId === heading.id;
             const indentClass =
-              heading.level === 1
-                ? "pl-3"
-                : heading.level === 2
-                  ? "pl-6"
-                  : heading.level === 3
-                    ? "pl-10"
-                    : "pl-14";
+              heading.level === 1 ? "pl-3" : heading.level === 2 ? "pl-6" : heading.level === 3 ? "pl-10" : "pl-14";
 
             return (
               <button

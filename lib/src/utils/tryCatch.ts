@@ -21,9 +21,7 @@ export const tryCatch = <T>(fn: () => T): TryCatchResult<T> => {
  * @param fn - The async function to try to execute.
  * @returns A tuple containing the result of the async function and the error if it occurred.
  */
-export const tryCatchAsync = async <T>(
-  fn: () => Promise<T>,
-): Promise<TryCatchResult<T>> => {
+export const tryCatchAsync = async <T>(fn: () => Promise<T>): Promise<TryCatchResult<T>> => {
   try {
     return [await fn(), null];
   } catch (error) {

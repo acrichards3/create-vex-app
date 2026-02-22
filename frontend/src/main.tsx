@@ -8,9 +8,7 @@ import { raise } from "@thunder-app/lib";
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(
-  document.getElementById("root") ?? raise("Root element not found"),
-).render(
+ReactDOM.createRoot(document.getElementById("root") ?? raise("Root element not found")).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <SessionProvider>

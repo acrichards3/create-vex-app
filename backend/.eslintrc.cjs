@@ -10,12 +10,7 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "sort-keys", "typescript-sort-keys"],
   extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  ignorePatterns: [
-    "dist/**",
-    "node_modules/**",
-    "drizzle.config.ts",
-    ".eslintrc.cjs",
-  ],
+  ignorePatterns: ["dist/**", "node_modules/**", "drizzle.config.ts", ".eslintrc.cjs"],
   rules: {
     // Prefer ?? over || when defaulting
     "@typescript-eslint/prefer-nullish-coalescing": [
@@ -37,32 +32,23 @@ module.exports = {
       {
         selector:
           "LogicalExpression[operator='||']:not([parent.type='IfStatement']):not([parent.type='ConditionalExpression']):not([parent.type='WhileStatement']):not([parent.type='DoWhileStatement']):not([parent.type='ForStatement'])",
-        message:
-          "Use ?? for defaulting; || is only allowed in boolean test contexts.",
+        message: "Use ?? for defaulting; || is only allowed in boolean test contexts.",
       },
       {
-        selector:
-          "BinaryExpression[operator='==='][right.type='Identifier'][right.name='undefined']",
-        message:
-          "Avoid explicit === undefined comparisons. Prefer nullish checks or refine types.",
+        selector: "BinaryExpression[operator='==='][right.type='Identifier'][right.name='undefined']",
+        message: "Avoid explicit === undefined comparisons. Prefer nullish checks or refine types.",
       },
       {
-        selector:
-          "BinaryExpression[operator='!=='][right.type='Identifier'][right.name='undefined']",
-        message:
-          "Avoid explicit !== undefined comparisons. Prefer nullish checks or refine types.",
+        selector: "BinaryExpression[operator='!=='][right.type='Identifier'][right.name='undefined']",
+        message: "Avoid explicit !== undefined comparisons. Prefer nullish checks or refine types.",
       },
       {
-        selector:
-          "BinaryExpression[operator='==='][left.type='Identifier'][left.name='undefined']",
-        message:
-          "Avoid explicit === undefined comparisons. Prefer nullish checks or refine types.",
+        selector: "BinaryExpression[operator='==='][left.type='Identifier'][left.name='undefined']",
+        message: "Avoid explicit === undefined comparisons. Prefer nullish checks or refine types.",
       },
       {
-        selector:
-          "BinaryExpression[operator='!=='][left.type='Identifier'][left.name='undefined']",
-        message:
-          "Avoid explicit !== undefined comparisons. Prefer nullish checks or refine types.",
+        selector: "BinaryExpression[operator='!=='][left.type='Identifier'][left.name='undefined']",
+        message: "Avoid explicit !== undefined comparisons. Prefer nullish checks or refine types.",
       },
     ],
     // Existing project hygiene

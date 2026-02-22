@@ -21,10 +21,7 @@ function getCsrfToken(): string | undefined {
   return undefined;
 }
 
-export async function apiFetch(
-  path: string,
-  init?: RequestInit,
-): Promise<unknown> {
+export async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
   const url = `${env.VITE_BACKEND_URL}${path}`;
 
   const method = (init?.method ?? "GET").toUpperCase();
@@ -35,8 +32,7 @@ export async function apiFetch(
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
     const token = getCsrfToken();
-    if (token && !headers.has("X-CSRF-Token"))
-      headers.set("X-CSRF-Token", token);
+    if (token && !headers.has("X-CSRF-Token")) headers.set("X-CSRF-Token", token);
   }
 
   const response = await fetch(url, {
@@ -49,14 +45,10 @@ export async function apiFetch(
   const isJson = contentType.includes("application/json");
 
   if (!response.ok) {
-    const body: unknown = isJson
-      ? await response.json().catch(() => undefined)
-      : undefined;
+    const body: unknown = isJson ? await response.json().catch(() => undefined) : undefined;
     const parsed = errorResponseSchema.safeParse(body);
     const errorMessage =
-      parsed.success && parsed.data.message != null
-        ? String(parsed.data.message)
-        : response.statusText;
+      parsed.success && parsed.data.message != null ? String(parsed.data.message) : response.statusText;
     throw new Error(`Request failed ${response.status}: ${errorMessage}`);
   }
 

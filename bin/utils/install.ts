@@ -6,16 +6,11 @@ import { askYesNo } from "../prompts";
 const blue = (s: string) => `\x1b[34m${s}\x1b[0m`;
 
 export const runInstall = async (config: ProjectConfig): Promise<void> => {
-  const doInstall = await askYesNo(
-    "Run bun install for all workspaces now?",
-    true,
-  );
+  const doInstall = await askYesNo("Run bun install for all workspaces now?", true);
 
   if (!doInstall) return;
 
-  console.log(
-    colors.bold(blue("\n› Installing dependencies (root workspace)...\n")),
-  );
+  console.log(colors.bold(blue("\n› Installing dependencies (root workspace)...\n")));
 
   const installResult = Bun.spawnSync(["bun", "install"], {
     cwd: config.targetDir,
@@ -23,9 +18,7 @@ export const runInstall = async (config: ProjectConfig): Promise<void> => {
   });
 
   if (installResult.exitCode !== 0) {
-    console.error(
-      colors.red("bun install failed. You can run it manually later."),
-    );
+    console.error(colors.red("bun install failed. You can run it manually later."));
     return;
   }
 
@@ -37,8 +30,6 @@ export const runInstall = async (config: ProjectConfig): Promise<void> => {
   });
 
   if (buildResult.exitCode !== 0) {
-    console.error(
-      colors.red("lib build failed. You can run 'bun run build:lib' later."),
-    );
+    console.error(colors.red("lib build failed. You can run 'bun run build:lib' later."));
   }
 };

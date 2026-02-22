@@ -20,8 +20,7 @@ function getClientIp(headers: Headers): string {
 
 export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
   const { windowMs, limit } = options;
-  const genKey =
-    options.keyGenerator ?? ((ip: string, path: string) => `${ip}:${path}`);
+  const genKey = options.keyGenerator ?? ((ip: string, path: string) => `${ip}:${path}`);
 
   return async (c, next) => {
     const ip = getClientIp(c.req.raw.headers);
@@ -38,10 +37,7 @@ export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
 
     bucket.count += 1;
     if (bucket.count > limit) {
-      const retryAfterSec = Math.max(
-        1,
-        Math.ceil((bucket.resetAt - now) / 1000),
-      );
+      const retryAfterSec = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
       c.header("Retry-After", String(retryAfterSec));
       c.header("X-RateLimit-Limit", String(limit));
       c.header("X-RateLimit-Remaining", "0");
@@ -50,10 +46,7 @@ export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
     }
 
     c.header("X-RateLimit-Limit", String(limit));
-    c.header(
-      "X-RateLimit-Remaining",
-      String(Math.max(0, limit - bucket.count)),
-    );
+    c.header("X-RateLimit-Remaining", String(Math.max(0, limit - bucket.count)));
     c.header("X-RateLimit-Reset", String(Math.floor(bucket.resetAt / 1000)));
 
     await next();

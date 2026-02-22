@@ -7,22 +7,14 @@ import { copyRecursive } from "../utils/copy";
 // Template root is the package root (parent of bin/)
 const templateRoot = resolve(import.meta.dir, "../..");
 
-export const copyBaseTemplate = async (
-  config: ProjectConfig,
-): Promise<void> => {
+export const copyBaseTemplate = async (config: ProjectConfig): Promise<void> => {
   // Check if target directory exists and is not empty
   const targetExists = await Bun.file(config.targetDir).exists();
 
   if (targetExists) {
     const contents = readdirSync(config.targetDir);
     if (contents.length > 0) {
-      console.error(
-        colors.red(
-          colors.bold(
-            `Error: directory "${config.name}" already exists and is not empty.`,
-          ),
-        ),
-      );
+      console.error(colors.red(colors.bold(`Error: directory "${config.name}" already exists and is not empty.`)));
       process.exit(1);
     }
   } else {

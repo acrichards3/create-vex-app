@@ -5,9 +5,7 @@ export const promptProjectName = async (argName: string): Promise<string> => {
   let projectName = argName;
 
   if (!projectName) {
-    const answer = await prompt(
-      colors.cyan(`Project name (${DEFAULT_PROJECT_NAME}): `),
-    );
+    const answer = await prompt(colors.cyan(`Project name (${DEFAULT_PROJECT_NAME}): `));
     projectName = answer || DEFAULT_PROJECT_NAME;
   }
 

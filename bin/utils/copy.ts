@@ -18,11 +18,7 @@ const shouldSkipFile = (name: string): boolean => {
   return false;
 };
 
-export const copyRecursive = async (
-  src: string,
-  dest: string,
-  config: ProjectConfig,
-): Promise<void> => {
+export const copyRecursive = async (src: string, dest: string, config: ProjectConfig): Promise<void> => {
   const entries: Dirent[] = readdirSync(src, { withFileTypes: true });
 
   for (const entry of entries) {

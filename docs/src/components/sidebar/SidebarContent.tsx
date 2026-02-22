@@ -79,35 +79,25 @@ export const getAllNavigationItems = (): Array<{
   href: string;
   title: string;
 }> => {
-  const sortedSections = Object.values(SIDEBAR_ITEMS).sort(
-    (a, b) => a.order - b.order,
-  );
-  return sortedSections.flatMap((section) =>
-    section.items.map((item) => ({ href: item.href, title: item.title })),
-  );
+  const sortedSections = Object.values(SIDEBAR_ITEMS).sort((a, b) => a.order - b.order);
+  return sortedSections.flatMap((section) => section.items.map((item) => ({ href: item.href, title: item.title })));
 };
 
 interface SidebarContentProps {
   onLinkClick?: () => void;
 }
 
-export const SidebarContent: React.FC<SidebarContentProps> = ({
-  onLinkClick,
-}) => {
+export const SidebarContent: React.FC<SidebarContentProps> = ({ onLinkClick }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const sortedSections = Object.values(SIDEBAR_ITEMS).sort(
-    (a, b) => a.order - b.order,
-  );
+  const sortedSections = Object.values(SIDEBAR_ITEMS).sort((a, b) => a.order - b.order);
 
   return (
     <>
       {sortedSections.map((section) => (
         <div className="flex flex-col gap-2" key={section.sectionTitle}>
-          <h3 className="mb-2 text-base font-semibold uppercase tracking-wide text-white">
-            {section.sectionTitle}
-          </h3>
+          <h3 className="mb-2 text-base font-semibold uppercase tracking-wide text-white">{section.sectionTitle}</h3>
           <nav className="flex flex-col gap-1">
             {section.items.map((item) => {
               const isActive = currentPath === item.href;
@@ -122,9 +112,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({
                   onClick={onLinkClick}
                   to={item.href}
                 >
-                  {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-400 rounded-r" />
-                  )}
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-400 rounded-r" />}
                   <span className="pl-1">{item.title}</span>
                 </Link>
               );

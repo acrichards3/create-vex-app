@@ -2,18 +2,12 @@ import { resolve } from "path";
 import { colors } from "../constants";
 import type { ProjectConfig, PackageJson } from "../types";
 
-export const transformRootPackage = async (
-  config: ProjectConfig,
-): Promise<void> => {
+export const transformRootPackage = async (config: ProjectConfig): Promise<void> => {
   const pkgPath = resolve(config.targetDir, "package.json");
   const pkgFile = Bun.file(pkgPath);
 
   if (!(await pkgFile.exists())) {
-    console.error(
-      colors.red(
-        colors.bold("Error: package.json not found in target directory"),
-      ),
-    );
+    console.error(colors.red(colors.bold("Error: package.json not found in target directory")));
     process.exit(1);
   }
 
@@ -40,10 +34,7 @@ export const transformRootPackage = async (
   await Bun.write(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 };
 
-export async function transformWorkspacePackage(
-  config: ProjectConfig,
-  workspaceName: string,
-): Promise<void> {
+export async function transformWorkspacePackage(config: ProjectConfig, workspaceName: string): Promise<void> {
   const pkgPath = resolve(config.targetDir, workspaceName, "package.json");
   const pkgFile = Bun.file(pkgPath);
 
@@ -71,9 +62,7 @@ export async function transformWorkspacePackage(
   await Bun.write(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 }
 
-export async function transformAllPackages(
-  config: ProjectConfig,
-): Promise<void> {
+export async function transformAllPackages(config: ProjectConfig): Promise<void> {
   await transformRootPackage(config);
   await transformWorkspacePackage(config, "frontend");
   await transformWorkspacePackage(config, "backend");

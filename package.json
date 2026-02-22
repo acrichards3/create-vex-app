@@ -42,6 +42,7 @@
     "lib/tsconfig.json",
     "lib/.eslintrc.cjs",
     ".cursor",
+    ".prettierrc",
     ".gitignore",
     "README.md",
     "tsconfig.json",

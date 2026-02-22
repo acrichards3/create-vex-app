@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { colors } from "./constants";
-import { main } from "./cli";
 import { closeReadline } from "./prompts";
+import { main } from "./cli";
 
 main().catch((err: Error) => {
   closeReadline();

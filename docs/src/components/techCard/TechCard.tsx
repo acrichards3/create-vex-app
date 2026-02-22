@@ -7,12 +7,7 @@ export interface TechCardProps {
   name: string;
 }
 
-export const TechCard: React.FC<TechCardProps> = ({
-  description,
-  href,
-  logo,
-  name,
-}) => {
+export const TechCard: React.FC<TechCardProps> = ({ description, href, logo, name }) => {
   return (
     <a
       className="flex flex-col bg-white/5 hover:bg-white/8 border border-cyan-500/20 hover:border-cyan-400/40 rounded-xl overflow-hidden transition-all duration-300 cursor-pointer group h-full hover:shadow-[0_0_15px_rgba(34,211,238,0.15)]"

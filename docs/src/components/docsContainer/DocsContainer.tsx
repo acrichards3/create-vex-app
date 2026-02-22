@@ -4,10 +4,7 @@ import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import { FiMenu, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { Navbar } from "../navbar/Navbar";
 import { Sidebar } from "../sidebar/Sidebar";
-import {
-  SidebarContent,
-  getAllNavigationItems,
-} from "../sidebar/SidebarContent";
+import { SidebarContent, getAllNavigationItems } from "../sidebar/SidebarContent";
 import { TableOfContents } from "../tableOfContents/TableOfContents";
 import { MarkdownContext } from "../markdown/MarkdownContext";
 
@@ -40,10 +37,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const markdownContent = React.useMemo(
-    () => extractMarkdownContent(children),
-    [children],
-  );
+  const markdownContent = React.useMemo(() => extractMarkdownContent(children), [children]);
 
   const handleCloseMobileMenu = () => {
     setIsMobileMenuOpen(false);
@@ -52,8 +46,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
   const allItems = getAllNavigationItems();
   const currentIndex = allItems.findIndex((item) => item.href === currentPath);
   const previousItem = currentIndex > 0 ? allItems[currentIndex - 1] : null;
-  const nextItem =
-    currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
+  const nextItem = currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
 
   return (
     <main className="relative flex min-h-screen flex-col">
@@ -69,11 +62,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
         }}
         type="button"
       >
-        {isMobileMenuOpen ? (
-          <FiX className="h-8 w-8" />
-        ) : (
-          <FiMenu className="h-8 w-8" />
-        )}
+        {isMobileMenuOpen ? <FiX className="h-8 w-8" /> : <FiMenu className="h-8 w-8" />}
       </button>
       {/* Mobile navbar with social icons only */}
       <nav className="fixed top-8 right-8 z-50 flex items-center gap-4 md:hidden pointer-events-auto">
@@ -99,10 +88,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
         <>
-          <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
-            onClick={handleCloseMobileMenu}
-          />
+          <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={handleCloseMobileMenu} />
           <aside className="fixed top-0 left-0 h-full w-80 bg-black/95 border-r border-cyan-500/20 z-40 overflow-y-auto md:hidden">
             <div className="flex items-center justify-between px-4 pt-8 pb-4">
               <div className="w-10 h-10" />
@@ -112,11 +98,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                 onClick={handleCloseMobileMenu}
                 to="/"
               >
-                <img
-                  alt="Thunder App Logo"
-                  className="h-10 w-10 drop-shadow-lg"
-                  src="/logos/thunder-app.png"
-                />
+                <img alt="Thunder App Logo" className="h-10 w-10 drop-shadow-lg" src="/logos/thunder-app.png" />
               </Link>
             </div>
             <div className="flex flex-col gap-8 px-4 pb-8">
@@ -140,9 +122,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                     <FiChevronLeft className="h-5 w-5 text-cyan-400 transition-transform duration-200 group-hover:-translate-x-1" />
                     <div className="flex flex-col">
                       <span className="text-xs text-gray-400">Previous</span>
-                      <span className="font-semibold text-white">
-                        {previousItem.title}
-                      </span>
+                      <span className="font-semibold text-white">{previousItem.title}</span>
                     </div>
                   </Link>
                 )}
@@ -155,9 +135,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                   >
                     <div className="flex flex-col text-right">
                       <span className="text-xs text-gray-400">Next</span>
-                      <span className="font-semibold text-white">
-                        {nextItem.title}
-                      </span>
+                      <span className="font-semibold text-white">{nextItem.title}</span>
                     </div>
                     <FiChevronRight className="h-5 w-5 text-cyan-400 transition-transform duration-200 group-hover:translate-x-1" />
                   </Link>

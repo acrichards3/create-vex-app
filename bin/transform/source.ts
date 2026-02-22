@@ -4,10 +4,7 @@ import type { ProjectConfig } from "../types";
 
 const SOURCE_EXTENSIONS = /\.(ts|tsx|js|mjs|cjs)$/;
 
-const replaceInDirectory = async (
-  dir: string,
-  newPrefix: string,
-): Promise<void> => {
+const replaceInDirectory = async (dir: string, newPrefix: string): Promise<void> => {
   const entries: Dirent[] = readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -21,10 +18,7 @@ const replaceInDirectory = async (
       if (!SOURCE_EXTENSIONS.test(entry.name)) continue;
 
       const content = await Bun.file(fullPath).text();
-      const replaced = content.replace(
-        /(["'])@thunder-app\//g,
-        `$1${newPrefix}`,
-      );
+      const replaced = content.replace(/(["'])@thunder-app\//g, `$1${newPrefix}`);
 
       if (replaced !== content) {
         await Bun.write(fullPath, replaced);
@@ -33,9 +27,7 @@ const replaceInDirectory = async (
   }
 };
 
-export async function transformSourceFiles(
-  config: ProjectConfig,
-): Promise<void> {
+export async function transformSourceFiles(config: ProjectConfig): Promise<void> {
   const newPrefix = `@${config.name}/`;
 
   await replaceInDirectory(resolve(config.targetDir, "backend"), newPrefix);

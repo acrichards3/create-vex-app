@@ -29,13 +29,9 @@ const CodeBlock: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (React.isValidElement(node)) {
       const props = node.props as { children?: React.ReactNode };
       if (node.type === "code") {
-        return React.Children.toArray(props.children)
-          .map(extractCodeText)
-          .join("");
+        return React.Children.toArray(props.children).map(extractCodeText).join("");
       }
-      return React.Children.toArray(props.children)
-        .map(extractCodeText)
-        .join("");
+      return React.Children.toArray(props.children).map(extractCodeText).join("");
     }
     if (Array.isArray(node)) {
       return node.map(extractCodeText).join("");
@@ -56,9 +52,7 @@ const CodeBlock: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="relative group mb-4">
       <pre className="bg-black/30 rounded-lg overflow-x-auto border border-cyan-500/20 p-4">
-        <code className="block text-gray-200 font-mono text-sm whitespace-pre">
-          {children}
-        </code>
+        <code className="block text-gray-200 font-mono text-sm whitespace-pre">{children}</code>
       </pre>
       <button
         className={`absolute top-3 right-3 px-3 py-1.5 rounded text-xs font-semibold transition-colors duration-200 cursor-pointer ${
@@ -91,9 +85,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
             </a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-cyan-500/40 pl-4 italic text-gray-300 mb-4">
-              {children}
-            </blockquote>
+            <blockquote className="border-l-4 border-cyan-500/40 pl-4 italic text-gray-300 mb-4">{children}</blockquote>
           ),
           code: ({ children, className }) => {
             const isInline = !className;
@@ -101,9 +93,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               return <code>{children}</code>;
             }
             return (
-              <code className="bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded text-sm font-mono">
-                {children}
-              </code>
+              <code className="bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
             );
           },
           h1: ({ children }) => {
@@ -112,10 +102,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               .join("");
             const id = generateId(text);
             return (
-              <h1
-                className="text-5xl py-5 font-bold text-white drop-shadow-md mb-6 mt-8 first:mt-0"
-                id={id}
-              >
+              <h1 className="text-5xl py-5 font-bold text-white drop-shadow-md mb-6 mt-8 first:mt-0" id={id}>
                 {children}
               </h1>
             );
@@ -126,10 +113,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               .join("");
             const id = generateId(text);
             return (
-              <h2
-                className="text-4xl py-5 font-bold text-white drop-shadow-md mb-4 mt-8"
-                id={id}
-              >
+              <h2 className="text-4xl py-5 font-bold text-white drop-shadow-md mb-4 mt-8" id={id}>
                 {children}
               </h2>
             );
@@ -140,10 +124,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               .join("");
             const id = generateId(text);
             return (
-              <h3
-                className="text-3xl py-5 font-bold text-white drop-shadow-md mb-3 mt-6"
-                id={id}
-              >
+              <h3 className="text-3xl py-5 font-bold text-white drop-shadow-md mb-3 mt-6" id={id}>
                 {children}
               </h3>
             );
@@ -154,43 +135,28 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               .join("");
             const id = generateId(text);
             return (
-              <h4
-                className="text-2xl py-5 font-bold text-white drop-shadow-md mb-2 mt-4"
-                id={id}
-              >
+              <h4 className="text-2xl py-5 font-bold text-white drop-shadow-md mb-2 mt-4" id={id}>
                 {children}
               </h4>
             );
           },
           hr: () => <hr className="border-cyan-500/20 my-8" />,
-          li: ({ children }) => (
-            <li className="text-gray-300 text-lg">{children}</li>
-          ),
+          li: ({ children }) => <li className="text-gray-300 text-lg">{children}</li>,
           ol: ({ children }) => (
-            <ol className="list-decimal list-inside text-gray-300 text-lg mb-4 space-y-2 ml-4">
-              {children}
-            </ol>
+            <ol className="list-decimal list-inside text-gray-300 text-lg mb-4 space-y-2 ml-4">{children}</ol>
           ),
           p: ({ children }) => {
             const parts = React.Children.toArray(children);
-            const text = parts
-              .map((p) => (typeof p === "string" ? p : ""))
-              .join("");
+            const text = parts.map((p) => (typeof p === "string" ? p : "")).join("");
             // If a paragraph contains only non‑breaking spaces, treat it as a spacer.
             if (text && text.replace(/\u00A0/g, "").trim().length === 0) {
               return <div aria-hidden="true" className="h-10 md:h-16" />;
             }
-            return (
-              <p className="text-gray-300 py-2 text-lg leading-relaxed mb-6">
-                {children}
-              </p>
-            );
+            return <p className="text-gray-300 py-2 text-lg leading-relaxed mb-6">{children}</p>;
           },
           pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
           ul: ({ children }) => (
-            <ul className="list-disc list-inside text-gray-300 text-lg mb-4 space-y-2 ml-4">
-              {children}
-            </ul>
+            <ul className="list-disc list-inside text-gray-300 text-lg mb-4 space-y-2 ml-4">{children}</ul>
           ),
         }}
         remarkPlugins={[remarkGfm]}

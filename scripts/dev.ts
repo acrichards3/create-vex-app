@@ -44,17 +44,11 @@ const services = {
 } as const satisfies Record<string, ServiceConfig>;
 
 // Spawn a process and prefix its output
-function spawnWithLabel(
-  service: string,
-  command: string[],
-  cwd: string,
-): Subprocess {
+function spawnWithLabel(service: string, command: string[], cwd: string): Subprocess {
   const config = services[service];
   const label = colors.bold(config.color(`[${config.emoji} ${config.name}]`));
 
-  console.log(
-    `${label} ${colors.gray(`Starting ${config.name.toLowerCase()}...`)}`,
-  );
+  console.log(`${label} ${colors.gray(`Starting ${config.name.toLowerCase()}...`)}`);
 
   const proc = Bun.spawn(command, {
     cwd,
@@ -120,37 +114,19 @@ function spawnWithLabel(
 
 // Start all services
 console.log();
-console.log(
-  colors.bold(colors.blue("╔════════════════════════════════════════╗")),
-);
-console.log(
-  colors.bold(colors.blue("║   Starting Development Servers         ║")),
-);
-console.log(
-  colors.bold(colors.blue("╚════════════════════════════════════════╝")),
-);
+console.log(colors.bold(colors.blue("╔════════════════════════════════════════╗")));
+console.log(colors.bold(colors.blue("║   Starting Development Servers         ║")));
+console.log(colors.bold(colors.blue("╚════════════════════════════════════════╝")));
 console.log();
 
 // Start lib (TypeScript watch)
-const libProc = spawnWithLabel(
-  "lib",
-  ["bun", "run", "dev"],
-  resolve(rootDir, "lib"),
-);
+const libProc = spawnWithLabel("lib", ["bun", "run", "dev"], resolve(rootDir, "lib"));
 
 // Start backend
-const backendProc = spawnWithLabel(
-  "backend",
-  ["bun", "run", "dev"],
-  resolve(rootDir, "backend"),
-);
+const backendProc = spawnWithLabel("backend", ["bun", "run", "dev"], resolve(rootDir, "backend"));
 
 // Start frontend
-const frontendProc = spawnWithLabel(
-  "frontend",
-  ["bun", "run", "dev"],
-  resolve(rootDir, "frontend"),
-);
+const frontendProc = spawnWithLabel("frontend", ["bun", "run", "dev"], resolve(rootDir, "frontend"));
 
 // Wait a moment for services to start, then show status
 setTimeout(() => {
@@ -159,14 +135,12 @@ setTimeout(() => {
   console.log();
   console.log(colors.bold("Services running:"));
   console.log(
-    `  ${services.frontend.emoji} ${colors.bold(colors.cyan("Frontend"))}  → http://localhost:${services.frontend.port}`,
+    `  ${services.frontend.emoji}  ${colors.bold(colors.cyan("Frontend"))}  → http://localhost:${services.frontend.port}`,
   );
   console.log(
     `  ${services.backend.emoji} ${colors.bold(colors.green("Backend"))}  → http://localhost:${services.backend.port}`,
   );
-  console.log(
-    `  ${services.lib.emoji} ${colors.bold(colors.yellow("Lib"))}      → Watching for changes`,
-  );
+  console.log(`  ${services.lib.emoji} ${colors.bold(colors.yellow("Lib"))}      → Watching for changes`);
   console.log();
   console.log(colors.gray("Press Ctrl+C to stop all services"));
   console.log();

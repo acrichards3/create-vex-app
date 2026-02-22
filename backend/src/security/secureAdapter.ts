@@ -5,26 +5,19 @@ type SecureAdapterOptions = {
   oauthEncryptionKey?: string;
 };
 
-export function createSecureAdapter(
-  base: Adapter,
-  opts: SecureAdapterOptions,
-): Adapter {
+export function createSecureAdapter(base: Adapter, opts: SecureAdapterOptions): Adapter {
   const encKey = getEncryptionKeyFromEnv(opts.oauthEncryptionKey);
 
   function encryptAccountTokens(account: AdapterAccount): AdapterAccount {
     const overridden = {
       ...account,
-      ...(account.access_token
-        ? { access_token: encryptString(String(account.access_token), encKey) }
-        : {}),
+      ...(account.access_token ? { access_token: encryptString(String(account.access_token), encKey) } : {}),
       ...(account.refresh_token
         ? {
             refresh_token: encryptString(String(account.refresh_token), encKey),
           }
         : {}),
-      ...(account.id_token
-        ? { id_token: encryptString(String(account.id_token), encKey) }
-        : {}),
+      ...(account.id_token ? { id_token: encryptString(String(account.id_token), encKey) } : {}),
     } satisfies AdapterAccount;
     return overridden;
   }
@@ -44,9 +37,7 @@ export function createSecureAdapter(
   // Sessions
   if (base.createSession) {
     const baseCreate = base.createSession;
-    const createSession: NonNullable<Adapter["createSession"]> = async (
-      session,
-    ) => {
+    const createSession: NonNullable<Adapter["createSession"]> = async (session) => {
       const toStore: AdapterSession = {
         ...session,
         sessionToken: hashToken(session.sessionToken),
@@ -58,40 +49,31 @@ export function createSecureAdapter(
   }
   if (base.getSessionAndUser) {
     const baseGet = base.getSessionAndUser;
-    const getSessionAndUser: NonNullable<Adapter["getSessionAndUser"]> = (
-      sessionToken,
-    ) => baseGet(hashToken(sessionToken));
+    const getSessionAndUser: NonNullable<Adapter["getSessionAndUser"]> = (sessionToken) =>
+      baseGet(hashToken(sessionToken));
     adapter.getSessionAndUser = getSessionAndUser;
   }
   if (base.updateSession) {
     const baseUpdate = base.updateSession;
-    const updateSession: NonNullable<Adapter["updateSession"]> = async (
-      session,
-    ) => {
+    const updateSession: NonNullable<Adapter["updateSession"]> = async (session) => {
       const updated = session.sessionToken
         ? { ...session, sessionToken: hashToken(session.sessionToken) }
         : { ...session };
       const result = await baseUpdate(updated);
-      return session.sessionToken && result
-        ? { ...result, sessionToken: session.sessionToken }
-        : result;
+      return session.sessionToken && result ? { ...result, sessionToken: session.sessionToken } : result;
     };
     adapter.updateSession = updateSession;
   }
   if (base.deleteSession) {
     const baseDelete = base.deleteSession;
-    const deleteSession: NonNullable<Adapter["deleteSession"]> = (
-      sessionToken,
-    ) => baseDelete(hashToken(sessionToken));
+    const deleteSession: NonNullable<Adapter["deleteSession"]> = (sessionToken) => baseDelete(hashToken(sessionToken));
     adapter.deleteSession = deleteSession;
   }
 
   // Verification tokens
   if (base.createVerificationToken) {
     const baseCreateVT = base.createVerificationToken;
-    const createVerificationToken: NonNullable<
-      Adapter["createVerificationToken"]
-    > = (vt) => {
+    const createVerificationToken: NonNullable<Adapter["createVerificationToken"]> = (vt) => {
       const toStore: VerificationToken = { ...vt, token: hashToken(vt.token) };
       return baseCreateVT(toStore);
     };
@@ -99,9 +81,7 @@ export function createSecureAdapter(
   }
   if (base.useVerificationToken) {
     const baseUseVT = base.useVerificationToken;
-    const useVerificationToken: NonNullable<Adapter["useVerificationToken"]> = (
-      params,
-    ) => {
+    const useVerificationToken: NonNullable<Adapter["useVerificationToken"]> = (params) => {
       return baseUseVT({ ...params, token: hashToken(params.token) });
     };
     adapter.useVerificationToken = useVerificationToken;

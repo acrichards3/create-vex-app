@@ -4,8 +4,7 @@
  * @param k - Key to check
  * @returns - True if key is a key of the object
  */
-export const isKey = <T extends object>(x: T, k: PropertyKey): k is keyof T =>
-  k in x;
+export const isKey = <T extends object>(x: T, k: PropertyKey): k is keyof T => k in x;
 
 /**
  * Type-safe version of Object.keys()
@@ -21,9 +20,7 @@ export const objectKeys = <T extends object>(obj: T) => {
  * @param entries - Iterable of key-value pairs
  * @returns - Object with the same keys and values as the input entries but with the correct types
  */
-export const objectFromEntries = <T extends object>(
-  entries: Iterable<readonly [keyof T, T[keyof T]]>,
-): T => {
+export const objectFromEntries = <T extends object>(entries: Iterable<readonly [keyof T, T[keyof T]]>): T => {
   return Object.fromEntries(entries) as T;
 };
 
