@@ -32,6 +32,7 @@ The generator will:
 - `frontend/` - Vite React application with Auth.js integration
 - `backend/` - HonoJS API server with Drizzle ORM and Auth.js
 - `lib/` - Shared TypeScript package used by both frontend and backend
+- `.cursor/` - Cursor AI rules for project-aware assistance
 - `backend/src/db/schema/` - Database schema definitions
   - `users.ts` - User table (merged with auth requirements)
   - `auth.ts` - Auth.js tables (accounts, sessions, verification tokens)
@@ -40,7 +41,7 @@ The generator will:
 
 | Command                  | Description                                      |
 | ------------------------ | ------------------------------------------------ |
-| `bun run dev`            | Start both frontend, lib, and backend            |
+| `bun run dev`            | Start frontend, lib, and backend                 |
 | `bun run dev:frontend`   | Start only the frontend (Vite, port 5173)        |
 | `bun run dev:backend`    | Start only the backend (Hono, port 3000)         |
 | `bun run dev:lib`        | Watch mode for lib package (rebuilds on changes) |
@@ -55,14 +56,14 @@ The generator will:
 | `bun run format`         | Format all files with Prettier                   |
 | `bun run format:check`   | Check formatting without fixing                  |
 
-### Database Commands (run from backend directory or with filter)
+### Database Commands
 
-| Command                                             | Description                     |
-| --------------------------------------------------- | ------------------------------- |
-| `bun run --filter @thunder-app/backend db:generate` | Generate database migrations    |
-| `bun run --filter @thunder-app/backend db:migrate`  | Run database migrations         |
-| `bun run --filter @thunder-app/backend db:push`     | Push schema changes to database |
-| `bun run --filter @thunder-app/backend db:studio`   | Open Drizzle Studio             |
+| Command              | Description                     |
+| -------------------- | ------------------------------- |
+| `bun run db:generate` | Generate database migrations    |
+| `bun run db:migrate`  | Run database migrations         |
+| `bun run db:push`     | Push schema changes to database |
+| `bun run db:studio`   | Open Drizzle Studio             |
 
 ## 📦 Using the Shared Library Package
 
@@ -99,20 +100,20 @@ This template uses **Drizzle ORM** with **PostgreSQL**. The database schema is d
 4. **Push schema to database:**
 
    ```bash
-   bun run --filter @thunder-app/backend db:push
+   bun run db:push
    ```
 
    Or generate and run migrations:
 
    ```bash
-   bun run --filter @thunder-app/backend db:generate
-   bun run --filter @thunder-app/backend db:migrate
+   bun run db:generate
+   bun run db:migrate
    ```
 
 5. **Open Drizzle Studio** to view/edit data:
 
    ```bash
-   bun run --filter @thunder-app/backend db:studio
+   bun run db:studio
    ```
 
 ## 🔐 Authentication Setup
@@ -146,7 +147,7 @@ This template includes **Auth.js** (formerly NextAuth) integration with **Google
 4. **Push the auth schema to your database:**
 
    ```bash
-   bun run --filter @thunder-app/backend db:push
+   bun run db:push
    ```
 
 ### Frontend Setup
@@ -314,7 +315,7 @@ VITE_PORT=5173
   - Flag impossible conditions (`@typescript-eslint/no-unnecessary-condition`)
   - Enforce `import type` when symbols are used as types only
   - JS configs like `postcss.config.js`, `tailwind.config.js` are ignored in typed linting
-- **Prettier** - Automatic code formatting
+- **Prettier** - Automatic code formatting (configured via `.prettierrc`)
 - **Type checking** - Run `bun run typecheck` to verify all packages
 
 ## 🔧 Publishing This Template (For Maintainers)
@@ -329,10 +330,10 @@ To publish this template to npm so others can use it:
 
 2. **Update the version in package.json** (if needed)
 
-3. **Bump a minor version and publish to npm:**
+3. **Bump the version and publish to npm:**
 
    ```bash
-   npm version minor -m "chore: release %s"
+   npm version patch   # or minor/major as appropriate
    npm publish --access public
    git push --follow-tags
    ```
