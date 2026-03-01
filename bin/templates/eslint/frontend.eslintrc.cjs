@@ -38,6 +38,7 @@ module.exports = {
     "max-statements": ["error", 15],
 
     // ─── Flat code style ─────────────────────────────────────
+    "func-style": ["error", "expression"],
     curly: ["error", "all"],
     eqeqeq: ["error", "always", { null: "ignore" }],
     "no-console": "error",

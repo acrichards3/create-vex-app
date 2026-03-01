@@ -5,7 +5,7 @@ import { envSchema } from "./schema";
 
 export type EnvIssue = { message: string; path: string };
 
-function getEnvSource(): Record<string, unknown> {
+const getEnvSource = (): Record<string, unknown> => {
   if (typeof window !== "undefined") {
     return import.meta.env;
   }
@@ -19,7 +19,7 @@ function getEnvSource(): Record<string, unknown> {
   }
 
   return import.meta.env;
-}
+};
 
 const result = envSchema.safeParse(getEnvSource());
 

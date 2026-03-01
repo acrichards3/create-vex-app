@@ -11,7 +11,7 @@ export const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
 });
 
-export function validatedEnv(): z.infer<typeof envSchema> {
+export const validatedEnv = (): z.infer<typeof envSchema> => {
   const result = envSchema.safeParse(Bun.env);
 
   if (!result.success) {
@@ -23,6 +23,6 @@ export function validatedEnv(): z.infer<typeof envSchema> {
   }
 
   return result.data;
-}
+};
 
 export const env = validatedEnv();

@@ -3,11 +3,7 @@ import { AuthSection } from "../components/AuthSection";
 import { DataSection } from "../components/DataSection";
 import type { ReactNode } from "react";
 
-export const Route = createFileRoute("/")({
-  component: Home,
-});
-
-function Home(): ReactNode {
+const Home = (): ReactNode => {
   return (
     <main className="flex flex-1 flex-col items-center gap-4 justify-center px-4 py-8">
       <img alt="Thunder App Logo" className="h-24 w-24 drop-shadow-lg" src="/thunder-app-logo.png" />
@@ -17,4 +13,8 @@ function Home(): ReactNode {
       <DataSection />
     </main>
   );
-}
+};
+
+export const Route = createFileRoute("/")({
+  component: Home,
+});

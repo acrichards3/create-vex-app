@@ -5,11 +5,7 @@ import type { ReactNode } from "react";
 
 const queryClient = new QueryClient();
 
-export const Route = createRootRoute({
-  component: RootLayout,
-});
-
-function RootLayout(): ReactNode {
+const RootLayout = (): ReactNode => {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
@@ -17,4 +13,8 @@ function RootLayout(): ReactNode {
       </SessionProvider>
     </QueryClientProvider>
   );
-}
+};
+
+export const Route = createRootRoute({
+  component: RootLayout,
+});

@@ -5,10 +5,10 @@ type SecureAdapterOptions = {
   oauthEncryptionKey: string | undefined;
 };
 
-export function createSecureAdapter(base: Adapter, opts: SecureAdapterOptions): Adapter {
+export const createSecureAdapter = (base: Adapter, opts: SecureAdapterOptions): Adapter => {
   const encKey = getEncryptionKeyFromEnv(opts.oauthEncryptionKey);
 
-  function encryptAccountTokens(account: AdapterAccount): AdapterAccount {
+  const encryptAccountTokens = (account: AdapterAccount): AdapterAccount => {
     const overridden = {
       ...account,
       ...(account.access_token ? { access_token: encryptString(String(account.access_token), encKey) } : {}),
@@ -16,7 +16,7 @@ export function createSecureAdapter(base: Adapter, opts: SecureAdapterOptions): 
       ...(account.id_token ? { id_token: encryptString(String(account.id_token), encKey) } : {}),
     } satisfies AdapterAccount;
     return overridden;
-  }
+  };
 
   const adapter: Adapter = { ...base };
 
@@ -85,4 +85,4 @@ export function createSecureAdapter(base: Adapter, opts: SecureAdapterOptions): 
   }
 
   return adapter;
-}
+};

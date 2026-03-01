@@ -8,22 +8,22 @@ const errorResponseSchema = z.object({
 const CSRF_COOKIE_NAMES = ["csrf-token", "XSRF-TOKEN", "_csrf", "csrfToken"];
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-function getCookie(name: string): string | undefined {
+const getCookie = (name: string): string | undefined => {
   return document.cookie
     .split("; ")
     .find((row) => row.startsWith(`${name}=`))
     ?.split("=")[1];
-}
+};
 
-function getCsrfToken(): string | undefined {
+const getCsrfToken = (): string | undefined => {
   const found = CSRF_COOKIE_NAMES.map(getCookie).find((v) => v != null);
   if (found == null) {
     return undefined;
   }
   return decodeURIComponent(found);
-}
+};
 
-function buildHeaders(init: RequestInit | undefined, method: string): Headers {
+const buildHeaders = (init: RequestInit | undefined, method: string): Headers => {
   const headers = new Headers(init?.headers);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -37,18 +37,18 @@ function buildHeaders(init: RequestInit | undefined, method: string): Headers {
   }
 
   return headers;
-}
+};
 
-async function parseErrorMessage(response: Response, isJson: boolean): Promise<string> {
+const parseErrorMessage = async (response: Response, isJson: boolean): Promise<string> => {
   const body: unknown = isJson ? await response.json().catch(() => null) : null;
   const parsed = errorResponseSchema.safeParse(body);
   if (parsed.success && parsed.data.message != null) {
     return String(parsed.data.message);
   }
   return response.statusText;
-}
+};
 
-export async function apiFetch(path: string, init?: RequestInit): Promise<unknown> {
+export const apiFetch = async (path: string, init?: RequestInit): Promise<unknown> => {
   const url = `${env.VITE_BACKEND_URL}${path}`;
   const method = (init?.method ?? "GET").toUpperCase();
   const headers = buildHeaders(init, method);
@@ -72,4 +72,4 @@ export async function apiFetch(path: string, init?: RequestInit): Promise<unknow
   }
 
   return response.json();
-}
+};

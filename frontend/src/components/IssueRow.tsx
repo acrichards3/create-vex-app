@@ -1,7 +1,7 @@
 import type { EnvIssue } from "../env/validate";
 import type { ReactNode } from "react";
 
-export function IssueRow({ issue }: { issue: EnvIssue }): ReactNode {
+export const IssueRow = ({ issue }: { issue: EnvIssue }): ReactNode => {
   return (
     <li className="flex gap-2">
       <span className="text-red-400">{issue.path}</span>
@@ -9,4 +9,4 @@ export function IssueRow({ issue }: { issue: EnvIssue }): ReactNode {
       <span className="text-neutral-400">{issue.message}</span>
     </li>
   );
-}
+};

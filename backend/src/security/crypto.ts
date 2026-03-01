@@ -4,11 +4,11 @@ export interface EncryptionKey {
   key: Buffer;
 }
 
-export function hashToken(value: string): string {
+export const hashToken = (value: string): string => {
   return new Bun.CryptoHasher("sha256").update(value).digest("hex");
-}
+};
 
-export function getEncryptionKeyFromEnv(keyString: string | undefined): EncryptionKey | undefined {
+export const getEncryptionKeyFromEnv = (keyString: string | undefined): EncryptionKey | undefined => {
   if (!keyString) {
     return undefined;
   }
@@ -38,9 +38,9 @@ export function getEncryptionKeyFromEnv(keyString: string | undefined): Encrypti
     buf = buf.subarray(0, 32);
   }
   return { key: buf };
-}
+};
 
-export function encryptString(plainText: string, encKey: EncryptionKey | undefined): string {
+export const encryptString = (plainText: string, encKey: EncryptionKey | undefined): string => {
   if (!encKey) {
     return plainText;
   }
@@ -49,9 +49,9 @@ export function encryptString(plainText: string, encKey: EncryptionKey | undefin
   const ciphertext = Buffer.concat([cipher.update(plainText, "utf8"), cipher.final()]);
   const authTag = cipher.getAuthTag();
   return Buffer.concat([iv, ciphertext, authTag]).toString("base64");
-}
+};
 
-export function decryptString(cipherTextB64: string, encKey: EncryptionKey | undefined): string {
+export const decryptString = (cipherTextB64: string, encKey: EncryptionKey | undefined): string => {
   if (!encKey) {
     return cipherTextB64;
   }
@@ -63,4 +63,4 @@ export function decryptString(cipherTextB64: string, encKey: EncryptionKey | und
   decipher.setAuthTag(tag);
   const plain = Buffer.concat([decipher.update(data), decipher.final()]);
   return plain.toString("utf8");
-}
+};

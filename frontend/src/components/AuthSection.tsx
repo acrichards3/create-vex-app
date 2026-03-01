@@ -1,15 +1,15 @@
 import { useSession, signIn, signOut } from "@hono/auth-js/react";
 import type { ReactNode } from "react";
 
-function handleSignOut(): void {
+const handleSignOut = (): void => {
   void signOut();
-}
+};
 
-function handleSignIn(): void {
+const handleSignIn = (): void => {
   void signIn("google");
-}
+};
 
-export function AuthSection(): ReactNode {
+export const AuthSection = (): ReactNode => {
   const { data: session, status: sessionStatus } = useSession();
 
   if (sessionStatus === "loading") {
@@ -39,4 +39,4 @@ export function AuthSection(): ReactNode {
       Sign in
     </button>
   );
-}
+};

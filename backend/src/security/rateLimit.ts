@@ -10,24 +10,24 @@ type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
 
-function pruneExpiredBuckets(now: number): void {
+const pruneExpiredBuckets = (now: number): void => {
   for (const [key, bucket] of buckets) {
     if (now > bucket.resetAt) buckets.delete(key);
   }
-}
+};
 
 let lastPruneAt = 0;
 const PRUNE_INTERVAL_MS = 60_000;
 
-function getClientIp(headers: Headers): string {
+const getClientIp = (headers: Headers): string => {
   const cf = headers.get("cf-connecting-ip");
   const real = headers.get("x-real-ip");
   const xff = headers.get("x-forwarded-for");
   const firstXff = xff?.split(",")[0]?.trim();
   return cf ?? real ?? firstXff ?? "";
-}
+};
 
-export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
+export const rateLimit = (options: RateLimitOptions): MiddlewareHandler => {
   const { limit, windowMs } = options;
   const genKey = options.keyGenerator ?? ((ip: string, path: string): string => `${ip}:${path}`);
 
@@ -65,4 +65,4 @@ export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
 
     await next();
   };
-}
+};

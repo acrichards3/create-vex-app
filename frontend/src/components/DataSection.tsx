@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "@hono/auth-js/react";
 import type { ReactNode } from "react";
 
-export function DataSection(): ReactNode {
+export const DataSection = (): ReactNode => {
   const { data, error, isLoading } = useQuery({
     queryFn: helloExample,
     queryKey: ["helloWorld"],
@@ -32,4 +32,4 @@ export function DataSection(): ReactNode {
   }
 
   return null;
-}
+};

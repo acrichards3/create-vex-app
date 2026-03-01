@@ -2,7 +2,7 @@ import type { EnvIssue } from "../env/validate";
 import type { ReactNode } from "react";
 import { IssueRow } from "./IssueRow";
 
-export function EnvError({ issues }: { issues: EnvIssue[] }): ReactNode {
+export const EnvError = ({ issues }: { issues: EnvIssue[] }): ReactNode => {
   return (
     <div className="bg-zinc-900 text-neutral-200 flex flex-col font-mono text-sm gap-4 min-h-screen p-12">
       <h1 className="text-red-400 text-xl font-bold">Invalid Environment Variables</h1>
@@ -16,4 +16,4 @@ export function EnvError({ issues }: { issues: EnvIssue[] }): ReactNode {
       </ul>
     </div>
   );
-}
+};
