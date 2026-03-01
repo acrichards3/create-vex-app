@@ -14,9 +14,14 @@ Always check linting after making changes. Build and lint pipelines must always 
 ### Component & File Organization:
 
 - **One component per file** — never define multiple components in a single file.
-- **Group related components in folders** — if a component has child or helper components, create a folder named after the parent and nest them inside. Folders can be nested within folders when the hierarchy calls for it.
+- **Page-specific components** go in a folder named after the page inside `components/`. If a component has child or helper components, nest them in sub-folders. Folders can be nested as deep as the hierarchy requires.
+- **Shared/reusable components** that are used across multiple pages go in `components/common/`.
   ```
   components/
+    common/
+      Button.tsx
+      Modal.tsx
+      Spinner.tsx
     Dashboard/
       Dashboard.tsx
       DashboardHeader.tsx
@@ -25,8 +30,17 @@ Always check linting after making changes. Build and lint pipelines must always 
         ChartLegend.tsx
         ChartTooltip.tsx
       DashboardSidebar.tsx
+    Settings/
+      Settings.tsx
+      SettingsForm.tsx
   ```
-- **Shared/generic components** that are used across unrelated features can live directly in `components/` without a folder.
+
+### Tailwind & Layout:
+
+- **No margin utilities** — do not use Tailwind margin classes (`m-`, `mx-`, `my-`, `mt-`, `mb-`, `ml-`, `mr-`, `ms-`, `me-`). Use `gap`, `space-x`, `space-y`, or padding instead.
+- **Flex layout only** — use `flex` for all layouts. Do not use `grid`, `float`, or `inline-block` for layout.
+- **Absolute positioning** is only allowed when an element must directly overlap another (e.g. badges, overlays, tooltips). Do not use `absolute` or `relative` for general layout spacing.
+- **No fixed dimensions** — do not use `w-`, `h-`, `vw`, `vh`, `dvh`, `svh` for sizing. Layouts should be flexible, not pixel-perfect. Use `min-w-`, `min-h-`, `max-w-`, `max-h-`, or flex/grow/shrink to control sizing. Exception: small fixed-size elements like spinners or icons (e.g. `h-4 w-4`, `h-8 w-8`) are allowed.
 
 ### Strict Code Standards:
 
