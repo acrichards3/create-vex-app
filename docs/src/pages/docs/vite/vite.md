@@ -30,7 +30,6 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
       "~": path.resolve(__dirname, "./src"),
     },
   },
@@ -59,13 +58,11 @@ The `@vitejs/plugin-react` plugin provides React Fast Refresh for instant feedba
 
 ## Path Aliases
 
-Two aliases are configured — `@` and `~` — both pointing to `frontend/src/`. The `~` alias is recommended because it is also configured in `tsconfig.json`, giving you full TypeScript support:
+The `~` alias points to `frontend/src/` and is configured in both `vite.config.ts` and `tsconfig.json`, giving you full runtime and TypeScript support:
 
 ```typescript
 import { Button } from "~/components/Button";
 ```
-
-The `@` alias works at runtime (Vite resolves it) but is not in the TypeScript config, so it may cause type-checking errors. Stick with `~` for the best experience.
 
 ## Dev Server Proxy
 

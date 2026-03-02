@@ -67,7 +67,7 @@ frontend/
 - **`src/api/client.util.ts`** — The `apiFetch` helper automatically attaches CSRF tokens on mutating requests and sends credentials for auth cookies.
 - **`src/env/schema.ts`** — The only file you need to edit to add or change environment variables. Defines the Zod schema for `VITE_` prefixed env vars.
 - **`src/env/env.ts`** — Exports a typed `env` object for use throughout your app (e.g. `env.VITE_BACKEND_URL`). Invalid variables are surfaced in the UI rather than silently failing.
-- **`vite.config.ts`** — Configures the TanStack Router plugin (file-based routing with auto code-splitting), proxies `/api/auth` requests to the backend, and sets up `@` and `~` path aliases.
+- **`vite.config.ts`** — Configures the TanStack Router plugin (file-based routing with auto code-splitting), proxies `/api/auth` requests to the backend, and sets up the `~` path alias.
 
 ## Backend (`backend/`)
 
