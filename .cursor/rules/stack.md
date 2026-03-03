@@ -1,0 +1,46 @@
+## Tech Stack
+
+This is a Bun monorepo with three workspaces. Do not introduce alternative frameworks, ORMs, routers, or runtimes. Use only the technologies listed below.
+
+### Monorepo Structure
+
+- `frontend/` — React app served by Vite
+- `backend/` — Hono API server running on Bun
+- `lib/` — Shared TypeScript utilities and types, imported as `@<project-name>/lib`
+
+### Frontend
+
+- **React 19** — UI library. No Next.js, Remix, or other meta-frameworks.
+- **Vite 5** — Build tool and dev server. Config uses `loadEnv` for environment variables.
+- **TanStack Router** — File-based routing in `frontend/src/routes/`. Do not use React Router.
+- **TanStack Query (React Query)** — Data fetching and caching. Do not use SWR or raw `useEffect` for data fetching.
+- **Tailwind CSS v4** — Styling. No CSS modules, styled-components, or CSS-in-JS.
+- **Auth.js (`@hono/auth-js/react`)** — Authentication hooks (`useSession`, `signIn`, `signOut`). Do not implement custom auth flows.
+- **Zod v4** — Runtime validation. Use Zod v4 syntax (e.g. `z.url()` not `z.string().url()`).
+
+### Backend
+
+- **Hono v4** — Web framework. Do not use Express, Fastify, or Elysia.
+- **Drizzle ORM** — Database access with PostgreSQL. Do not use Prisma, TypeORM, or raw SQL.
+- **Auth.js (`@hono/auth-js`)** — Authentication with database sessions. Do not use JWT sessions or Passport.
+- **Zod v4** — Request/response validation.
+
+### Key Patterns
+
+- **API calls**: Use `apiFetch` from `frontend/src/api/client.util.ts`. It handles CSRF tokens, credentials, and error parsing. Do not use raw `fetch` or install Axios.
+- **Environment variables**: Validated with Zod at startup. Frontend vars are in `frontend/src/env/`, backend vars are in `backend/src/env/`. Do not access `process.env` or `import.meta.env` directly in app code.
+- **Shared code**: Put shared types, schemas, and utilities in `lib/src/`. Import via `@<project-name>/lib`.
+- **Database schema**: Defined in `backend/src/db/schema/`. Use Drizzle's schema API.
+- **Protected routes**: Backend routes under `/api/protected/*` require authentication via `verifyAuth()` middleware.
+- **Path aliases**: Use `~/` to import from `src/` in both frontend and backend. Do not use `@/`.
+- **Security middleware**: CORS, CSRF, secure headers, and rate limiting are already configured in `backend/src/index.ts`. Do not add duplicate middleware or remove existing security layers.
+
+### Do Not Install
+
+- Express, Fastify, Koa, or any alternative backend framework
+- React Router, Wouter, or any alternative router
+- Prisma, TypeORM, Sequelize, or any alternative ORM
+- Axios, ky, or any alternative HTTP client
+- NextAuth (standalone) — use `@hono/auth-js` which is already configured
+- styled-components, Emotion, CSS modules, or any CSS-in-JS library
+- Moment.js, Day.js, or date libraries — use native `Date` and `Intl`
