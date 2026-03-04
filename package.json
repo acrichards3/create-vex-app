@@ -1,6 +1,6 @@
 {
   "name": "create-thunder-app",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": false,
   "type": "module",
   "description": "A monorepo template with Vite React frontend, HonoJS backend, and shared lib package",
