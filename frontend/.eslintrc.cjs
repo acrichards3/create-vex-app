@@ -81,6 +81,7 @@ module.exports = {
     "react-hooks-extra/no-unnecessary-use-callback": "error",
     "react-hooks-extra/no-unnecessary-use-memo": "error",
     "react/jsx-sort-props": ["error", { ignoreCase: false, noSortAlphabetically: false, reservedFirst: false }],
+    "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
     "sort-keys": ["error", "asc", { caseSensitive: false, natural: false }],
     "typescript-sort-keys/interface": "error",

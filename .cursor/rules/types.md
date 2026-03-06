@@ -5,9 +5,11 @@ Never use `any` type and avoid type casting. Always properly handle types.
 ### Rules:
 
 - **Never use `any`**: Use `unknown` if the type is truly unknown, then narrow it down with type guards or validation
-- **No type assertions (`as` keyword)**: Instead, use proper type narrowing, type guards, or validation to handle types correctly
+- **No type assertions (`as` keyword)**: Do not use `as` to cast types. Instead, use proper type narrowing, type guards, or validation. **Exception**: `as const` is allowed and encouraged (see below).
 - **No `@ts-ignore` or `@ts-expect-error`**: Fix the underlying type issues instead
 - **Prefer type guards and validation**: Use runtime checks and validation (e.g., Zod schemas) to narrow types safely
+- **Prefer `as const`**: Use `as const` on arrays and objects to get the narrowest possible type
+- **Prefer `satisfies` over type annotations**: For arrays and objects, use `satisfies` instead of explicitly annotating a variable's type. It validates the value matches the type while preserving the narrowed literal type instead of widening it.
 
 ### Examples:
 
@@ -29,4 +31,16 @@ if (typeof data === 'string') {
   const value = data;
   ...
 }
+
+// ❌ Bad - type annotation widens to Record, loses literal info
+const routes: Record<string, string> = { home: '/', about: '/about' };
+
+// ✅ Good - satisfies validates the shape without widening
+const routes = { home: '/', about: '/about' } satisfies Record<string, string>;
+
+// ✅ Better - as const + satisfies for full narrowing with validation
+const routes = {
+  home: '/',
+  about: '/about',
+} as const satisfies Record<string, string>;
 ```

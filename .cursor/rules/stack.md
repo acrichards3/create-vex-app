@@ -35,6 +35,12 @@ This is a Bun monorepo with three workspaces. Do not introduce alternative frame
 - **Path aliases**: Use `~/` to import from `src/` in both frontend and backend. Do not use `@/`.
 - **Security middleware**: CORS, CSRF, secure headers, and rate limiting are already configured in `backend/src/index.ts`. Do not add duplicate middleware or remove existing security layers.
 
+### Do Not Modify
+
+- **`tsconfig.json` files** — Do not change `target`, `lib`, `module`, or other compiler settings. They are intentional.
+- **`vite.config.ts` proxy** — Only `/api/auth` is proxied for Auth.js cookie handling. Do not add a blanket `/api` proxy. The `apiFetch` utility handles CORS and CSRF for all other API calls directly.
+- **ESLint configuration** — Do not change `.eslintrc.cjs` files, add overrides, or alter any ESLint rules.
+
 ### Do Not Install
 
 - Express, Fastify, Koa, or any alternative backend framework

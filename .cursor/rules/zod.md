@@ -2,10 +2,24 @@
 
 We are using Zod v4. Do NOT use deprecated Zod v3 syntax.
 
-### Common deprecated patterns to avoid:
+### Deprecated `z.string()` methods — use top-level equivalents:
 
-- `z.string().url()` → Use `z.url()` instead
-- `z.string().email()` → Use `z.email()` instead
-- `z.string().uuid()` → Use `z.uuid()` instead
+| Deprecated (v3)         | Use instead (v4)           |
+| ----------------------- | -------------------------- |
+| `z.string().url()`      | `z.url()`                  |
+| `z.string().email()`    | `z.email()`                |
+| `z.string().uuid()`     | `z.uuid()`                 |
+| `z.string().datetime()` | `z.iso.datetime()`         |
+| `z.string().date()`     | `z.iso.date()`             |
+| `z.string().time()`     | `z.iso.time()`             |
+| `z.string().duration()` | `z.iso.duration()`         |
+| `z.string().ip()`       | `z.ipv4()` or `z.ipv6()`   |
+| `z.string().cidr()`     | `z.cidr4()` or `z.cidr6()` |
+| `z.string().base64()`   | `z.base64()`               |
+| `z.string().nanoid()`   | `z.nanoid()`               |
+| `z.string().cuid()`     | `z.cuid()`                 |
+| `z.string().cuid2()`    | `z.cuid2()`                |
+| `z.string().ulid()`     | `z.ulid()`                 |
+| `z.string().jwt()`      | `z.jwt()`                  |
 
-In Zod v4, validators like `url()`, `email()`, and `uuid()` are top-level functions, not methods on `z.string()`.
+In Zod v4, these validators are top-level functions (or under `z.iso`), not methods on `z.string()`.

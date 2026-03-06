@@ -42,12 +42,26 @@ Always check linting after making changes. Build and lint pipelines must always 
 - **Flex layout only** — use `flex` for all layouts. Do not use `grid`, `float`, or `inline-block` for layout.
 - **Absolute positioning** is only allowed when an element must directly overlap another (e.g. badges, overlays, tooltips). Do not use `absolute` or `relative` for general layout spacing.
 - **No fixed dimensions** — do not use `w-`, `h-`, `vw`, `vh`, `dvh`, `svh` for sizing. Layouts should be flexible, not pixel-perfect. Use `min-w-`, `min-h-`, `max-w-`, `max-h-`, or flex/grow/shrink to control sizing. Exception: small fixed-size elements like spinners or icons (e.g. `h-4 w-4`, `h-8 w-8`) are allowed.
+- **Tailwind v4 variable syntax** — use the `(--var)` shorthand to reference CSS custom properties. Do not use the v3 arbitrary value syntax with `var()`.
+
+  ```html
+  <!-- ❌ Bad — v3 arbitrary value syntax -->
+  <div class="bg-[var(--brand-color)]">
+    <div class="text-[var(--text-primary)]">
+      <!-- ✅ Good — v4 shorthand -->
+      <div class="bg-(--brand-color)">
+        <div class="text-(--text-primary)"></div>
+      </div>
+    </div>
+  </div>
+  ```
 
 ### Strict Code Standards:
 
 - Do not add comments to code — no JSDoc, no inline comments, no block comments. Existing comments that shipped with the template must be left in place.
 - No `console.log`, `console.error`, or `console.warn`
-- No type assertions (`as` keyword) — use proper type narrowing instead
+- No type assertions (`as` keyword) — use proper type narrowing instead. **Exception**: `as const` is allowed and encouraged.
+- **No `.then()` on promises** — use `async`/`await` instead. `.catch()` is allowed for fire-and-forget error handling.
 - No mutation of arrays (`.push`, `.pop`, `.sort`, `.reverse`, `.splice`) — use immutable alternatives (`.concat`, `.toSorted`, `.toReversed`, `.toSpliced`)
 - No mutation of objects via property assignment — use spread `{ ...obj, key: value }`
 - No `for...in` or `for...of` loops — use `.map()`, `.filter()`, `.reduce()`, `.forEach()`

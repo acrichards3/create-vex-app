@@ -1,0 +1,42 @@
+## React Conventions
+
+### Component Typing
+
+Always type components with `React.FC`. Do not use bare function declarations for components.
+
+```tsx
+// ❌ Bad
+function MyComponent({ title }: Props): React.ReactElement {
+  return <h1>{title}</h1>;
+}
+
+// ❌ Bad
+const MyComponent = ({ title }: Props): ReactNode => {
+  return <h1>{title}</h1>;
+};
+
+// ✅ Good
+const MyComponent: React.FC<Props> = ({ title }) => {
+  return <h1>{title}</h1>;
+};
+```
+
+### React Imports
+
+Never destructure imports from React. Always use the `React.` namespace prefix.
+
+```tsx
+// ❌ Bad — destructured imports
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
+
+const [count, setCount] = useState(0);
+useEffect(() => { ... }, []);
+
+// ✅ Good — namespace access
+import React from 'react';
+
+const [count, setCount] = React.useState(0);
+React.useEffect(() => { ... }, []);
+```
+
+This applies to all React APIs: hooks (`React.useState`, `React.useEffect`, `React.useCallback`, `React.useMemo`, `React.useRef`, etc.), types (`React.ReactNode`, `React.FC`, `React.ComponentProps`, etc.), and utilities (`React.memo`, `React.lazy`, `React.createContext`, etc.).
