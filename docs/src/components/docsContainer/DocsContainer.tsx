@@ -69,7 +69,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
         <a
           aria-label="Open GitHub repository"
           className="text-white/80 hover:text-white transition-colors duration-200"
-          href="https://github.com/acrichards3/thunder-cli"
+          href="https://github.com/acrichards3/create-thunder-app"
           rel="noopener noreferrer"
           target="_blank"
         >

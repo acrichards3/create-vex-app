@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({ hideLogo }) => {
         <a
           aria-label="Open GitHub repository"
           className="hover:text-white transition-colors duration-200"
-          href="https://github.com/acrichards3/thunder-cli"
+          href="https://github.com/acrichards3/create-thunder-app"
           rel="noopener noreferrer"
           target="_blank"
         >

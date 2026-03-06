@@ -12,10 +12,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/acrichards3/thunder-cli.git"
+    "url": "https://github.com/acrichards3/create-thunder-app.git"
   },
   "bugs": {
-    "url": "https://github.com/acrichards3/thunder-cli/issues"
+    "url": "https://github.com/acrichards3/create-thunder-app/issues"
   },
   "keywords": [
     "template",
