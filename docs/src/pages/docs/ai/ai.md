@@ -38,6 +38,10 @@ The `.cursor/rules/` directory contains markdown files that the AI model reads b
 
 Rules are pre-emptive guidance. They reduce first-pass errors but don't enforce anything — that's what the hooks are for.
 
+### Testing Conventions
+
+The AI settings also include testing rules that enforce a structured **WHEN / AND / it** test pattern using Bun's built-in test runner. When opted in, your AI agent will write `.spec.ts` files co-located with source code, structure tests as decision trees that mirror code paths, and follow strict rules around setup, assertions, and mocking. See the [Testing](/testing) page for the full convention guide.
+
 ## Post-Write Hooks
 
 The hooks are the enforcement layer. Every time the AI agent writes a file, four scripts run in sequence:
