@@ -286,6 +286,15 @@ module.exports = {
         "sonarjs/function-return-type": "off",
       },
     },
+    {
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      rules: {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-nested-callbacks": "off",
+        "max-statements": "off",
+      },
+    },
   ],
   settings: { react: { version: "detect" } },
 };

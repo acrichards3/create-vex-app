@@ -98,6 +98,15 @@ module.exports = {
       },
     },
     {
+      files: ["**/*.test.ts", "**/*.spec.ts"],
+      rules: {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-nested-callbacks": "off",
+        "max-statements": "off",
+      },
+    },
+    {
       files: ["src/env/env.ts"],
       rules: {
         "no-restricted-syntax": [

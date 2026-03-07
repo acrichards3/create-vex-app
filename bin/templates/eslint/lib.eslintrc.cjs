@@ -23,6 +23,15 @@ module.exports = {
         "@typescript-eslint/consistent-type-assertions": "off",
       },
     },
+    {
+      files: ["**/*.test.ts", "**/*.spec.ts"],
+      rules: {
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-nested-callbacks": "off",
+        "max-statements": "off",
+      },
+    },
   ],
   rules: {
     // ─── Complexity bounds ───────────────────────────────────
