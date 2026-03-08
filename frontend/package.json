@@ -1,5 +1,5 @@
 {
-  "name": "@thunder-app/frontend",
+  "name": "@vex-app/frontend",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "@hono/auth-js": "^1.1.0",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.163.3",
-    "@thunder-app/lib": "workspace:*",
+    "@vex-app/lib": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zod": "^4"

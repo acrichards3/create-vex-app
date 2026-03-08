@@ -1,10 +1,10 @@
 # Deployment
 
-Thunder App is a monorepo with two deployable pieces: a static frontend (Vite build) and a Bun-powered backend API. The frontend compiles to static files that can be served from any CDN or hosting provider. The backend runs on Bun and needs a host that supports it — either through a Docker container or a platform with native Bun support. Both pieces need to know about each other: the frontend needs `VITE_BACKEND_URL` at build time, and the backend needs `FRONTEND_URL` at runtime for CORS.
+Vex App is a monorepo with two deployable pieces: a static frontend (Vite build) and a Bun-powered backend API. The frontend compiles to static files that can be served from any CDN or hosting provider. The backend runs on Bun and needs a host that supports it — either through a Docker container or a platform with native Bun support. Both pieces need to know about each other: the frontend needs `VITE_BACKEND_URL` at build time, and the backend needs `FRONTEND_URL` at runtime for CORS.
 
 ## Quick Deployment Guide
 
-This guide walks through deploying your Thunder App using AWS Amplify for the frontend and AWS App Runner (via ECR) for the backend. The frontend deployment takes about 5 minutes — connect your GitHub repo, set one environment variable, and Amplify handles the rest, including automatic redeployments on every push to `main`. The backend takes a bit more setup but gives you a fully managed, auto-scaling container service running Bun.
+This guide walks through deploying your Vex App using AWS Amplify for the frontend and AWS App Runner (via ECR) for the backend. The frontend deployment takes about 5 minutes — connect your GitHub repo, set one environment variable, and Amplify handles the rest, including automatic redeployments on every push to `main`. The backend takes a bit more setup but gives you a fully managed, auto-scaling container service running Bun.
 
 ### Frontend — AWS Amplify
 
@@ -12,7 +12,7 @@ AWS Amplify can host your frontend as a static site with automatic builds from G
 
 #### 1. Add `amplify.yml` to the repo root
 
-If you selected "Include Thunder App quick deploy setup?" during `bun create thunder-app`, this file is already in your project — skip to step 2. Otherwise, create `amplify.yml` at the repo root with the following contents:
+If you selected "Include Vex App quick deploy setup?" during `bun create vex-app`, this file is already in your project — skip to step 2. Otherwise, create `amplify.yml` at the repo root with the following contents:
 
 ```yaml
 version: 1
@@ -70,7 +70,7 @@ App Runner is a fully managed container service that auto-scales your backend. Y
 
 #### 1. Create a `Dockerfile` at the repo root
 
-If you selected "Include Thunder App quick deploy setup?" during `bun create thunder-app`, the `Dockerfile` and `.dockerignore` are already in your project — skip to step 3.
+If you selected "Include Vex App quick deploy setup?" during `bun create vex-app`, the `Dockerfile` and `.dockerignore` are already in your project — skip to step 3.
 
 Multi-stage build — the builder stage compiles only the `lib` package, and the runner copies the backend source directly since Bun runs TypeScript natively:
 
@@ -228,7 +228,7 @@ Trailing slashes in either URL will cause CORS failures.
 
 ### CI/CD Automation
 
-If you selected both "Include GitHub CI/CD pipeline?" and "Include Thunder App quick deploy setup?" during `bun create thunder-app`, your project includes a GitHub Actions workflow that automatically builds, lints, type-checks, and deploys on every push to `main`.
+If you selected both "Include GitHub CI/CD pipeline?" and "Include Vex App quick deploy setup?" during `bun create vex-app`, your project includes a GitHub Actions workflow that automatically builds, lints, type-checks, and deploys on every push to `main`.
 
 The workflow has two jobs:
 

@@ -1,4 +1,4 @@
-# Thunder Docs
+# Vex Docs
 
 Standalone Vite + React + TypeScript app for project documentation.
 

@@ -186,7 +186,7 @@ export const TableOfContents: React.FC = () => {
               <button
                 className={`flex flex-1 text-left rounded-md px-3 py-1.5 text-sm transition-colors duration-200 ${
                   isActive
-                    ? "bg-white/10 font-semibold text-cyan-300"
+                    ? "bg-white/10 font-semibold text-violet-300"
                     : "text-gray-300 hover:bg-white/5 hover:text-white"
                 } ${indentClass}`}
                 key={`${heading.id}-${index}`}

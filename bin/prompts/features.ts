@@ -14,11 +14,11 @@ export const promptIncludeGithub = async (): ReturnType<typeof askYesNo> => {
 };
 
 export const promptIncludeDeploy = async (): ReturnType<typeof askYesNo> => {
-  return askYesNo("Include Thunder App quick deploy setup?", true);
+  return askYesNo("Include Vex App quick deploy setup?", true);
 };
 
 export const promptIncludeAiSettings = async (): ReturnType<typeof askYesNo> => {
-  return askYesNo("Use Thunder App recommended AI settings?", true);
+  return askYesNo("Use Vex App recommended AI settings?", true);
 };
 
 export const promptIncludeSpecFirst = async (): ReturnType<typeof askYesNo> => {

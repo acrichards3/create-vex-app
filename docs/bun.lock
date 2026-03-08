@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "@thunder-app/docs",
+      "name": "@vex-app/docs",
       "dependencies": {
         "@tanstack/react-router": "^1.134.15",
         "react": "^19.2.0",

@@ -1,6 +1,6 @@
 # AI Integration
 
-Thunder App ships with an optional AI configuration layer that keeps AI agents writing clean, compliant code. When you select "Use Thunder App recommended AI settings" during `bun create thunder-app`, the CLI sets up three systems that work together: a strict ESLint config, Cursor rules, and post-write hooks.
+Vex App ships with an optional AI configuration layer that keeps AI agents writing clean, compliant code. When you select "Use Vex App recommended AI settings" during `bun create vex-app`, the CLI sets up three systems that work together: a strict ESLint config, Cursor rules, and post-write hooks.
 
 ## How It Works
 

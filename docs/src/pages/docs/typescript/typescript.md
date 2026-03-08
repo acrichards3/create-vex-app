@@ -1,6 +1,6 @@
 # TypeScript
 
-Thunder App is built with strict TypeScript from top to bottom. Every package — frontend, backend, and lib — shares a common base configuration with additional strictness rules enforced by ESLint.
+Vex App is built with strict TypeScript from top to bottom. Every package — frontend, backend, and lib — shares a common base configuration with additional strictness rules enforced by ESLint.
 
 ## Configuration
 
@@ -39,7 +39,7 @@ The frontend config adds DOM types, React JSX support, and path aliases:
     "jsx": "react-jsx",
     "composite": true,
     "paths": {
-      "@thunder-app/lib": ["../lib/dist/index.d.ts"],
+      "@vex-app/lib": ["../lib/dist/index.d.ts"],
       "~/*": ["src/*"]
     }
   },
@@ -140,11 +140,11 @@ import { Button } from "../../../components/Button";
 import { Button } from "~/components/Button";
 ```
 
-The lib package is available everywhere via `@thunder-app/lib`:
+The lib package is available everywhere via `@vex-app/lib`:
 
 ```typescript
-import { tryCatch, raise } from "@thunder-app/lib";
-import type { User } from "@thunder-app/lib";
+import { tryCatch, raise } from "@vex-app/lib";
+import type { User } from "@vex-app/lib";
 ```
 
 ## Adding Types to the Lib Package
@@ -172,7 +172,7 @@ export type { Post } from "./types/post";
 3. Import it in either package:
 
 ```typescript
-import type { Post } from "@thunder-app/lib";
+import type { Post } from "@vex-app/lib";
 ```
 
 The lib runs in watch mode during development, so the type becomes available immediately.

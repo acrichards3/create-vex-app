@@ -1,4 +1,4 @@
-import { tryCatchAsync } from "@thunder-app/lib";
+import { tryCatchAsync } from "@vex-app/lib";
 import { z } from "zod";
 import { env } from "../env/env";
 

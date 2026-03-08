@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { EnvError } from "./components/EnvError";
 import { envIssues } from "./env/validate";
-import { raise } from "@thunder-app/lib";
+import { raise } from "@vex-app/lib";
 import { routeTree } from "./routeTree.gen";
 
 const router = createRouter({ routeTree });

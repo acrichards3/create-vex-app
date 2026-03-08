@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { raise } from "@thunder-app/lib";
+import { raise } from "@vex-app/lib";
 
 declare const process: { env: Record<string, string | undefined> };
 

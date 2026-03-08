@@ -1,6 +1,6 @@
 # Bun
 
-Thunder App uses [Bun](https://bun.sh) as both the JavaScript runtime and package manager. Bun's speed advantages apply across the entire development workflow — installing dependencies, running the dev server, executing TypeScript directly, and running the backend in production.
+Vex App uses [Bun](https://bun.sh) as both the JavaScript runtime and package manager. Bun's speed advantages apply across the entire development workflow — installing dependencies, running the dev server, executing TypeScript directly, and running the backend in production.
 
 ## Why Bun?
 
@@ -11,7 +11,7 @@ Thunder App uses [Bun](https://bun.sh) as both the JavaScript runtime and packag
 
 ## Workspaces
 
-Thunder App is a monorepo managed with Bun workspaces. The root `package.json` declares the three packages:
+Vex App is a monorepo managed with Bun workspaces. The root `package.json` declares the three packages:
 
 ```json
 {
@@ -24,7 +24,7 @@ This allows all packages to share a single `node_modules` tree and `bun.lock` fi
 ```json
 {
   "dependencies": {
-    "@thunder-app/lib": "workspace:*"
+    "@vex-app/lib": "workspace:*"
   }
 }
 ```
@@ -41,10 +41,10 @@ To add a dependency to a specific package, use `--filter`:
 
 ```bash
 # Add to frontend
-bun add react-icons --filter @thunder-app/frontend
+bun add react-icons --filter @vex-app/frontend
 
 # Add a dev dependency to backend
-bun add -D @types/node --filter @thunder-app/backend
+bun add -D @types/node --filter @vex-app/backend
 ```
 
 ## Running Scripts
@@ -56,7 +56,7 @@ Bun provides several ways to run scripts across the monorepo:
 bun run dev
 
 # Run a script in a specific package
-bun run --filter @thunder-app/frontend dev
+bun run --filter @vex-app/frontend dev
 
 # Run a script in all packages that have it
 bun run --filter '*' lint
@@ -103,7 +103,7 @@ In development, `bun --watch src/index.ts` restarts the server on file changes. 
 
 ## Bun vs Node.js
 
-Thunder App uses Bun as the primary runtime, but Node.js (v22+) is still recommended as a prerequisite for some tooling that may not yet support Bun natively. The frontend build (Vite) and linting (ESLint) work with both runtimes.
+Vex App uses Bun as the primary runtime, but Node.js (v22+) is still recommended as a prerequisite for some tooling that may not yet support Bun natively. The frontend build (Vite) and linting (ESLint) work with both runtimes.
 
 ## Key Bun Features Used
 

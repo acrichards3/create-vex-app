@@ -1,29 +1,29 @@
 <div align="center">
-  <img src="https://www.thunderapp.io/logos/thunder-app.png" alt="Thunder App Logo" width="200" />
+  <img src="https://www.vexapp.io/logos/vex-app.png" alt="Vex App Logo" width="200" />
 </div>
 
-# Thunder App Template
+# Vex App Template
 
-[![npm version](https://img.shields.io/npm/v/create-thunder-app)](https://www.npmjs.com/package/create-thunder-app)
-[![CI](https://github.com/acrichards3/create-thunder-app/actions/workflows/ci.yml/badge.svg)](https://github.com/acrichards3/create-thunder-app/actions/workflows/ci.yml)
-[![license](https://img.shields.io/npm/l/create-thunder-app)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/create-vex-app)](https://www.npmjs.com/package/create-vex-app)
+[![CI](https://github.com/acrichards3/create-vex-app/actions/workflows/ci.yml/badge.svg)](https://github.com/acrichards3/create-vex-app/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/create-vex-app)](./LICENSE)
 
-An AI-first full-stack starter kit with Vite + React frontend, Hono backend, and a shared TypeScript `lib` package — all powered by Bun. Ships with strict linting, post-write hooks, and Cursor rules that keep AI agents writing production-quality code.
+Stop wrestling with annoying AI slop. Vex App is a Bun-powered full-stack starter kit with Vite + React, Hono, and a shared TypeScript lib, built with strict guardrails that make AI agents write production-quality code from the first keystroke.
 
-**[Documentation](https://www.thunderapp.io)**
+**[Documentation](https://www.vexapp.io)**
 
 ## 🚀 Quickstart
 
 Create a new app in the current directory (you'll be prompted for a name):
 
 ```bash
-bun create thunder-app@latest
+bun create vex-app@latest
 ```
 
 Or specify the name directly:
 
 ```bash
-bun create thunder-app@latest my-app
+bun create vex-app@latest my-app
 ```
 
 The generator will:
@@ -339,7 +339,7 @@ Environment variables are validated at startup with Zod. The backend logs errors
 
 ## 🤖 AI Integration
 
-When you select "Use Thunder App recommended AI settings" during setup, the CLI configures your project for AI-assisted development:
+When you select "Use Vex App recommended AI settings" during setup, the CLI configures your project for AI-assisted development:
 
 - **Strict ESLint config** — Swaps in a hardened ruleset with `sonarjs`, `unicorn`, and `perfectionist` plugins. Enforces explicit return types, bans type assertions, prevents mutation, bans raw `try/catch` blocks (use `tryCatch`/`tryCatchAsync` utilities instead), limits complexity, and more. Designed to catch the mistakes AI models make most often.
 - **Cursor rules** (`.cursor/rules/`) — `.mdc` files with frontmatter that Cursor automatically injects into the AI model's context. Cover component organization, Tailwind conventions, type safety patterns, Zod v4 usage, Bun APIs, backend architecture, and testing conventions.
@@ -375,7 +375,7 @@ To publish this template to npm so others can use it:
 
 3. **Users can then create projects with:**
    ```bash
-   bun create thunder-app@latest
+   bun create vex-app@latest
    ```
 
-Note: The package name is `create-thunder-app`, but users call it with `bun create thunder-app` (Bun automatically prepends `create-`).
+Note: The package name is `create-vex-app`, but users call it with `bun create vex-app` (Bun automatically prepends `create-`).

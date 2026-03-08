@@ -62,14 +62,14 @@ const CodeBlock: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="relative group mb-4">
-      <pre className="bg-black/30 rounded-lg overflow-x-auto border border-cyan-500/20 p-4">
+      <pre className="bg-black/30 rounded-lg overflow-x-auto border border-violet-500/20 p-4">
         <code className="block text-gray-200 font-mono text-sm whitespace-pre">{children}</code>
       </pre>
       <button
         className={`absolute top-3 right-3 px-3 py-1.5 rounded text-xs font-semibold transition-colors duration-200 cursor-pointer ${
           copied
             ? "bg-green-500/30 hover:bg-green-500/40 border border-green-400 text-green-200"
-            : "bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300"
+            : "bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/40 text-violet-300"
         }`}
         onClick={handleCopy}
         type="button"
@@ -82,12 +82,12 @@ const CodeBlock: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
   return (
-    <div className="prose prose-invert prose-cyan max-w-none">
+    <div className="prose prose-invert prose-violet max-w-none">
       <ReactMarkdown
         components={{
           a: ({ children, href }) => (
             <a
-              className="text-cyan-400 hover:text-cyan-300 underline transition-colors"
+              className="text-violet-400 hover:text-violet-300 underline transition-colors"
               href={href}
               rel="noopener noreferrer"
               target="_blank"
@@ -96,7 +96,9 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
             </a>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-cyan-500/40 pl-4 italic text-gray-300 mb-4">{children}</blockquote>
+            <blockquote className="border-l-4 border-violet-500/40 pl-4 italic text-gray-300 mb-4">
+              {children}
+            </blockquote>
           ),
           code: ({ children, className }) => {
             const isInline = !className;
@@ -104,7 +106,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               return <code>{children}</code>;
             }
             return (
-              <code className="bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+              <code className="bg-white/10 text-violet-300 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
             );
           },
           h1: ({ children }) => {
@@ -143,7 +145,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
               </h4>
             );
           },
-          hr: () => <hr className="border-cyan-500/20 my-8" />,
+          hr: () => <hr className="border-violet-500/20 my-8" />,
           li: ({ children }) => <li className="text-gray-300 text-lg">{children}</li>,
           ol: ({ children }) => (
             <ol className="list-decimal list-inside text-gray-300 text-lg mb-4 space-y-2 ml-4">{children}</ol>
@@ -165,10 +167,10 @@ export const Markdown: React.FC<MarkdownProps> = ({ content }) => {
           ),
           tbody: ({ children }) => <tbody>{children}</tbody>,
           td: ({ children }) => (
-            <td className="text-gray-300 text-base border-b border-cyan-500/10 px-4 py-3">{children}</td>
+            <td className="text-gray-300 text-base border-b border-violet-500/10 px-4 py-3">{children}</td>
           ),
           th: ({ children }) => (
-            <th className="text-white text-base font-semibold border-b border-cyan-500/30 px-4 py-3">{children}</th>
+            <th className="text-white text-base font-semibold border-b border-violet-500/30 px-4 py-3">{children}</th>
           ),
           thead: ({ children }) => <thead>{children}</thead>,
           tr: ({ children }) => <tr>{children}</tr>,

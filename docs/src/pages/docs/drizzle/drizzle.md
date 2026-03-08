@@ -1,6 +1,6 @@
 # Drizzle
 
-Thunder App uses [Drizzle ORM](https://orm.drizzle.team) for type-safe database access with PostgreSQL. Drizzle provides a SQL-like query builder that gives you full TypeScript type safety without sacrificing control over your queries.
+Vex App uses [Drizzle ORM](https://orm.drizzle.team) for type-safe database access with PostgreSQL. Drizzle provides a SQL-like query builder that gives you full TypeScript type safety without sacrificing control over your queries.
 
 ## Database Setup
 
@@ -12,7 +12,7 @@ Make sure PostgreSQL is running locally or via a cloud provider. If you don't ha
 docker run -d --name postgres \
   -e POSTGRES_USER=user \
   -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=thunderapp \
+  -e POSTGRES_DB=vexapp \
   -p 5432:5432 \
   postgres:17
 ```
@@ -22,7 +22,7 @@ docker run -d --name postgres \
 Set `DATABASE_URL` in `backend/.env`:
 
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/thunderapp
+DATABASE_URL=postgresql://user:password@localhost:5432/vexapp
 ```
 
 ### 3. Push the Schema
@@ -37,7 +37,7 @@ This creates all the tables defined in `backend/src/db/schema/`.
 
 ## Schema
 
-Database schemas are defined in `backend/src/db/schema/` using Drizzle's table builder. Thunder App includes two schema files out of the box:
+Database schemas are defined in `backend/src/db/schema/` using Drizzle's table builder. Vex App includes two schema files out of the box:
 
 ### Users
 

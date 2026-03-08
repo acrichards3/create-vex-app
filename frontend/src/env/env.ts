@@ -1,7 +1,7 @@
 /**
  * You probably won't need to touch this file. Edit schema.ts to add or change env variables.
  */
-import { raise } from "@thunder-app/lib";
+import { raise } from "@vex-app/lib";
 import { envSchema } from "./schema";
 
 const result = envSchema.safeParse(import.meta.env);

@@ -15,7 +15,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@thunder-app/lib": ["../lib/dist/index.d.ts"],
+      "@vex-app/lib": ["../lib/dist/index.d.ts"],
       "~/*": ["src/*"]
     }
   },

@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "create-thunder-app",
+      "name": "create-vex-app",
       "devDependencies": {
         "@types/bun": "^1.3.5",
         "eslint-plugin-sort-keys": "^2.3.5",
@@ -12,13 +12,13 @@
       },
     },
     "backend": {
-      "name": "@thunder-app/backend",
+      "name": "@vex-app/backend",
       "version": "0.0.0",
       "dependencies": {
         "@auth/core": "^0.34.3",
         "@auth/drizzle-adapter": "^1.11.1",
         "@hono/auth-js": "^1.1.0",
-        "@thunder-app/lib": "workspace:*",
+        "@vex-app/lib": "workspace:*",
         "drizzle-orm": "^0.44.7",
         "hono": "^4.0.0",
         "postgres": "^3.4.7",
@@ -42,13 +42,13 @@
       },
     },
     "frontend": {
-      "name": "@thunder-app/frontend",
+      "name": "@vex-app/frontend",
       "version": "0.0.0",
       "dependencies": {
         "@hono/auth-js": "^1.1.0",
         "@tanstack/react-query": "^5.90.5",
         "@tanstack/react-router": "^1.163.3",
-        "@thunder-app/lib": "workspace:*",
+        "@vex-app/lib": "workspace:*",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "zod": "^4",
@@ -79,7 +79,7 @@
       },
     },
     "lib": {
-      "name": "@thunder-app/lib",
+      "name": "@vex-app/lib",
       "version": "0.0.0",
       "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^7.0.0",
@@ -354,12 +354,6 @@
 
     "@tanstack/virtual-file-routes": ["@tanstack/virtual-file-routes@1.161.4", "", {}, "sha512-42WoRePf8v690qG8yGRe/YOh+oHni9vUaUUfoqlS91U2scd3a5rkLtVsc6b7z60w3RogH0I00vdrC5AaeiZ18w=="],
 
-    "@thunder-app/backend": ["@thunder-app/backend@workspace:backend"],
-
-    "@thunder-app/frontend": ["@thunder-app/frontend@workspace:frontend"],
-
-    "@thunder-app/lib": ["@thunder-app/lib@workspace:lib"],
-
     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
 
     "@types/babel__generator": ["@types/babel__generator@7.27.0", "", { "dependencies": { "@babel/types": "^7.0.0" } }, "sha512-ufFd2Xi92OAVPYsy+P4n7/U7e68fex0+Ee8gSG9KX7eo084CWiQ4sdxktvdl0bOPupXtVJPY19zk6EwWqUQ8lg=="],
@@ -409,6 +403,12 @@
     "@typescript-eslint/visitor-keys": ["@typescript-eslint/visitor-keys@7.18.0", "", { "dependencies": { "@typescript-eslint/types": "7.18.0", "eslint-visitor-keys": "^3.4.3" } }, "sha512-cDF0/Gf81QpY3xYyJKDV14Zwdmid5+uuENhjH2EqFaF0ni+yAyq/LzMaIJdhNJXZI7uLzwIlA+V7oWoyn6Curg=="],
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.0", "", {}, "sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g=="],
+
+    "@vex-app/backend": ["@vex-app/backend@workspace:backend"],
+
+    "@vex-app/frontend": ["@vex-app/frontend@workspace:frontend"],
+
+    "@vex-app/lib": ["@vex-app/lib@workspace:lib"],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@4.7.0", "", { "dependencies": { "@babel/core": "^7.28.0", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.27", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0" } }, "sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA=="],
 

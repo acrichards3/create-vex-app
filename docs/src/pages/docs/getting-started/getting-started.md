@@ -1,6 +1,6 @@
 # Getting Started
 
-Get up and running with Thunder App in minutes.
+Get up and running with Vex App in minutes.
 
 ## Prerequisites
 
@@ -13,15 +13,15 @@ _Note: Earlier versions may work but have not been tested_
 
 ## Installation
 
-To create a new Thunder App project, run:
+To create a new Vex App project, run:
 
 ```bash
-bun create thunder-app@latest
+bun create vex-app@latest
 ```
 
 The CLI will guide you through the setup process and ask you a few questions about your project configuration.
 
-![Thunder App CLI](/thunder-app-cli.png)
+![Vex App CLI](/vex-app-cli.png)
 
 Once the project is created, navigate into your new project directory:
 
@@ -43,7 +43,7 @@ And the frontend will show invalid environment variables directly in the browser
 
 ### Database Setup
 
-Thunder App uses Drizzle ORM with PostgreSQL. To set up your database:
+Vex App uses Drizzle ORM with PostgreSQL. To set up your database:
 
 1. Make sure PostgreSQL is running
 2. Update your database connection string in `backend/.env`

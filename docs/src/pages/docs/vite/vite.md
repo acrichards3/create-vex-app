@@ -1,6 +1,6 @@
 # Vite
 
-Thunder App uses [Vite 5](https://vite.dev) as the frontend build tool. Vite provides fast hot module replacement (HMR) during development and optimized production builds.
+Vex App uses [Vite 5](https://vite.dev) as the frontend build tool. Vite provides fast hot module replacement (HMR) during development and optimized production builds.
 
 ## Configuration
 

@@ -1,12 +1,12 @@
 # Introduction
 
-Welcome to Thunder App — a modern full-stack monorepo template designed to help you build fast, type-safe applications. Think of it as your starting point for building scalable apps with Bun as the runtime, Vite and React for the frontend, Hono for the backend, and a shared TypeScript library to keep everything in sync.
+Welcome to Vex App — a modern full-stack monorepo template designed to help you build fast, type-safe applications. Think of it as your starting point for building scalable apps with Bun as the runtime, Vite and React for the frontend, Hono for the backend, and a shared TypeScript library to keep everything in sync.
 
 ## Motivation
 
-There wasn't a great way to scaffold a Bun-first project that truly prioritized speed and developer experience. Setting this up manually each time a new side project came along was a pain — the goal was a way to get started quickly and jump straight into building. Speed and Bun were the main drivers. Thunder App takes full advantage of Bun's performance while giving you a modern, type-safe development experience.
+There wasn't a great way to scaffold a Bun-first project that truly prioritized speed and developer experience. Setting this up manually each time a new side project came along was a pain — the goal was a way to get started quickly and jump straight into building. Speed and Bun were the main drivers. Vex App takes full advantage of Bun's performance while giving you a modern, type-safe development experience.
 
-This project takes a lot of inspiration from [create-t3-app](https://create.t3.gg/), which has done an amazing job making typesafe Next.js apps easy to set up. Thunder App follows similar principles but is built specifically for the Bun ecosystem, giving you a fast, modular approach to full-stack TypeScript development.
+This project takes a lot of inspiration from [create-t3-app](https://create.t3.gg/), which has done an amazing job making typesafe Next.js apps easy to set up. Vex App follows similar principles but is built specifically for the Bun ecosystem, giving you a fast, modular approach to full-stack TypeScript development.
 
 ## Strictness
 
@@ -14,7 +14,7 @@ This project is opinionated. TypeScript is non-negotiable, and the TypeScript co
 
 ## AI First
 
-Thunder App is designed for AI-assisted development. When you select "Use Thunder App recommended AI settings" during setup, the CLI configures your project with guardrails that keep AI agents producing clean, compliant code:
+Vex App is designed for AI-assisted development. When you select "Use Vex App recommended AI settings" during setup, the CLI configures your project with guardrails that keep AI agents producing clean, compliant code:
 
 - **Strict ESLint config** — A hardened ruleset replaces the default config when AI settings are enabled. It enforces explicit return types, bans type assertions, prevents object and array mutation, limits function complexity, and more. Human developers get a lighter ruleset; AI agents get the strict one.
 - **Cursor rules** — A set of `.cursor/rules/` files tell the AI model exactly how to write code for this stack — component organization, Tailwind conventions, type safety patterns, and which ESLint patterns to follow.
@@ -35,4 +35,4 @@ Here's what you get out of the box:
 - **Code Quality**: ESLint, Prettier (configured via `.prettierrc`), and strict TypeScript across all packages.
 - **Development Tools**: Scripts for dev, build, lint, format, typecheck, and database management — everything you need to get productive fast.
 
-With Thunder App, skip the setup headaches and jump straight into building the features that matter.
+With Vex App, skip the setup headaches and jump straight into building the features that matter.

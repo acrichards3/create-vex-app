@@ -18,7 +18,7 @@ const replaceInDirectory = async (dir: string, newPrefix: string): Promise<void>
       if (!SOURCE_EXTENSIONS.test(entry.name)) continue;
 
       const content = await Bun.file(fullPath).text();
-      const replaced = content.replace(/(["'])@thunder-app\//g, `$1${newPrefix}`);
+      const replaced = content.replace(/(["'])@vex-app\//g, `$1${newPrefix}`);
 
       if (replaced !== content) {
         await Bun.write(fullPath, replaced);

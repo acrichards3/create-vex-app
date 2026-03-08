@@ -1,6 +1,6 @@
 # Auth.js
 
-Thunder App uses [Auth.js](https://authjs.dev) (formerly NextAuth) for authentication, integrated with the Hono backend via `@hono/auth-js`. The setup includes database sessions, Google OAuth, and additional security features like session token hashing and optional OAuth token encryption.
+Vex App uses [Auth.js](https://authjs.dev) (formerly NextAuth) for authentication, integrated with the Hono backend via `@hono/auth-js`. The setup includes database sessions, Google OAuth, and additional security features like session token hashing and optional OAuth token encryption.
 
 ## Setup
 
@@ -17,7 +17,7 @@ Add the following to `backend/.env`:
 
 ```
 AUTH_SECRET="your-secret-here"          # openssl rand -base64 32
-DATABASE_URL=postgresql://user:password@localhost:5432/thunderapp
+DATABASE_URL=postgresql://user:password@localhost:5432/vexapp
 GOOGLE_CLIENT_ID="your-client-id"
 GOOGLE_CLIENT_SECRET="your-client-secret"
 FRONTEND_URL=http://localhost:5173
@@ -53,7 +53,7 @@ Start the dev server (`bun run dev`) and click the **Sign in** button on the fro
 
 ### Session Strategy
 
-Thunder App uses **database sessions** (not JWTs). Sessions are stored in the `auth_sessions` table and looked up on each request. This means you can:
+Vex App uses **database sessions** (not JWTs). Sessions are stored in the `auth_sessions` table and looked up on each request. This means you can:
 
 - Revoke sessions server-side
 - See all active sessions for a user
@@ -132,7 +132,7 @@ if (!session?.user) return <Navigate to="/login" />;
 
 ## Security
 
-Thunder App adds several security layers on top of Auth.js.
+Vex App adds several security layers on top of Auth.js.
 
 ### Session Token Hashing
 
@@ -171,7 +171,7 @@ To add another OAuth provider (e.g., GitHub):
 1. Install the provider (if not already available via `@auth/core`):
 
 ```bash
-bun add @auth/core --filter @thunder-app/backend
+bun add @auth/core --filter @vex-app/backend
 ```
 
 2. Import and add it to the `providers` array in `backend/src/index.ts`:

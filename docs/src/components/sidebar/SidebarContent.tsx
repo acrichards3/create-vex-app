@@ -21,7 +21,7 @@ export const SIDEBAR_ITEMS = {
     order: 3,
     sectionTitle: "Deployment",
   },
-  thunderApp: {
+  vexApp: {
     items: [
       {
         href: "/introduction",
@@ -45,7 +45,7 @@ export const SIDEBAR_ITEMS = {
       },
     ],
     order: 1,
-    sectionTitle: "Thunder App",
+    sectionTitle: "Vex App",
   },
   usage: {
     items: [
@@ -113,14 +113,14 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ onLinkClick }) =
                 <Link
                   className={`relative flex items-center rounded-md px-3 py-2 text-sm transition-colors duration-200 ${
                     isActive
-                      ? "bg-white/10 font-semibold text-cyan-300"
+                      ? "bg-white/10 font-semibold text-violet-300"
                       : "text-gray-300 hover:bg-white/5 hover:text-white"
                   }`}
                   key={item.href}
                   onClick={onLinkClick}
                   to={item.href}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-400 rounded-r" />}
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-400 rounded-r" />}
                   <span className="pl-1">{item.title}</span>
                 </Link>
               );

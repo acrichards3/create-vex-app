@@ -1,10 +1,10 @@
 # Project Structure
 
-Understand how your Thunder App project is organized.
+Understand how your Vex App project is organized.
 
 ---
 
-Thunder App is a monorepo managed with [Bun workspaces](https://bun.sh/docs/install/workspaces). It contains three packages — `frontend`, `backend`, and `lib` — along with shared configuration and tooling at the root.
+Vex App is a monorepo managed with [Bun workspaces](https://bun.sh/docs/install/workspaces). It contains three packages — `frontend`, `backend`, and `lib` — along with shared configuration and tooling at the root.
 
 ## Overview
 
@@ -126,7 +126,7 @@ lib/
 Both `frontend` and `backend` depend on `lib` via `workspace:*`. Import from it like:
 
 ```typescript
-import { raise, tryCatch } from "@thunder-app/lib";
+import { raise, tryCatch } from "@vex-app/lib";
 ```
 
 **Important:** After making changes to `lib`, you need to rebuild it (`bun run build:lib`) or run it in watch mode (`bun run dev:lib`) for changes to be picked up by other packages.

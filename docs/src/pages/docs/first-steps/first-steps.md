@@ -1,10 +1,10 @@
 # First Steps
 
-You've created your Thunder App project and run `bun run dev` — now what? This guide walks you through the most common tasks to start building your app.
+You've created your Vex App project and run `bun run dev` — now what? This guide walks you through the most common tasks to start building your app.
 
 ## Understand the Monorepo
 
-Thunder App is split into three packages managed by Bun workspaces:
+Vex App is split into three packages managed by Bun workspaces:
 
 | Package     | Purpose                                  |
 | ----------- | ---------------------------------------- |
@@ -12,7 +12,7 @@ Thunder App is split into three packages managed by Bun workspaces:
 | `backend/`  | Hono API server — routes, database, auth |
 | `lib/`      | Shared TypeScript utilities and types    |
 
-Every package can import from `lib` via `@thunder-app/lib`. Changes to `lib` are picked up automatically during development thanks to TypeScript's `--watch` mode.
+Every package can import from `lib` via `@vex-app/lib`. Changes to `lib` are picked up automatically during development thanks to TypeScript's `--watch` mode.
 
 ## Add Environment Variables
 
@@ -47,7 +47,7 @@ Then add the value to `frontend/.env`. If validation fails, the frontend will re
 
 ## Add a Frontend Route
 
-Thunder App uses TanStack Router with file-based routing. To add a new page, create a file in `frontend/src/routes/`:
+Vex App uses TanStack Router with file-based routing. To add a new page, create a file in `frontend/src/routes/`:
 
 ```typescript
 // frontend/src/routes/about.tsx
@@ -157,7 +157,7 @@ function Users() {
 The `lib` package is the right place for types, utilities, and validation schemas used by both frontend and backend. It's already set up with TypeScript project references so both packages can import from it:
 
 ```typescript
-import { tryCatchAsync, raise } from "@thunder-app/lib";
+import { tryCatchAsync, raise } from "@vex-app/lib";
 ```
 
 To add a new utility, create a file in `lib/src/utils/`, export it from `lib/src/index.ts`, and it becomes available in both frontend and backend immediately during development.

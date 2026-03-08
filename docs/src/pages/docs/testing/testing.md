@@ -1,6 +1,6 @@
 # Testing
 
-Thunder App uses [Bun's built-in test runner](https://bun.com/docs/test) — no Jest, Vitest, or any other framework needed. Tests are written with `describe` and `it` from `bun:test` and run with a single command.
+Vex App uses [Bun's built-in test runner](https://bun.com/docs/test) — no Jest, Vitest, or any other framework needed. Tests are written with `describe` and `it` from `bun:test` and run with a single command.
 
 If you opted into the AI settings during project setup, your AI agent will automatically follow these testing conventions — including the WHEN/AND structure, `.spec.ts` file naming, and all the rules below. The Cursor rules and ESLint overrides enforce these patterns so the agent writes tests the same way you would.
 

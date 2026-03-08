@@ -13,7 +13,7 @@ const printBanner = (): void => {
 const printSuccess = (config: ProjectConfig, installed: boolean): void => {
   console.log();
   console.log(colors.green(colors.bold(`✓ Project initialized as "${config.name}"`)));
-  console.log(colors.yellow(colors.bold("🚀 Thunder App template initialized!")));
+  console.log(colors.yellow(colors.bold("🚀 Vex App template initialized!")));
   console.log();
   console.log(colors.cyan(colors.bold("📍 Project location:")), colors.gray(config.targetDir));
   console.log();

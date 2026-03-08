@@ -21,12 +21,12 @@ export const transformRootPackage = async (config: ProjectConfig): Promise<void>
   delete pkg.bin;
   delete pkg.files;
 
-  // Replace @thunder-app/ prefix in scripts
+  // Replace @vex-app/ prefix in scripts
   if (pkg.scripts) {
     for (const key of Object.keys(pkg.scripts)) {
       const script = pkg.scripts[key];
       if (typeof script === "string") {
-        pkg.scripts[key] = script.replace(/@thunder-app\//g, newPrefix);
+        pkg.scripts[key] = script.replace(/@vex-app\//g, newPrefix);
       }
     }
   }
@@ -44,15 +44,15 @@ export async function transformWorkspacePackage(config: ProjectConfig, workspace
   const newPrefix = `@${config.name}/`;
 
   // Update package name
-  if (pkg.name?.startsWith("@thunder-app/")) {
-    pkg.name = pkg.name.replace(/@thunder-app\//, newPrefix);
+  if (pkg.name?.startsWith("@vex-app/")) {
+    pkg.name = pkg.name.replace(/@vex-app\//, newPrefix);
   }
 
   // Update dependencies
   if (pkg.dependencies) {
     for (const dep of Object.keys(pkg.dependencies)) {
-      if (dep.startsWith("@thunder-app/")) {
-        const newDep = dep.replace(/@thunder-app\//, newPrefix);
+      if (dep.startsWith("@vex-app/")) {
+        const newDep = dep.replace(/@vex-app\//, newPrefix);
         pkg.dependencies[newDep] = pkg.dependencies[dep];
         delete pkg.dependencies[dep];
       }

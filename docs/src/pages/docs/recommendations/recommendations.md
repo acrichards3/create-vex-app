@@ -1,10 +1,10 @@
 # Recommendations
 
-Best practices and conventions for building with Thunder App.
+Best practices and conventions for building with Vex App.
 
 ## Validate Everything at the Boundary
 
-Use Zod to validate data at every boundary — API responses, environment variables, form inputs, and database results. Thunder App already does this for environment variables in both frontend and backend. Extend this pattern to your own code:
+Use Zod to validate data at every boundary — API responses, environment variables, form inputs, and database results. Vex App already does this for environment variables in both frontend and backend. Extend this pattern to your own code:
 
 ```typescript
 // frontend/src/api/users.ts
@@ -27,7 +27,7 @@ This guarantees the shape of data flowing through your app, catches bugs early, 
 
 ## Use the Lib Package for Shared Code
 
-If you find yourself duplicating types, schemas, or utility functions between frontend and backend, move them to `lib/`. The `@thunder-app/lib` import works in both packages and changes are picked up automatically during development.
+If you find yourself duplicating types, schemas, or utility functions between frontend and backend, move them to `lib/`. The `@vex-app/lib` import works in both packages and changes are picked up automatically during development.
 
 Good candidates for the lib package:
 
@@ -76,10 +76,10 @@ The ESLint config enforces `import type` when an import is only used as a type. 
 
 ```typescript
 // Good
-import type { User } from "@thunder-app/lib";
+import type { User } from "@vex-app/lib";
 
 // Will be flagged by ESLint
-import { User } from "@thunder-app/lib";
+import { User } from "@vex-app/lib";
 ```
 
 ## Avoid `=== undefined` Checks
@@ -123,7 +123,7 @@ app.use("/api/public/*", rateLimit({ limit: 30, windowMs: 60_000 }));
 The lib package provides `tryCatch` and `tryCatchAsync` utilities that return a tuple instead of throwing. This leads to explicit, readable error handling:
 
 ```typescript
-import { tryCatchAsync } from "@thunder-app/lib";
+import { tryCatchAsync } from "@vex-app/lib";
 
 const [user, error] = await tryCatchAsync(() => getUser(id));
 

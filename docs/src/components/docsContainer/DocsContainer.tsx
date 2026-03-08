@@ -56,7 +56,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
       {/* Mobile hamburger button */}
       <button
         aria-label="Toggle mobile menu"
-        className="fixed top-8 left-8 z-50 md:hidden p-2 text-white hover:text-cyan-300 transition-colors duration-200"
+        className="fixed top-8 left-8 z-50 md:hidden p-2 text-white hover:text-violet-300 transition-colors duration-200"
         onClick={() => {
           setIsMobileMenuOpen(!isMobileMenuOpen);
         }}
@@ -69,7 +69,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
         <a
           aria-label="Open GitHub repository"
           className="text-white/80 hover:text-white transition-colors duration-200"
-          href="https://github.com/acrichards3/create-thunder-app"
+          href="https://github.com/acrichards3/create-vex-app"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -89,7 +89,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
       {isMobileMenuOpen && (
         <>
           <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={handleCloseMobileMenu} />
-          <aside className="fixed top-0 left-0 h-full w-80 bg-black/95 border-r border-cyan-500/20 z-40 overflow-y-auto md:hidden">
+          <aside className="fixed top-0 left-0 h-full w-80 bg-black/95 border-r border-violet-500/20 z-40 overflow-y-auto md:hidden">
             <div className="flex items-center justify-between px-4 pt-8 pb-4">
               <div className="w-10 h-10" />
               <Link
@@ -98,7 +98,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                 onClick={handleCloseMobileMenu}
                 to="/"
               >
-                <img alt="Thunder App Logo" className="h-10 w-10 drop-shadow-lg" src="/logos/thunder-app.png" />
+                <img alt="Vex App Logo" className="h-10 w-10 drop-shadow-lg" src="/logos/vex-app.png" />
               </Link>
             </div>
             <div className="flex flex-col gap-8 px-4 pb-8">
@@ -113,13 +113,13 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
           <div className="flex flex-1 flex-col items-start gap-8 px-4 md:px-8 py-12 overflow-y-auto thin-scrollbar">
             {children}
             {previousItem !== null || nextItem !== null ? (
-              <div className="flex w-full items-center gap-4 border-t border-cyan-500/20 pt-8 mt-8">
+              <div className="flex w-full items-center gap-4 border-t border-violet-500/20 pt-8 mt-8">
                 {previousItem && (
                   <Link
-                    className="group flex flex-1 items-center gap-3 rounded-lg border border-cyan-500/20 bg-white/5 px-4 py-3 transition-colors duration-200 hover:border-cyan-500/40 hover:bg-white/10"
+                    className="group flex flex-1 items-center gap-3 rounded-lg border border-violet-500/20 bg-white/5 px-4 py-3 transition-colors duration-200 hover:border-violet-500/40 hover:bg-white/10"
                     to={previousItem.href}
                   >
-                    <FiChevronLeft className="h-5 w-5 text-cyan-400 transition-transform duration-200 group-hover:-translate-x-1" />
+                    <FiChevronLeft className="h-5 w-5 text-violet-400 transition-transform duration-200 group-hover:-translate-x-1" />
                     <div className="flex flex-col">
                       <span className="text-xs text-gray-400">Previous</span>
                       <span className="font-semibold text-white">{previousItem.title}</span>
@@ -128,7 +128,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                 )}
                 {nextItem && (
                   <Link
-                    className={`group flex items-center justify-end gap-3 rounded-lg border border-cyan-500/20 bg-white/5 px-4 py-3 transition-colors duration-200 hover:border-cyan-500/40 hover:bg-white/10 ${
+                    className={`group flex items-center justify-end gap-3 rounded-lg border border-violet-500/20 bg-white/5 px-4 py-3 transition-colors duration-200 hover:border-violet-500/40 hover:bg-white/10 ${
                       previousItem ? "flex-1" : "w-full"
                     }`}
                     to={nextItem.href}
@@ -137,7 +137,7 @@ export const DocsContainer: React.FC<DocsContainerProps> = ({ children }) => {
                       <span className="text-xs text-gray-400">Next</span>
                       <span className="font-semibold text-white">{nextItem.title}</span>
                     </div>
-                    <FiChevronRight className="h-5 w-5 text-cyan-400 transition-transform duration-200 group-hover:translate-x-1" />
+                    <FiChevronRight className="h-5 w-5 text-violet-400 transition-transform duration-200 group-hover:translate-x-1" />
                   </Link>
                 )}
               </div>
