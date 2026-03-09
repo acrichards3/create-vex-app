@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://www.vexapp.io/logos/vex-app.png" alt="Vex App Logo" width="200" />
+  <img src="https://www.vexapp.io/logos/vex-app-logo.png" alt="Vex App Logo" width="200" />
 </div>
 
 # Vex App Template
