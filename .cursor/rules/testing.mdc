@@ -1,7 +1,7 @@
 ---
 description: Testing conventions — Bun test runner, WHEN/AND structure, spec file rules
 globs: "**/*.spec.ts, **/*.spec.tsx"
-alwaysApply: false
+alwaysApply: true
 ---
 
 ## Testing
