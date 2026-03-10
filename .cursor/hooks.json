@@ -18,6 +18,11 @@
         "command": "./.cursor/hooks/jscpd.sh",
         "matcher": "Write"
       }
+    ],
+    "stopTool": [
+      {
+        "command": "./.cursor/hooks/stop.sh"
+      }
     ]
   }
 }

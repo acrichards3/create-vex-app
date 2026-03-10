@@ -1,6 +1,6 @@
 ---
-description: React conventions — React.FC typing, no destructured imports
-globs: frontend/**/*.tsx, frontend/**/*.ts
+description: React conventions — React.FC typing, no destructured imports, no local JSX render helpers
+globs: frontend/**/*.tsx, frontend/**/*.ts, packages/**/*.tsx, packages/**/*.ts
 alwaysApply: false
 ---
 
@@ -46,3 +46,29 @@ React.useEffect(() => { ... }, []);
 ```
 
 This applies to all React APIs: hooks (`React.useState`, `React.useEffect`, `React.useCallback`, `React.useMemo`, `React.useRef`, etc.), types (`React.ReactNode`, `React.FC`, `React.ComponentProps`, etc.), and utilities (`React.memo`, `React.lazy`, `React.createContext`, etc.).
+
+### No Local JSX Render Helpers
+
+Do not create local helper functions inside `.tsx` files that return JSX and get called during render. If UI needs to be reused or split up, extract it into its own component file instead.
+
+```tsx
+// ❌ Bad — local render helper returning JSX
+const renderHeader = (): React.ReactNode => {
+  return <HeaderCard />;
+};
+
+const Dashboard: React.FC = () => {
+  return <section>{renderHeader()}</section>;
+};
+
+// ✅ Good — extracted component
+const Dashboard: React.FC = () => {
+  return (
+    <section>
+      <DashboardHeader />
+    </section>
+  );
+};
+```
+
+This applies even if the helper is small. Prefer imported child components over `renderX()` helpers in component files.

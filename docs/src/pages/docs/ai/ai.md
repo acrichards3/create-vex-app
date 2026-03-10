@@ -1,6 +1,6 @@
 # AI Integration
 
-Vex App ships with an optional AI configuration layer that keeps AI agents writing clean, compliant code. When you select "Use Vex App recommended AI settings" during `bun create vex-app`, the CLI sets up three systems that work together: a strict ESLint config, Cursor rules, and post-write hooks.
+Vex App ships with an optional AI configuration layer that keeps AI agents writing clean, compliant code. When you select "Use Vex App recommended AI settings" during `bun create vex-app`, the CLI sets up three systems that work together: a strict ESLint config, Cursor rules, and hooks.
 
 ## How It Works
 
@@ -8,7 +8,7 @@ The AI settings are opt-in. If you say yes during setup, the CLI:
 
 1. **Swaps the ESLint configs** in `frontend/`, `backend/`, and `lib/` for strict versions that add plugins like `sonarjs`, `unicorn`, and `perfectionist`, along with rules covering complexity limits, immutability, explicit return types, and more.
 2. **Copies `.cursor/rules/`** with guidance files that tell the AI model how to structure components, handle types, use Tailwind, and follow project conventions.
-3. **Copies `.cursor/hooks/`** with four shell scripts and a `hooks.json` config that run automatically after every file write.
+3. **Copies `.cursor/hooks/`** with shell scripts and a `hooks.json` config. Post-write hooks run automatically after every file write. A stop hook runs once at the end of the agent's full turn.
 
 If you say no, you get the standard ESLint config without the extra plugins, and no `.cursor/` directory is created.
 
@@ -58,9 +58,27 @@ If you enable the spec-first workflow during setup ("Use AI spec-first workflow?
 
 This gives you control over what gets built. You define the behavior through test paths, and the AI builds to match.
 
+## Stop Hook
+
+The stop hook (`stop.sh`) runs once at the end of the agent's entire turn, after all files have been written. Where post-write hooks catch per-file issues in isolation, the stop hook can see the full picture of everything the agent changed.
+
+### What it does
+
+The hook inspects the list of files written during the turn and runs two checks:
+
+**1. Full cross-package type check**
+
+Runs `bun run typecheck` across all three packages (`frontend`, `backend`, `lib`) using TypeScript project references. This catches cross-package type errors that the per-file `typecheck.sh` hook misses — for example, a breaking change to a `lib/` type that only surfaces when the packages are checked together.
+
+**2. Co-located test runner**
+
+For each TypeScript file written during the turn, the hook looks for a co-located `.spec.ts` file. If any exist, it runs `bun test` on those specific files. This closes the gap between writing code and verifying it — especially useful with the spec-first workflow, where the agent fills in an implementation and the stop hook immediately confirms all the pre-approved test paths pass.
+
+If either check fails, the stop hook returns `deny` with the full error output, blocking the agent's turn from completing and prompting it to fix the issues.
+
 ## Post-Write Hooks
 
-The hooks are the enforcement layer. Every time the AI agent writes a file, four scripts run in sequence:
+The post-write hooks are the per-file enforcement layer. Every time the AI agent writes a file, four scripts run in sequence:
 
 ### 1. Prettier (`prettier.sh`)
 

@@ -4,9 +4,11 @@ Welcome to Vex App — a modern full-stack monorepo template designed to help yo
 
 ## Motivation
 
-There wasn't a great way to scaffold a Bun-first project that truly prioritized speed and developer experience. Setting this up manually each time a new side project came along was a pain — the goal was a way to get started quickly and jump straight into building. Speed and Bun were the main drivers. Vex App takes full advantage of Bun's performance while giving you a modern, type-safe development experience.
+There wasn't a great way to scaffold a Bun-first project that truly prioritized speed and developer experience. Setting this up manually each time a new side project came along was a pain — the goal was a way to get started quickly and jump straight into building.
 
-This project takes a lot of inspiration from [create-t3-app](https://create.t3.gg/), which has done an amazing job making typesafe Next.js apps easy to set up. Vex App follows similar principles but is built specifically for the Bun ecosystem, giving you a fast, modular approach to full-stack TypeScript development.
+Bun changes the equation. It's not just faster installs — it's a genuinely different runtime that makes the whole stack feel lighter. Vex App is built around that from the ground up: Bun as the runtime, package manager, test runner, and build tool. Everything is tuned to take full advantage of it.
+
+The other half of the equation is AI. Modern development increasingly means working alongside AI agents, and most scaffolding tools weren't built with that in mind. Vex App ships with the guardrails — strict ESLint rules, Cursor rules, and post-write hooks — that keep AI agents writing production-quality code instead of generating plausible-looking slop. The template isn't just a starting point; it's an environment where AI can build correctly from the first file.
 
 ## Strictness
 

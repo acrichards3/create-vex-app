@@ -1,6 +1,6 @@
 ---
 description: Testing conventions — Bun test runner, WHEN/AND structure, spec file rules
-globs: "**/*.spec.ts, **/*.spec.tsx"
+globs: "**/*.spec.ts"
 alwaysApply: true
 ---
 
@@ -8,9 +8,11 @@ alwaysApply: true
 
 Use Bun's built-in test runner exclusively. Do not install Jest, Vitest, or any other test framework. Import everything from `bun:test`.
 
+Testing applies to **logical code only** — backend controllers, actions, services, and shared `lib/` utilities. Do not write tests for React components, JSX, or any frontend UI code.
+
 ### Test File Location
 
-Co-locate test files next to the source file they test. Always use `.spec.ts` — not `.test.ts`.
+Co-locate test files next to the source file they test. Always use `.spec.ts` — not `.test.ts` and never `.spec.tsx`.
 
 ```
 features/
