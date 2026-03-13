@@ -24,7 +24,7 @@ const getClientIp = (headers: Headers): string => {
   const real = headers.get("x-real-ip");
   const xff = headers.get("x-forwarded-for");
   const firstXff = xff?.split(",")[0]?.trim();
-  return cf ?? real ?? firstXff ?? "";
+  return cf ?? real ?? firstXff ?? "unknown";
 };
 
 export const rateLimit = (options: RateLimitOptions): MiddlewareHandler => {

@@ -39,7 +39,7 @@ app.use(
   "/api/auth/*",
   rateLimit({
     keyGenerator: undefined,
-    limit: 10,
+    limit: 60,
     windowMs: 60_000,
   }),
 );
