@@ -1,6 +1,7 @@
 import "./index.css";
 import React from "react";
 import { Ai } from "./pages/docs/ai/Ai";
+import { Analytics } from "@vercel/analytics/react";
 import { App } from "./App";
 import { AuthJs } from "./pages/docs/authjs/AuthJs";
 import { Bun } from "./pages/docs/bun/Bun";
@@ -104,5 +105,6 @@ const router = createRouter({ routeTree });
 createRoot(rootElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />
+    <Analytics />
   </React.StrictMode>,
 );
