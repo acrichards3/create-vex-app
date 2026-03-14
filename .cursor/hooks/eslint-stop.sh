@@ -31,18 +31,55 @@ if [ -n "$ALL_ERRORS" ]; then
   exit 0
 fi
 
-# Check 2: Unfilled it.todo() in spec files whose implementation file exists
-# Only flags todos when the implementation has been written (spec-first phase is over)
+# Check 2: TypeScript errors
+cd "$REPO_ROOT"
+TS_OUTPUT=$(bun tsc -b 2>&1) || true
+if [ -n "$TS_OUTPUT" ] && echo "$TS_OUTPUT" | grep -q "error TS"; then
+  MSG=$(printf "TypeScript errors were found that must be fixed before this task is complete. Do not respond — fix every error listed below, then verify with bun run typecheck.\n\n%s" "$TS_OUTPUT")
+  echo "{\"followup_message\": $(echo "$MSG" | jq -Rs .)}"
+  exit 0
+fi
+
+# Check 3: Prettier formatting
+cd "$REPO_ROOT"
+PRETTIER_OUTPUT=$(bunx prettier --check "**/*.{ts,tsx,js,json}" --ignore-path .gitignore --ignore-path .prettierignore 2>&1) || true
+if echo "$PRETTIER_OUTPUT" | grep -q "Code style issues"; then
+  FILTERED=$(echo "$PRETTIER_OUTPUT" | grep -v "routeTree.gen.ts")
+  if echo "$FILTERED" | grep -q "Code style issues"; then
+    MSG=$(printf "Prettier formatting issues were found. Do not respond — run bunx prettier --write on the affected files listed below, then verify with bunx prettier --check.\n\n%s" "$FILTERED")
+    echo "{\"followup_message\": $(echo "$MSG" | jq -Rs .)}"
+    exit 0
+  fi
+fi
+
+# Check 4: Failing tests
+TEST_OUTPUT=""
+for WS in "${WORKSPACES[@]}"; do
+  SPEC_COUNT=$(find "$WS/src" -name "*.spec.ts" 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$SPEC_COUNT" -eq 0 ]; then
+    continue
+  fi
+  cd "$WS"
+  WS_OUTPUT=$(bun test 2>&1) || true
+  if echo "$WS_OUTPUT" | grep -qE "^(FAIL|✗|error)"; then
+    TEST_OUTPUT="$TEST_OUTPUT\n--- $(basename "$WS") ---\n$WS_OUTPUT"
+  fi
+done
+
+if [ -n "$TEST_OUTPUT" ]; then
+  MSG=$(printf "Failing tests were found that must be fixed before this task is complete. Do not respond — fix every failing test listed below, then verify with bun test.\n\n%b" "$TEST_OUTPUT")
+  echo "{\"followup_message\": $(echo "$MSG" | jq -Rs .)}"
+  exit 0
+fi
+
+# Check 5: Unfilled it.todo() in spec files whose implementation exists
 PENDING_TODOS=""
 for WS in "${WORKSPACES[@]}"; do
   while IFS= read -r -d '' SPEC_FILE; do
-    # Derive the implementation file path (strip .spec.ts -> .ts)
     IMPL_FILE="${SPEC_FILE%.spec.ts}.ts"
-    # Only flag if the implementation file exists (i.e. we are past step 1)
     if [ ! -f "$IMPL_FILE" ]; then
       continue
     fi
-    # Check for any it.todo( calls remaining in the spec
     if grep -q "it\.todo(" "$SPEC_FILE"; then
       PENDING_TODOS="$PENDING_TODOS\n  $SPEC_FILE"
     fi
