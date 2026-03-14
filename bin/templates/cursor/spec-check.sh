@@ -4,21 +4,42 @@ set -uo pipefail
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path')
 
-# Only spec files that contain testable logic — not spec files themselves
+# Never require specs for spec files themselves
 [[ "$FILE" == *.spec.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
 [[ "$FILE" == */node_modules/* ]] && { echo '{"permission": "allow"}'; exit 0; }
 
 # Frontend has no tests
 [[ "$FILE" == */frontend/* ]] && { echo '{"permission": "allow"}'; exit 0; }
 
-# Only enforce on the logical layers: controllers, actions, services, and lib utilities
-REQUIRES_SPEC=false
-[[ "$FILE" == *.controller.ts ]] && REQUIRES_SPEC=true
-[[ "$FILE" == *.actions.ts ]] && REQUIRES_SPEC=true
-[[ "$FILE" == *.service.ts ]] && REQUIRES_SPEC=true
-[[ "$FILE" == */lib/src/* && "$FILE" == *.ts ]] && REQUIRES_SPEC=true
+# Only backend and lib contain testable logic
+[[ "$FILE" != */backend/* && "$FILE" != */lib/src/* ]] && { echo '{"permission": "allow"}'; exit 0; }
 
-[ "$REQUIRES_SPEC" = true ] || { echo '{"permission": "allow"}'; exit 0; }
+# Non-.ts files never need specs
+[[ "$FILE" != *.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Pure declarations — no logic, no spec needed
+[[ "$FILE" == *.schema.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == *.table.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == *.types.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == *.config.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == *.constants.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Env validation files — just Zod schemas, no logic
+[[ "$FILE" == */env/* ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == */env.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Database schema definitions
+[[ "$FILE" == */db/schema/* ]] && { echo '{"permission": "allow"}'; exit 0; }
+[[ "$FILE" == */db/index.ts ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Barrel/index files — just re-exports
+BASENAME=$(basename "$FILE")
+[[ "$BASENAME" == "index.ts" ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Route/entry-point files — wiring only, not logic
+[[ "$FILE" == */routes/* ]] && { echo '{"permission": "allow"}'; exit 0; }
+
+# Everything else in backend or lib/src requires a spec
 
 # Find repo root
 REPO_ROOT=""
