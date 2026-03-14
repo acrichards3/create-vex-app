@@ -52,24 +52,34 @@ if echo "$PRETTIER_OUTPUT" | grep -q "Code style issues"; then
   fi
 fi
 
-# Check 4: Failing tests
-TEST_OUTPUT=""
+# Check 4: Failing tests — only run if any .ts files were modified in the last 5 minutes
+RECENTLY_MODIFIED=""
 for WS in "${WORKSPACES[@]}"; do
-  SPEC_COUNT=$(find "$WS/src" -name "*.spec.ts" 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$SPEC_COUNT" -eq 0 ]; then
-    continue
-  fi
-  cd "$WS"
-  WS_OUTPUT=$(bun test 2>&1) || true
-  if echo "$WS_OUTPUT" | grep -qE "^(FAIL|✗|error)"; then
-    TEST_OUTPUT="$TEST_OUTPUT\n--- $(basename "$WS") ---\n$WS_OUTPUT"
+  if find "$WS/src" -name "*.ts" -newer "$WS/package.json" -print -quit 2>/dev/null | grep -q .; then
+    RECENTLY_MODIFIED="yes"
+    break
   fi
 done
 
-if [ -n "$TEST_OUTPUT" ]; then
-  MSG=$(printf "Failing tests were found that must be fixed before this task is complete. Do not respond — fix every failing test listed below, then verify with bun test.\n\n%b" "$TEST_OUTPUT")
-  echo "{\"followup_message\": $(echo "$MSG" | jq -Rs .)}"
-  exit 0
+if [ -n "$RECENTLY_MODIFIED" ]; then
+  TEST_OUTPUT=""
+  for WS in "${WORKSPACES[@]}"; do
+    SPEC_COUNT=$(find "$WS/src" -name "*.spec.ts" 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$SPEC_COUNT" -eq 0 ]; then
+      continue
+    fi
+    cd "$WS"
+    WS_OUTPUT=$(bun test 2>&1) || true
+    if echo "$WS_OUTPUT" | grep -qE "^(FAIL|✗|error)"; then
+      TEST_OUTPUT="$TEST_OUTPUT\n--- $(basename "$WS") ---\n$WS_OUTPUT"
+    fi
+  done
+
+  if [ -n "$TEST_OUTPUT" ]; then
+    MSG=$(printf "Failing tests were found that must be fixed before this task is complete. Do not respond — fix every failing test listed below, then verify with bun test.\n\n%b" "$TEST_OUTPUT")
+    echo "{\"followup_message\": $(echo "$MSG" | jq -Rs .)}"
+    exit 0
+  fi
 fi
 
 # Check 5: Unfilled it.todo() in spec files whose implementation exists

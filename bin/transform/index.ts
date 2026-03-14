@@ -86,27 +86,6 @@ const applySpecCheck = async (config: ProjectConfig): Promise<void> => {
 
   await Bun.write(resolve(config.targetDir, ".spec-pending"), "");
 
-  const bunfigContent = '[test]\nroot = "src"\npreload = ["./src/test-setup.ts"]\n';
-  await Bun.write(resolve(config.targetDir, "backend", "bunfig.toml"), bunfigContent);
-  await Bun.write(resolve(config.targetDir, "lib", "bunfig.toml"), bunfigContent);
-
-  const testSetup = [
-    "Object.assign(Bun.env, {",
-    '  AUTH_SECRET: "test-secret-for-testing-only",',
-    '  DATABASE_URL: "postgres://localhost:5432/test",',
-    '  GOOGLE_CLIENT_ID: "test-client-id",',
-    '  GOOGLE_CLIENT_SECRET: "test-client-secret",',
-    "});",
-    "",
-  ].join("\n");
-  await Bun.write(resolve(config.targetDir, "backend", "src", "test-setup.ts"), testSetup);
-
-  const tsconfigEslint =
-    JSON.stringify({ extends: "./tsconfig.json", include: ["src/**/*", "src/**/*.spec.ts"], exclude: [] }, null, 2) +
-    "\n";
-  await Bun.write(resolve(config.targetDir, "backend", "tsconfig.eslint.json"), tsconfigEslint);
-  await Bun.write(resolve(config.targetDir, "lib", "tsconfig.eslint.json"), tsconfigEslint);
-
   const hooksJsonPath = resolve(config.targetDir, ".cursor", "hooks.json");
   const parsed: unknown = JSON.parse(await Bun.file(hooksJsonPath).text());
 

@@ -30,6 +30,31 @@ const RULE_FILES = [
   "no-todo-without-description.js",
 ] as const satisfies readonly string[];
 
+const TEST_SETUP_CONTENT = [
+  "Object.assign(Bun.env, {",
+  '  AUTH_SECRET: "test-secret-for-testing-only",',
+  '  DATABASE_URL: "postgres://localhost:5432/test",',
+  '  GOOGLE_CLIENT_ID: "test-client-id",',
+  '  GOOGLE_CLIENT_SECRET: "test-client-secret",',
+  "});",
+  "",
+].join("\n");
+
+const BUNFIG_CONTENT = '[test]\nroot = "src"\npreload = ["./src/test-setup.ts"]\n';
+
+const TSCONFIG_ESLINT_CONTENT =
+  JSON.stringify({ extends: "./tsconfig.json", include: ["src/**/*"], exclude: [] }, null, 2) + "\n";
+
+async function applyTestSetup(targetDir: string): Promise<void> {
+  await Promise.all([
+    Bun.write(resolve(targetDir, "backend", "bunfig.toml"), BUNFIG_CONTENT),
+    Bun.write(resolve(targetDir, "lib", "bunfig.toml"), BUNFIG_CONTENT),
+    Bun.write(resolve(targetDir, "backend", "src", "test-setup.ts"), TEST_SETUP_CONTENT),
+    Bun.write(resolve(targetDir, "backend", "tsconfig.eslint.json"), TSCONFIG_ESLINT_CONTENT),
+    Bun.write(resolve(targetDir, "lib", "tsconfig.eslint.json"), TSCONFIG_ESLINT_CONTENT),
+  ]);
+}
+
 async function overwriteEslintConfig(targetDir: string, workspace: string, templateName: string): Promise<void> {
   const src = resolve(STRICT_ESLINT_DIR, templateName);
   const dest = resolve(targetDir, workspace, "eslint.config.js");
@@ -86,6 +111,8 @@ export async function applyStrictEslint(config: ProjectConfig): Promise<void> {
   });
 
   await Promise.all(tasks);
+
+  await applyTestSetup(config.targetDir);
 
   const rootPkgPath = resolve(config.targetDir, "package.json");
   const rootPkgFile = Bun.file(rootPkgPath);
