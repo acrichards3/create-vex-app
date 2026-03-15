@@ -176,9 +176,11 @@ Run these from the root of the monorepo:
 | `bun run test:frontend` | Run tests in the frontend package only           |
 | `bun run test:backend`  | Run tests in the backend package only            |
 | `bun run test:lib`      | Run tests in the lib package only                |
+| `bun run test:db:up`    | Start the Docker test database                   |
+| `bun run test:db:down`  | Stop the Docker test database                    |
 | `bun run typecheck`     | Run TypeScript type checking across all packages |
 | `bun run format`        | Format all files with Prettier                   |
+| `bun run db:generate`   | Generate a Drizzle migration from schema changes |
 | `bun run db:push`       | Push schema changes to the database              |
-| `bun run db:generate`   | Generate a Drizzle migration                     |
 | `bun run db:migrate`    | Run pending database migrations                  |
 | `bun run db:studio`     | Open Drizzle Studio for visual database browsing |

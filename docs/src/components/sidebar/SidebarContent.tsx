@@ -21,32 +21,6 @@ export const SIDEBAR_ITEMS = {
     order: 3,
     sectionTitle: "Deployment",
   },
-  vexApp: {
-    items: [
-      {
-        href: "/introduction",
-        title: "Introduction",
-      },
-      {
-        href: "/getting-started",
-        title: "Getting Started",
-      },
-      {
-        href: "/project-structure",
-        title: "Project Structure",
-      },
-      {
-        href: "/recommendations",
-        title: "Recommendations",
-      },
-      {
-        href: "/ai",
-        title: "AI Integration",
-      },
-    ],
-    order: 1,
-    sectionTitle: "Vex App",
-  },
   usage: {
     items: [
       {
@@ -80,6 +54,32 @@ export const SIDEBAR_ITEMS = {
     ],
     order: 2,
     sectionTitle: "Usage",
+  },
+  vexApp: {
+    items: [
+      {
+        href: "/introduction",
+        title: "Introduction",
+      },
+      {
+        href: "/getting-started",
+        title: "Getting Started",
+      },
+      {
+        href: "/project-structure",
+        title: "Project Structure",
+      },
+      {
+        href: "/recommendations",
+        title: "Recommendations",
+      },
+      {
+        href: "/ai",
+        title: "AI Integration",
+      },
+    ],
+    order: 1,
+    sectionTitle: "Vex App",
   },
 } as const satisfies Record<string, SidebarItem>;
 

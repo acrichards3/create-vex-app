@@ -2,7 +2,7 @@
 
 Vex App uses [Bun's built-in test runner](https://bun.com/docs/test) — no Jest, Vitest, or any other framework needed. Tests are written with `describe` and `it` from `bun:test` and run with a single command.
 
-If you opted into the AI settings during project setup, your AI agent will automatically follow these testing conventions — including the WHEN/AND structure, `.spec.ts` file naming, and all the rules below. The Cursor rules and ESLint overrides enforce these patterns so the agent writes tests the same way you would.
+Your AI agent will automatically follow these testing conventions — including the WHEN/AND structure, `.spec.ts` file naming, and all the rules below. The Cursor rules and ESLint overrides enforce these patterns so the agent writes tests the same way you would.
 
 ## Running Tests
 
@@ -17,6 +17,42 @@ bun run test:backend
 bun run test:frontend
 bun run test:lib
 ```
+
+## Integration Tests (Database)
+
+Backend tests that hit the database require a running Postgres instance. Vex App ships with a `docker-compose.test.yml` that spins up an isolated Postgres container on port `5433` — separate from your dev database so there's no risk of touching real data.
+
+Before running integration tests, generate your migrations:
+
+```bash
+bun run db:generate
+```
+
+Re-run this command any time you add or change a table in `backend/src/db/schema/`. The test database is migrated from these files on every test run, so they must be up to date.
+
+Then start the test database and run:
+
+```bash
+# Start the test database
+bun run test:db:up
+
+# Run all tests
+bun run test
+
+# Stop the test database when done
+bun run test:db:down
+```
+
+The `test:db:up` command uses Docker's `--wait` flag, so it blocks until the container is healthy before returning. The `backend/src/test-setup.ts` preload file sets mock environment variables and runs Drizzle migrations against the test database before any tests execute.
+
+If you forget either prerequisite, you'll get a clear error before any tests run:
+
+- **No migration files** → `[test-setup] No migration files found. Run bun run db:generate first.`
+- **Container not running** → `[test-setup] Could not connect to the test database. Run bun run test:db:up first.`
+
+Each spec file is responsible for inserting the data it needs in `beforeEach` and cleaning up in `afterEach`. Tests should never depend on data left over from another test.
+
+> **Prerequisites**: [Docker](https://docs.docker.com/get-docker/) must be installed and running. Pure unit tests in `lib/` do not require Docker.
 
 ## Test File Convention
 
@@ -81,23 +117,29 @@ import { describe, it, expect, beforeEach } from "bun:test";
 
 describe("applyDiscount", () => {
   describe("WHEN the discount code does not exist", () => {
-    it("throws an invalid discount code error", () => {});
+    it("throws an invalid discount code error", () => {
+      expect(() => applyDiscount(order, "INVALID")).toThrow("Invalid discount code");
+    });
   });
 
   describe("WHEN the discount code exists", () => {
     describe("AND the code has expired", () => {
-      it("throws a discount expired error", () => {});
+      it("throws a discount expired error", () => {
+        expect(() => applyDiscount(order, "EXPIRED")).toThrow("Discount code has expired");
+      });
     });
 
     describe("AND the code has not expired", () => {
       describe("AND the order total is below the minimum spend", () => {
-        it("throws a minimum spend error", () => {});
+        it("throws a minimum spend error", () => {
+          expect(() => applyDiscount(smallOrder, "VALID")).toThrow("Order does not meet minimum spend");
+        });
       });
 
       describe("AND the order total meets the minimum spend", () => {
-        it("returns the order with the discount applied", () => {});
-
-        it("reduces the total by the discount amount", () => {});
+        it("returns the order with the discount applied", () => {
+          expect(applyDiscount(order, "VALID")).toMatchObject({ discount: 10 });
+        });
       });
     });
   });
@@ -140,9 +182,9 @@ Do not mock your own code just to make tests pass. If you can run it, run it for
 
 If you opted into the spec-first workflow during setup, the AI agent is required to follow a three-step process for every new feature:
 
-1. **Write the specs** — Creates `.spec.ts` files for every logical layer (controller, actions, service) with empty `it` blocks mapping all code paths in the WHEN/AND/it structure. No implementation code is written.
+1. **Write the specs** — Creates `.spec.ts` files for every logical layer (controller, actions, service) with `it.todo()` blocks mapping all code paths in the WHEN/AND/it structure. No implementation code is written.
 2. **Stop and ask** — Presents the test structure and waits for you to approve, modify, or add paths before continuing.
-3. **Implement** — Only after you explicitly approve does the AI write the implementation files, fill in the test bodies, and run `bun test`.
+3. **Implement** — Only after you explicitly approve does the AI write the implementation files, replace the `it.todo()` blocks with real assertions, and run `bun test`.
 
 This gives you control over what gets built. You define the behavior through test paths, and the AI builds to match.
 

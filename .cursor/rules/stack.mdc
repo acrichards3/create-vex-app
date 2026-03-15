@@ -44,7 +44,7 @@ This is a Bun monorepo with three workspaces. Do not introduce alternative frame
 
 - **`tsconfig.json` files** — Do not change `target`, `lib`, `module`, or other compiler settings. They are intentional.
 - **`vite.config.ts` proxy** — Only `/api/auth` is proxied for Auth.js cookie handling. Do not add a blanket `/api` proxy. The `apiFetch` utility handles CORS and CSRF for all other API calls directly.
-- **ESLint configuration** — Do not change `.eslintrc.cjs` files, add overrides, or alter any ESLint rules.
+- **ESLint configuration** — Do not change `eslint.config.js` files, add overrides, or alter any ESLint rules.
 
 ### Do Not Install
 

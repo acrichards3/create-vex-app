@@ -10,6 +10,21 @@ jobs:
   build-and-lint:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,21 +46,60 @@ jobs:
       - name: Run typecheck
         run: bun run typecheck
 
+      - name: Generate migrations
+        run: bun run db:generate
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5433/test
+
       - name: Run tests
         run: |
-          OUTPUT=$(bun test 2>&1) || {
-            if echo "$OUTPUT" | grep -q "No tests found"; then
-              echo "No test files found, skipping"
-              exit 0
-            else
-              echo "$OUTPUT"
-              exit 1
-            fi
-          }
-          echo "$OUTPUT"
+          bun run test 2>&1 | tee /tmp/test-output.txt
+          EXIT=${PIPESTATUS[0]}
+          if grep -q "No tests found" /tmp/test-output.txt; then
+            echo "No tests found — skipping"
+            exit 0
+          fi
+          exit $EXIT
 
       - name: Run build
         env:
           VITE_BACKEND_URL: http://localhost:3000
           DATABASE_URL: postgresql://localhost:5432/test
         run: bun run build:frontend && bun run build:backend
+
+  # deploy:
+  #   needs: build-and-lint
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ vars.AWS_REGION }}
+
+  #     - name: Login to ECR
+  #       uses: aws-actions/amazon-ecr-login@v2
+
+  #     - name: Build and push image
+  #       run: |
+  #         IMAGE=${{ vars.ECR_REPO_URI }}:latest
+  #         docker build --platform linux/amd64 -t $IMAGE .
+  #         docker push $IMAGE
+
+  #     - name: Deploy to App Runner
+  #       run: |
+  #         aws apprunner start-deployment \
+  #           --service-arn ${{ vars.APP_RUNNER_SERVICE_ARN }}
+
+  #     - name: Trigger Amplify deployment
+  #       run: |
+  #         aws amplify start-job \
+  #           --app-id ${{ vars.AMPLIFY_APP_ID }} \
+  #           --branch-name main \
+  #           --job-type RELEASE \
+  #           --region ${{ vars.AWS_REGION }}
