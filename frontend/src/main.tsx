@@ -6,8 +6,9 @@ import { EnvError } from "./components/EnvError";
 import { envIssues } from "./env/validate";
 import { raise } from "@vex-app/lib";
 import { routeTree } from "./routeTree.gen";
+import { queryClient } from "./api/queryClient";
 
-const router = createRouter({ routeTree });
+const router = createRouter({ context: { queryClient }, routeTree });
 
 declare module "@tanstack/react-router" {
   interface Register {

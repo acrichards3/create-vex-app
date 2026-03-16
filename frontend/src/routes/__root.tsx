@@ -1,9 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { SessionProvider } from "@hono/auth-js/react";
+import { queryClient } from "~/api/queryClient";
+import type { QueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-
-const queryClient = new QueryClient();
 
 const RootLayout = (): ReactNode => {
   return (
@@ -15,6 +15,6 @@ const RootLayout = (): ReactNode => {
   );
 };
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootLayout,
 });

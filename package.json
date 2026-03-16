@@ -91,10 +91,12 @@
     "lint": "bun run format:check && bun run lint:eslint",
     "lint:eslint": "bun run --filter '*' lint",
     "lint:fix": "bun run format && bun run --filter '*' lint --fix",
-    "test": "bun test",
-    "test:backend": "bun test --filter backend",
-    "test:frontend": "bun test --filter frontend",
-    "test:lib": "bun test --filter lib",
+    "test": "bun run --filter '*' test",
+    "test:backend": "bun run --filter @vex-app/backend test",
+    "test:frontend": "bun run --filter @vex-app/frontend test",
+    "test:lib": "bun run --filter @vex-app/lib test",
+    "test:db:up": "docker compose -f docker-compose.test.yml up -d --wait",
+    "test:db:down": "docker compose -f docker-compose.test.yml down",
     "typecheck": "bun tsc -b --clean && bun tsc -b"
   },
   "devDependencies": {

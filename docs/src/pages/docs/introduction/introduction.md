@@ -16,12 +16,12 @@ This project is opinionated. TypeScript is non-negotiable, and the TypeScript co
 
 ## AI First
 
-Vex App is designed for AI-assisted development. When you select "Use Vex App recommended AI settings" during setup, the CLI configures your project with guardrails that keep AI agents producing clean, compliant code:
+Vex App is built for AI-assisted development. Every project ships with the guardrails that keep AI agents producing clean, compliant code:
 
-- **Strict ESLint config** — A hardened ruleset replaces the default config when AI settings are enabled. It enforces explicit return types, bans type assertions, prevents object and array mutation, limits function complexity, and more. Human developers get a lighter ruleset; AI agents get the strict one.
-- **Cursor rules** — A set of `.cursor/rules/` files tell the AI model exactly how to write code for this stack — component organization, Tailwind conventions, type safety patterns, and which ESLint patterns to follow.
-- **Post-write hooks** — Four shell scripts (`.cursor/hooks/`) run automatically every time the AI writes a file. They format with Prettier, lint with ESLint (auto-fixing what they can), type-check with `tsc`, and scan for duplicate code with `jscpd`. If any check fails, the write is blocked and the AI gets immediate feedback to fix it.
-- **Spec-first workflow** (optional) — When enabled, a pre-write hook blocks the AI from writing any implementation code until a corresponding `.spec.ts` file exists and you've explicitly approved it. The AI writes the test spec first, stops and asks for approval, then implements. Enforcement is mechanical — the AI literally cannot skip the approval step.
+- **Strict ESLint config** — A hardened ruleset with custom testing rules, complexity limits, immutability enforcement, type safety requirements, and more. Ships with every project.
+- **Cursor rules** — A set of `.cursor/rules/` files tell the AI model exactly how to write code for this stack — component organization, Tailwind conventions, type safety patterns, backend architecture layers, and testing conventions.
+- **Hooks** — Shell scripts in `.cursor/hooks/` run before every file write and at the end of every agent turn. Pre-write hooks block bad patterns before they land. The stop hook checks ESLint, TypeScript, Prettier, failing tests, and unfilled `it.todo()` placeholders before the AI considers any task complete.
+- **Spec-first workflow** (optional) — When enabled, the AI is mechanically blocked from writing implementation code until you've approved the test spec. The AI writes `it.todo()` branches first, stops and asks for your approval, then implements. See the [Testing](/testing) page for how this works.
 
 The result: AI agents write code that passes the same quality bar as the rest of the codebase, without you having to manually review and fix every file.
 

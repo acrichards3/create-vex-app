@@ -1,0 +1,14 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: postgres
+    healthcheck:
+      interval: 2s
+      retries: 10
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      timeout: 5s
+    ports:
+      - "5433:5432"

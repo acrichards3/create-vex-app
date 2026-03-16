@@ -27,9 +27,7 @@ export const getEncryptionKeyFromEnv = (keyString: string | undefined): Encrypti
       }
     }
   }
-  if (!buf) {
-    buf = Buffer.from(keyString, "utf8");
-  }
+  buf ??= Buffer.from(keyString, "utf8");
   if (buf.length < 32) {
     const out = Buffer.alloc(32);
     buf.copy(out);

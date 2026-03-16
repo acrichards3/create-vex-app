@@ -10,6 +10,21 @@ jobs:
   build-and-lint:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +45,21 @@ jobs:
 
       - name: Run typecheck
         run: bun run typecheck
+
+      - name: Generate migrations
+        run: bun run db:generate
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5433/test
+
+      - name: Run tests
+        run: |
+          bun run test 2>&1 | tee /tmp/test-output.txt
+          EXIT=${PIPESTATUS[0]}
+          if grep -q "No tests found" /tmp/test-output.txt; then
+            echo "No tests found — skipping"
+            exit 0
+          fi
+          exit $EXIT
 
       - name: Run build
         env:

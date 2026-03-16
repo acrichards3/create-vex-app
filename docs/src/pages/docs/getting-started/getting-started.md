@@ -6,10 +6,10 @@ Get up and running with Vex App in minutes.
 
 Before you begin, make sure you have the following installed:
 
-- **Bun** (v1.3 or later) - [Install Bun](https://bun.sh/docs/installation)
-- **Node.js** (v22 or later) - Required for some tooling, though Bun handles most of it
+- **Bun** (v1.2 or later) — [Install Bun](https://bun.sh/docs/installation)
+- **Docker** — Required for running integration tests locally. [Install Docker](https://docs.docker.com/get-docker/)
 
-_Note: Earlier versions may work but have not been tested_
+_Note: Earlier versions of Bun may work but have not been tested._
 
 ## Installation
 
@@ -19,7 +19,12 @@ To create a new Vex App project, run:
 bun create vex-app@latest
 ```
 
-The CLI will guide you through the setup process and ask you a few questions about your project configuration.
+The CLI will guide you through the setup process and ask a few questions:
+
+- **Project name** — The name of your new directory
+- **Include GitHub CI/CD pipeline?** — Adds a GitHub Actions workflow with lint, typecheck, tests, and build
+- **Include Vex App quick deploy setup?** _(only asked if you said yes above)_ — Extends the workflow with an auto-deploy job to AWS App Runner and Amplify
+- **Use AI spec-first workflow?** — Enables the three-step spec-before-implementation workflow (see [Testing](/testing))
 
 ![Vex App CLI](/vex-app-cli.png)
 
@@ -67,7 +72,7 @@ This will start:
 - Lib (watches for file changes)
 - Backend API server (defaults to `http://localhost:3000`)
 
-The frontend and lib support hot module replacement, so your changes will be reflected immediately. The backend uses Bun's `--watch` mode to automatically restart on file changes.
+The frontend and lib support hot module replacement, so your changes will be reflected immediately. The backend uses Bun's `--hot` mode to hot-reload changed modules in-place without restarting the process, so the server stays responsive during development.
 
 ## Next Steps
 

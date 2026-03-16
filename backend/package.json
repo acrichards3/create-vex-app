@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev": "bun --hot src/index.ts",
     "build": "tsc",
     "start": "bun run dist/index.js",
+    "test": "bun test --passWithNoTests",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "db:generate": "drizzle-kit generate",
@@ -26,16 +27,13 @@
   "devDependencies": {
     "@hono/node-server": "^1.11.0",
     "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.6",
-    "eslint": "^8.57.0",
-    "eslint-plugin-no-comments": "^1.1.10",
-    "eslint-plugin-perfectionist": "3",
-    "eslint-plugin-sonarjs": "^4.0.0",
-    "eslint-plugin-sort-keys": "^2.3.5",
-    "eslint-plugin-typescript-sort-keys": "^3.3.0",
+    "eslint": "^9",
+    "eslint-plugin-perfectionist": "^5",
+    "eslint-plugin-sonarjs": "^4",
     "eslint-plugin-unicorn": "56",
     "typescript": "^5.9.0"
   }
