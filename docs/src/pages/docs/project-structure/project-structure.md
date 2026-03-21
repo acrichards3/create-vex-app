@@ -173,27 +173,29 @@ If the spec-first workflow is enabled, an additional rule is added:
 
 ## Cursor Hooks (`.cursor/hooks/`)
 
-Shell scripts that run automatically on every AI file write. They enforce code quality, protect critical configuration files, and implement the spec-first workflow.
+Shell scripts registered in `.cursor/hooks.json` run on AI file writes and at the end of each agent turn. They enforce code quality, protect critical config files, and support the spec-first workflow.
 
-**Post-write hooks** (run after every write):
+**Pre-write hooks** (`preToolUse` — run before a write and can block it):
 
-- **`prettier.sh`** — Auto-formats the written file
-- **`spec-marker.sh`** — Writes the spec path into `.spec-pending` whenever a `.spec.ts` file is saved, signalling that specs are awaiting approval
-- **`eslint-guard.sh`** — Blocks any AI write to `eslint.config.js` files, preventing the model from disabling lint rules
-- **`tsconfig-guard.sh`** — Blocks any AI write to `tsconfig.json` files, preventing unintended compiler setting changes
+- **`eslint-guard.sh`** — Blocks writes to ESLint config and custom rule files
+- **`tsconfig-guard.sh`** — Blocks writes or deletes of `tsconfig*.json` files
+- **`spec-check.sh`** — Blocks implementation when `.spec-pending` has content; blocks markdown outside `docs/` as fake specs; for backend and `lib/src`, requires co-located `.spec.ts` for logical implementation files
+- **`spec-lint.sh`** — Validates spec file structure (one `it` or `it.todo` per `describe`) before the write lands
+- **`spec-delete-guard.sh`** — Requires confirmation before deleting a `.spec.ts` file
 
-**Pre-write hooks** (run before a write and can block it):
+**Post-write hooks** (`postToolUse` — run after a write):
 
-- **`spec-check.sh`** — Blocks implementation writes if `.spec-pending` has content (specs awaiting approval) or if no co-located spec file exists
-
-If the spec-first workflow is enabled, two additional hooks are added:
-
-- **`spec-lint.sh`** (post-write) — Lints newly written spec files to ensure they follow the WHEN/AND/it structure and have no empty `it` blocks
-- **`spec-delete-guard.sh`** (pre-write) — Blocks deletion of any `.spec.ts` file
+- **`prettier.sh`** — Formats the written file
+- **`eslint.sh`** — Runs ESLint in the relevant workspace
+- **`typecheck.sh`** — Runs TypeScript checks
+- **`jscpd.sh`** — Runs duplicate-code detection
+- **`spec-marker.sh`** — Appends to `.spec-pending` when a `.spec.ts` file is written
 
 **Stop hook** (runs once at the end of every AI turn):
 
-- **`eslint-stop.sh`** — Runs ESLint, type-checking, and verifies no unfilled `it.todo()` blocks remain before the agent's turn completes
+- **`eslint-stop.sh`** — Surfaces ESLint issues, TypeScript errors, Prettier drift, failing tests, and unfilled `it.todo()` before the turn completes
+
+If you enable spec-first during `bun create`, the CLI adds **spec-first.mdc**, creates an empty **`.spec-pending`**, and refreshes the spec-related hook scripts from the generator templates.
 
 ## CI/CD (`.github/workflows/`)
 

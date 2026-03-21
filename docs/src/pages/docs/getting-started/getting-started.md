@@ -26,6 +26,8 @@ The CLI will guide you through the setup process and ask a few questions:
 - **Include Vex App quick deploy setup?** _(only asked if you said yes above)_ — Extends the workflow with an auto-deploy job to AWS App Runner and Amplify
 - **Use AI spec-first workflow?** — Enables the three-step spec-before-implementation workflow (see [Testing](/testing))
 
+Strict ESLint (`eslint.config.js` in each workspace), `.cursor/rules/`, `.cursor/hooks/`, and `.jscpd.json` are included for every project. There is no separate prompt to turn those off; spec-first is the only optional AI workflow question.
+
 ![Vex App CLI](/vex-app-cli.png)
 
 Once the project is created, navigate into your new project directory:

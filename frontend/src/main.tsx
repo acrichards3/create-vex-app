@@ -3,8 +3,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { EnvError } from "./components/EnvError";
-import { envIssues } from "./env/validate";
+import { env, envIssues } from "./env/validate";
 import { raise } from "@vex-app/lib";
+import { VexProvider } from "vexapp-sdk";
 import { routeTree } from "./routeTree.gen";
 import { queryClient } from "./api/queryClient";
 
@@ -25,9 +26,12 @@ if (envIssues.length > 0) {
     </React.StrictMode>,
   );
 } else {
+  const validatedEnv = env ?? raise("Environment validation invariant");
   root.render(
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <VexProvider apiKey={validatedEnv.VITE_VEX_API_KEY} baseUrl={validatedEnv.VITE_VEX_API_URL}>
+        <RouterProvider router={router} />
+      </VexProvider>
     </React.StrictMode>,
   );
 }

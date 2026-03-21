@@ -21,8 +21,8 @@ interface HookEntry {
 interface HooksJson {
   version: number;
   hooks: {
-    postToolUse: HookEntry[];
-    preToolUse?: HookEntry[];
+    postToolUse: readonly HookEntry[];
+    preToolUse?: readonly HookEntry[];
   };
 }
 
@@ -41,6 +41,23 @@ const isHooksJson = (value: unknown): value is HooksJson => {
   return Array.isArray(hooks["postToolUse"]) && hooks["postToolUse"].every(isHookEntry);
 };
 
+const SPEC_FIRST_PRE_TOOL_USE = [
+  { command: ".cursor/hooks/eslint-guard.sh", matcher: "Write" },
+  { command: ".cursor/hooks/tsconfig-guard.sh", matcher: "Write" },
+  { command: ".cursor/hooks/tsconfig-guard.sh", matcher: "Delete" },
+  { command: ".cursor/hooks/spec-check.sh", matcher: "Write" },
+  { command: ".cursor/hooks/spec-lint.sh", matcher: "Write" },
+  { command: ".cursor/hooks/spec-delete-guard.sh", matcher: "Delete" },
+] as const satisfies readonly HookEntry[];
+
+const SPEC_FIRST_POST_TOOL_USE = [
+  { command: ".cursor/hooks/prettier.sh", matcher: "Write" },
+  { command: ".cursor/hooks/eslint.sh", matcher: "Write" },
+  { command: ".cursor/hooks/typecheck.sh", matcher: "Write" },
+  { command: ".cursor/hooks/jscpd.sh", matcher: "Write" },
+  { command: ".cursor/hooks/spec-marker.sh", matcher: "Write" },
+] as const satisfies readonly HookEntry[];
+
 const makeHooksExecutable = (config: ProjectConfig): void => {
   const hooksDir = resolve(config.targetDir, ".cursor", "hooks");
 
@@ -51,7 +68,7 @@ const makeHooksExecutable = (config: ProjectConfig): void => {
       Bun.spawnSync(["chmod", "+x", resolve(hooksDir, name)]);
     }
   } catch {
-    // hooks dir doesn't exist (user opted out of AI settings)
+    // hooks dir missing (e.g. user removed .cursor)
   }
 };
 
@@ -93,20 +110,8 @@ const applySpecCheck = async (config: ProjectConfig): Promise<void> => {
     throw new Error(`Invalid hooks.json structure at ${hooksJsonPath}`);
   }
 
-  parsed.hooks.preToolUse = [
-    ...(parsed.hooks.preToolUse ?? []),
-    { command: ".cursor/hooks/eslint-guard.sh", matcher: "Write" },
-    { command: ".cursor/hooks/tsconfig-guard.sh", matcher: "Write" },
-    { command: ".cursor/hooks/tsconfig-guard.sh", matcher: "Delete" },
-    { command: ".cursor/hooks/spec-check.sh", matcher: "Write" },
-    { command: ".cursor/hooks/spec-lint.sh", matcher: "Write" },
-    { command: ".cursor/hooks/spec-delete-guard.sh", matcher: "Delete" },
-  ];
-
-  parsed.hooks.postToolUse = [
-    ...parsed.hooks.postToolUse,
-    { command: ".cursor/hooks/spec-marker.sh", matcher: "Write" },
-  ];
+  parsed.hooks.preToolUse = SPEC_FIRST_PRE_TOOL_USE;
+  parsed.hooks.postToolUse = SPEC_FIRST_POST_TOOL_USE;
 
   await Bun.write(hooksJsonPath, JSON.stringify(parsed, null, 2) + "\n");
 };

@@ -190,7 +190,7 @@ This gives you control over what gets built. You define the behavior through tes
 
 ### How enforcement works
 
-The workflow is enforced mechanically through two hooks, not just through rules that can be forgotten:
+The workflow is enforced mechanically through hooks (not only through rules that can be forgotten). The main pair is:
 
 - **`spec-marker.sh`** (`postToolUse`) — fires every time a `.spec.ts` file is written. It appends the spec path to a file called `.spec-pending` at the repo root.
 - **`spec-check.sh`** (`preToolUse`) — fires before every implementation write. If `.spec-pending` has content, it returns `permission: deny` and blocks the write. The AI literally cannot write a controller, actions, or service file while specs are awaiting approval.
@@ -204,4 +204,4 @@ When you approve ("looks good", "proceed", "build it"), the AI clears `.spec-pen
 - **Empty** → no specs are pending, implementation writes are allowed
 - **Has content** → specs are written and awaiting your approval, implementation is blocked
 
-It's seeded empty by the CLI at scaffold time. If a turn is cancelled mid-way and the file is left with stale content, write an empty string to it to reset the lock manually. That's the only time you should ever need to touch it.
+When you enable spec-first during `bun create`, the CLI creates an empty `.spec-pending` at the repo root. If you skipped spec-first, the file may be absent until you start the workflow yourself. If a turn is cancelled mid-way and the file is left with stale content, write an empty string to it to reset the lock manually. That's the only time you should ever need to touch it.

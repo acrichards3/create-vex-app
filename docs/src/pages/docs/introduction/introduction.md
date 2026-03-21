@@ -16,12 +16,12 @@ This project is opinionated. TypeScript is non-negotiable, and the TypeScript co
 
 ## AI First
 
-Vex App is built for AI-assisted development. Every project ships with the guardrails that keep AI agents producing clean, compliant code:
+Vex App is built for AI-assisted development. Every project ships with the guardrails that keep AI agents producing clean, compliant code. The generator does not ask you to opt in or out of ESLint strictness, Cursor rules, or hooks — those are always part of the template. The only optional AI workflow the CLI prompts for is **spec-first**.
 
-- **Strict ESLint config** — A hardened ruleset with custom testing rules, complexity limits, immutability enforcement, type safety requirements, and more. Ships with every project.
-- **Cursor rules** — A set of `.cursor/rules/` files tell the AI model exactly how to write code for this stack — component organization, Tailwind conventions, type safety patterns, backend architecture layers, and testing conventions.
-- **Hooks** — Shell scripts in `.cursor/hooks/` run before every file write and at the end of every agent turn. Pre-write hooks block bad patterns before they land. The stop hook checks ESLint, TypeScript, Prettier, failing tests, and unfilled `it.todo()` placeholders before the AI considers any task complete.
-- **Spec-first workflow** (optional) — When enabled, the AI is mechanically blocked from writing implementation code until you've approved the test spec. The AI writes `it.todo()` branches first, stops and asks for your approval, then implements. See the [Testing](/testing) page for how this works.
+- **Strict ESLint config** — A hardened flat config (`eslint.config.js` per workspace) with custom testing rules where applicable, complexity limits, immutability enforcement, type safety requirements, and more.
+- **Cursor rules** — `.cursor/rules/` files tell the AI model how to write for this stack: component organization, Tailwind conventions, type safety patterns, backend architecture layers, and testing conventions.
+- **Hooks** — `.cursor/hooks/` and `hooks.json` run pre-write checks, post-write format/lint/typecheck/jscpd, and a stop hook that surfaces ESLint, TypeScript, Prettier, failing tests, and unfilled `it.todo()` issues before the AI considers a turn complete.
+- **Spec-first workflow** (optional) — If you enable it when running `bun create vex-app`, the AI is mechanically blocked from writing implementation code until you approve the test spec. The AI writes `it.todo()` branches first, stops and asks for approval, then implements. See the [Testing](/testing) page for how this works.
 
 The result: AI agents write code that passes the same quality bar as the rest of the codebase, without you having to manually review and fix every file.
 
