@@ -20,6 +20,7 @@ import { Testing } from "./pages/docs/testing/Testing";
 import { TypeScript } from "./pages/docs/typescript/TypeScript";
 import { Vite } from "./pages/docs/vite/Vite";
 import { getVexProviderProps } from "./vexEnv";
+import { FLAGS } from "./constants/featureFlags";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element #root not found");
@@ -108,7 +109,7 @@ const vexProps = getVexProviderProps();
 
 createRoot(rootElement).render(
   <React.StrictMode>
-    <VexProvider apiKey={vexProps.apiKey} baseUrl={vexProps.baseUrl}>
+    <VexProvider apiKey={vexProps.apiKey} flags={FLAGS}>
       <RouterProvider router={router} />
       <Analytics />
     </VexProvider>
