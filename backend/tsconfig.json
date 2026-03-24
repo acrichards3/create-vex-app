@@ -10,9 +10,8 @@
     "noEmit": false,
     "composite": true,
     "types": ["bun-types", "node"],
-    "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

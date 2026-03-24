@@ -109,6 +109,6 @@
     "eslint-plugin-sort-keys": "^2.3.5",
     "eslint-plugin-typescript-sort-keys": "^3.3.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.9.0"
+    "typescript": "^6.0.0"
   }
 }

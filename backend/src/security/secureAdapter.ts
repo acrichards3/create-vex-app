@@ -22,11 +22,10 @@ export const createSecureAdapter = (base: Adapter, opts: SecureAdapterOptions): 
 
   if (base.linkAccount) {
     const baseLink = base.linkAccount;
-    const linkAccount: NonNullable<Adapter["linkAccount"]> = (account) => {
+    adapter.linkAccount = async (account): Promise<void> => {
       const enc = encryptAccountTokens(account);
-      return baseLink(enc);
+      await baseLink(enc);
     };
-    adapter.linkAccount = linkAccount;
   }
 
   if (base.createSession) {
@@ -69,19 +68,17 @@ export const createSecureAdapter = (base: Adapter, opts: SecureAdapterOptions): 
 
   if (base.createVerificationToken) {
     const baseCreateVT = base.createVerificationToken;
-    const createVerificationToken: NonNullable<Adapter["createVerificationToken"]> = (vt) => {
+    adapter.createVerificationToken = async (vt): Promise<VerificationToken | null | undefined> => {
       const toStore: VerificationToken = { ...vt, token: hashToken(vt.token) };
-      return baseCreateVT(toStore);
+      return await baseCreateVT(toStore);
     };
-    adapter.createVerificationToken = createVerificationToken;
   }
 
   if (base.useVerificationToken) {
     const baseUseVT = base.useVerificationToken;
-    const useVerificationToken: NonNullable<Adapter["useVerificationToken"]> = (params) => {
-      return baseUseVT({ ...params, token: hashToken(params.token) });
+    adapter.useVerificationToken = async (params): Promise<VerificationToken | null> => {
+      return await baseUseVT({ ...params, token: hashToken(params.token) });
     };
-    adapter.useVerificationToken = useVerificationToken;
   }
 
   return adapter;
