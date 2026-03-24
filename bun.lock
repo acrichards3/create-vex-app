@@ -88,6 +88,25 @@
         "typescript": "^6.0.0",
       },
     },
+    "packages/vexkit": {
+      "name": "@vex-app/vexkit",
+      "version": "0.0.0",
+      "bin": {
+        "vexkit": "./src/cli.ts",
+      },
+      "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@typescript-eslint/eslint-plugin": "^8",
+        "@typescript-eslint/parser": "^8",
+        "bun-types": "latest",
+        "eslint": "^9",
+        "eslint-plugin-no-comments": "^1.1.10",
+        "eslint-plugin-perfectionist": "^5",
+        "eslint-plugin-sonarjs": "^4.0.0",
+        "eslint-plugin-unicorn": "56",
+        "typescript": "^6.0.0",
+      },
+    },
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
@@ -417,6 +436,8 @@
     "@vex-app/frontend": ["@vex-app/frontend@workspace:frontend"],
 
     "@vex-app/lib": ["@vex-app/lib@workspace:lib"],
+
+    "@vex-app/vexkit": ["@vex-app/vexkit@workspace:packages/vexkit"],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@4.7.0", "", { "dependencies": { "@babel/core": "^7.28.0", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.27", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0" } }, "sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA=="],
 

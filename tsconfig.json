@@ -15,5 +15,18 @@
     "noEmit": true
   },
   "files": [],
-  "references": [{ "path": "./frontend" }, { "path": "./lib" }, { "path": "./backend" }]
+  "references": [
+    {
+      "path": "./frontend"
+    },
+    {
+      "path": "./lib"
+    },
+    {
+      "path": "./backend"
+    },
+    {
+      "path": "./packages/vexkit"
+    }
+  ]
 }

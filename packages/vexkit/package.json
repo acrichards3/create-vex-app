@@ -1,0 +1,37 @@
+{
+  "name": "@vex-app/vexkit",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Dev tooling for the Vex spec-first workflow (.vex format, codegen, local dashboard)",
+  "license": "MIT",
+  "bin": {
+    "vexkit": "./src/cli.ts"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "bun-types": "latest",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^9",
+    "eslint-plugin-no-comments": "^1.1.10",
+    "eslint-plugin-perfectionist": "^5",
+    "eslint-plugin-sonarjs": "^4.0.0",
+    "eslint-plugin-unicorn": "56",
+    "typescript": "^6.0.0"
+  }
+}
