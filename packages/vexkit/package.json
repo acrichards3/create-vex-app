@@ -34,5 +34,9 @@
     "eslint-plugin-sonarjs": "^4.0.0",
     "eslint-plugin-unicorn": "56",
     "typescript": "^6.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@vex-app/lib": "workspace:*"
   }
 }

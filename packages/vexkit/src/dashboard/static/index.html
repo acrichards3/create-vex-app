@@ -58,6 +58,10 @@
         border-color: var(--accent);
         color: var(--text);
       }
+      .header-fill {
+        flex: 1;
+        min-width: 0;
+      }
       .header-root {
         min-width: 0;
         overflow: hidden;
@@ -69,24 +73,193 @@
         display: flex;
         min-height: 0;
       }
-      #sidebar {
-        background: var(--panel);
+      .sidebar-shell {
         border-right: 1px solid var(--border);
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex-shrink: 0;
         min-height: 0;
-        overflow: hidden;
-        padding: 0;
         transition:
           border-color 0.2s ease,
           opacity 0.15s ease,
           width 0.2s ease;
-        width: min(320px, 38vw);
+        width: var(--explorer-width, min(320px, 38vw));
+        max-width: min(640px, 92vw);
+        min-width: min(200px, 50vw);
       }
-      #layout.sidebar-explorer-collapsed #sidebar {
+      #layout.sidebar-shell-resizing .sidebar-shell {
+        transition:
+          border-color 0.2s ease,
+          opacity 0.15s ease;
+      }
+      .assistant-shell {
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: row;
+        flex-shrink: 0;
+        min-height: 0;
+        transition:
+          border-color 0.2s ease,
+          opacity 0.15s ease,
+          width 0.2s ease;
+        width: var(--assistant-width, min(360px, 42vw));
+        max-width: min(560px, 92vw);
+        min-width: min(260px, 55vw);
+      }
+      #layout.assistant-shell-resizing .assistant-shell {
+        transition:
+          border-color 0.2s ease,
+          opacity 0.15s ease;
+      }
+      body.assistant-resize-active {
+        cursor: col-resize;
+        user-select: none;
+      }
+      #assistant-panel {
+        background: var(--panel);
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .assistant-panel-head {
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        flex-shrink: 0;
+        font-size: 0.75rem;
+        padding: 0.4rem 0.5rem;
+      }
+      .assistant-messages {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.65rem;
+        min-height: 0;
+        overflow: auto;
+        padding: 0.5rem 0.65rem;
+      }
+      .assistant-msg {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+      .assistant-msg-label {
+        color: var(--muted);
+        flex-shrink: 0;
+        font-size: 0.65rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .assistant-msg-body {
+        color: var(--text);
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+      .assistant-msg-user .assistant-msg-body {
+        color: var(--accent);
+      }
+      .assistant-form {
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        gap: 0.4rem;
+        padding: 0.5rem;
+      }
+      .assistant-input {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        flex-shrink: 0;
+        font: inherit;
+        min-height: 4.5rem;
+        padding: 0.45rem 0.5rem;
+        resize: vertical;
+      }
+      .assistant-input:focus {
+        border-color: var(--accent);
+        outline: none;
+      }
+      .assistant-send {
+        align-self: flex-end;
+        background: rgba(91, 159, 212, 0.2);
+        border: 1px solid var(--accent);
+        border-radius: 6px;
+        color: var(--text);
+        cursor: pointer;
+        flex-shrink: 0;
+        font: inherit;
+        font-size: 0.8125rem;
+        padding: 0.35rem 0.75rem;
+      }
+      .assistant-send:hover {
+        background: rgba(91, 159, 212, 0.32);
+      }
+      .assistant-status {
+        color: var(--muted);
+        font-size: 0.65rem;
+        min-height: 1rem;
+      }
+      .assistant-resize-handle {
+        background: var(--panel);
+        cursor: col-resize;
+        flex-shrink: 0;
+        touch-action: none;
+        width: 6px;
+      }
+      .assistant-resize-handle:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+      }
+      body.assistant-resize-active .assistant-resize-handle {
+        background: rgba(91, 159, 212, 0.22);
+      }
+      #layout.assistant-panel-collapsed .assistant-shell {
+        border-left-color: transparent;
+        border-left-width: 0;
+        max-width: none;
+        min-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        width: 0;
+      }
+      body.sidebar-resize-active {
+        cursor: col-resize;
+        user-select: none;
+      }
+      #sidebar {
+        background: var(--panel);
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+      .sidebar-resize-handle {
+        background: var(--panel);
+        cursor: col-resize;
+        flex-shrink: 0;
+        touch-action: none;
+        width: 6px;
+      }
+      .sidebar-resize-handle:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+      }
+      body.sidebar-resize-active .sidebar-resize-handle {
+        background: rgba(91, 159, 212, 0.22);
+      }
+      #layout.sidebar-explorer-collapsed .sidebar-shell {
         border-right-color: transparent;
         border-right-width: 0;
+        max-width: none;
         min-width: 0;
         opacity: 0;
         overflow: hidden;
@@ -166,6 +339,14 @@
       .file-row.file-vex {
         cursor: pointer;
         color: var(--accent);
+      }
+      .file-row.file-row-current {
+        background: rgba(91, 159, 212, 0.15);
+        outline: 1px solid var(--accent);
+        outline-offset: -1px;
+      }
+      .file-row.file-row-current:hover {
+        background: rgba(91, 159, 212, 0.22);
       }
       .file-row.file-other {
         color: var(--muted);
@@ -289,7 +470,7 @@
   <body>
     <header class="app-header">
       <button
-        aria-controls="sidebar"
+        aria-controls="sidebar-shell"
         aria-expanded="true"
         class="explorer-toggle"
         id="toggle-explorer"
@@ -299,6 +480,17 @@
         ⟨
       </button>
       <span class="header-root" id="header-root">Loading project…</span>
+      <span class="header-fill" aria-hidden="true"></span>
+      <button
+        aria-controls="assistant-shell"
+        aria-expanded="true"
+        class="explorer-toggle"
+        id="toggle-assistant"
+        title="Hide assistant (Ctrl+Shift+L)"
+        type="button"
+      >
+        ⟫
+      </button>
     </header>
     <div id="layout">
       <script>
@@ -309,6 +501,27 @@
               return;
             }
             const parsed = JSON.parse(raw);
+            if (typeof parsed.explorerWidthPx === "number" && Number.isFinite(parsed.explorerWidthPx)) {
+              const w = Math.min(640, Math.max(200, Math.round(parsed.explorerWidthPx)));
+              document.documentElement.style.setProperty("--explorer-width", `${String(w)}px`);
+            }
+            if (typeof parsed.assistantWidthPx === "number" && Number.isFinite(parsed.assistantWidthPx)) {
+              const aw = Math.min(560, Math.max(260, Math.round(parsed.assistantWidthPx)));
+              document.documentElement.style.setProperty("--assistant-width", `${String(aw)}px`);
+            }
+            if (parsed.assistantCollapsed === true) {
+              const layoutA = document.getElementById("layout");
+              if (layoutA != null) {
+                layoutA.classList.add("assistant-panel-collapsed");
+              }
+              const btnA = document.getElementById("toggle-assistant");
+              if (btnA != null) {
+                btnA.setAttribute("aria-expanded", "false");
+                btnA.textContent = "⟪";
+                btnA.setAttribute("title", "Show assistant (Ctrl+Shift+L)");
+                btnA.setAttribute("aria-label", "Show assistant");
+              }
+            }
             if (parsed.explorerCollapsed !== true) {
               return;
             }
@@ -328,12 +541,22 @@
           }
         })();
       </script>
-      <nav aria-label="Project files" id="sidebar">
-        <div class="sidebar-toolbar">
-          <button class="sidebar-action-btn" id="collapse-all-folders" type="button">Collapse all folders</button>
-        </div>
-        <div class="sidebar-tree" id="sidebar-tree"></div>
-      </nav>
+      <div class="sidebar-shell" id="sidebar-shell">
+        <nav aria-label="Project files" id="sidebar">
+          <div class="sidebar-toolbar">
+            <button class="sidebar-action-btn" id="collapse-all-folders" type="button">Collapse all folders</button>
+          </div>
+          <div class="sidebar-tree" id="sidebar-tree"></div>
+        </nav>
+        <div
+          aria-label="Resize file explorer"
+          aria-orientation="vertical"
+          class="sidebar-resize-handle"
+          id="sidebar-resize-handle"
+          role="separator"
+          tabindex="0"
+        ></div>
+      </div>
       <div id="main">
         <div id="toolbar"></div>
         <div id="tree-panel">
@@ -345,6 +568,31 @@
               <svg class="logic-canvas-svg" id="logic-canvas-svg" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="assistant-shell" id="assistant-shell">
+        <div
+          aria-label="Resize assistant"
+          aria-orientation="vertical"
+          class="assistant-resize-handle"
+          id="assistant-resize-handle"
+          role="separator"
+          tabindex="0"
+        ></div>
+        <div id="assistant-panel">
+          <div class="assistant-panel-head">Assistant</div>
+          <div class="assistant-messages" id="assistant-messages"></div>
+          <p class="assistant-status" id="assistant-status"></p>
+          <form autocomplete="off" class="assistant-form" id="assistant-form">
+            <textarea
+              aria-label="Assistant message"
+              class="assistant-input"
+              id="assistant-input"
+              placeholder="Ask about your spec…"
+              rows="3"
+            ></textarea>
+            <button class="assistant-send" id="assistant-send" type="submit">Send</button>
+          </form>
         </div>
       </div>
     </div>

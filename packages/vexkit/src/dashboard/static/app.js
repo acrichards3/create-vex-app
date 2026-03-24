@@ -1,21 +1,48 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
+import { initAssistantPanel } from "./chat-panel.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const NODE_H = 74;
 const NODE_MIN_W = 128;
 const NODE_MAX_W = 260;
-const NODE_LEVEL_GAP_X = 36;
+const NODE_LEVEL_GAP_X = 16;
+const TREE_LEAF_SPACING_X = 58;
+const TREE_DEPTH_PER_LEVEL = 112;
+const TREE_LAYOUT_MIN_DEPTH_PX = 168;
+const TREE_LAYOUT_MIN_BREADTH = 340;
 
 const DASHBOARD_VIEW_STORAGE_KEY = "vexkit.dashboard.view.v1";
+const EXPLORER_WIDTH_MIN = 200;
+const EXPLORER_WIDTH_MAX = 640;
 
 const state = {
+  assistantCollapsed: false,
+  assistantWidthPx: null,
   currentPath: null,
   explorerCollapsed: false,
+  explorerWidthPx: null,
   expandedDirs: new Set(),
   parseResult: null,
   selectedFnIndex: 0,
   tree: [],
 };
+
+function clampExplorerWidthPx(w) {
+  return Math.min(EXPLORER_WIDTH_MAX, Math.max(EXPLORER_WIDTH_MIN, Math.round(w)));
+}
+
+function setExplorerWidthCss(px) {
+  document.documentElement.style.setProperty("--explorer-width", `${String(px)}px`);
+}
+
+function applyExplorerWidthFromState() {
+  if (typeof state.explorerWidthPx !== "number" || !Number.isFinite(state.explorerWidthPx)) {
+    return;
+  }
+  const w = clampExplorerWidthPx(state.explorerWidthPx);
+  state.explorerWidthPx = w;
+  setExplorerWidthCss(w);
+}
 
 function loadDashboardView() {
   try {
@@ -36,6 +63,15 @@ function loadDashboardView() {
     if (typeof parsed.selectedFnIndex === "number" && Number.isFinite(parsed.selectedFnIndex)) {
       state.selectedFnIndex = Math.max(0, Math.floor(parsed.selectedFnIndex));
     }
+    if (typeof parsed.explorerWidthPx === "number" && Number.isFinite(parsed.explorerWidthPx)) {
+      state.explorerWidthPx = clampExplorerWidthPx(parsed.explorerWidthPx);
+    }
+    if (typeof parsed.assistantCollapsed === "boolean") {
+      state.assistantCollapsed = parsed.assistantCollapsed;
+    }
+    if (typeof parsed.assistantWidthPx === "number" && Number.isFinite(parsed.assistantWidthPx)) {
+      state.assistantWidthPx = Math.min(560, Math.max(260, Math.round(parsed.assistantWidthPx)));
+    }
   } catch {
     /* ignore corrupt or unavailable storage */
   }
@@ -44,9 +80,12 @@ function loadDashboardView() {
 function saveDashboardView() {
   try {
     const payload = {
+      assistantCollapsed: state.assistantCollapsed,
+      assistantWidthPx: typeof state.assistantWidthPx === "number" ? state.assistantWidthPx : null,
       currentPath: state.currentPath,
       explorerCollapsed: state.explorerCollapsed,
       expandedDirs: [...state.expandedDirs],
+      explorerWidthPx: typeof state.explorerWidthPx === "number" ? state.explorerWidthPx : null,
       selectedFnIndex: state.selectedFnIndex,
     };
     localStorage.setItem(DASHBOARD_VIEW_STORAGE_KEY, JSON.stringify(payload));
@@ -56,6 +95,7 @@ function saveDashboardView() {
 }
 
 let graphInteractionAbort = null;
+let watchReloadTimer = null;
 const graphView = {
   applyTransform: () => {},
   scale: 1,
@@ -146,12 +186,16 @@ function layoutHierarchy(treeData) {
   const leaves = root.leaves();
   const leafCount = Math.max(1, leaves.length);
   const maxDepth = root.height + 1;
-  const breadth = Math.max(520, leafCount * 112, NODE_MAX_W * leafCount + NODE_LEVEL_GAP_X * (leafCount + 1));
-  const depthPx = Math.max(300, maxDepth * 224);
+  const breadth = Math.max(
+    TREE_LAYOUT_MIN_BREADTH,
+    leafCount * TREE_LEAF_SPACING_X,
+    NODE_MAX_W * leafCount + NODE_LEVEL_GAP_X * (leafCount + 1),
+  );
+  const depthPx = Math.max(TREE_LAYOUT_MIN_DEPTH_PX, maxDepth * TREE_DEPTH_PER_LEVEL);
   d3.tree().size([breadth, depthPx])(root);
   root.each((d) => {
-    d.px = d.x + 28;
-    d.py = d.y + 28;
+    d.px = d.x + 18;
+    d.py = d.y + 18;
   });
   return root;
 }
@@ -488,6 +532,10 @@ function renderFileNode(node) {
   const row = document.createElement("div");
   const isVex = node.name.endsWith(".vex");
   row.className = isVex ? "file-row file-vex" : "file-row file-other";
+  if (isVex && node.relativePath === state.currentPath) {
+    row.classList.add("file-row-current");
+    row.setAttribute("aria-current", "true");
+  }
   row.textContent = node.name;
   if (isVex) {
     row.addEventListener("click", () => {
@@ -604,6 +652,7 @@ async function openVexFile(relPath, options) {
   const res = await fetch(`/api/document?${params.toString()}`);
   state.parseResult = await res.json();
   updateMainPanel();
+  renderFileTree();
 }
 
 document.getElementById("collapse-all-folders").addEventListener("click", collapseAllExplorerFolders);
@@ -641,13 +690,114 @@ function onExplorerHotkey(e) {
 }
 
 loadDashboardView();
+applyExplorerWidthFromState();
+
+function wireSidebarResize() {
+  const handle = document.getElementById("sidebar-resize-handle");
+  const layout = document.getElementById("layout");
+  const shell = document.getElementById("sidebar-shell");
+  let dragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  function shellWidthNow() {
+    return shell.getBoundingClientRect().width;
+  }
+
+  function onPointerDown(e) {
+    if (state.explorerCollapsed) {
+      return;
+    }
+    e.preventDefault();
+    dragging = true;
+    startX = e.clientX;
+    startWidth = shellWidthNow();
+    layout.classList.add("sidebar-shell-resizing");
+    document.body.classList.add("sidebar-resize-active");
+    handle.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    if (!dragging) {
+      return;
+    }
+    const delta = e.clientX - startX;
+    const w = clampExplorerWidthPx(startWidth + delta);
+    setExplorerWidthCss(w);
+  }
+
+  function onPointerUp(e) {
+    if (!dragging) {
+      return;
+    }
+    dragging = false;
+    layout.classList.remove("sidebar-shell-resizing");
+    document.body.classList.remove("sidebar-resize-active");
+    try {
+      handle.releasePointerCapture(e.pointerId);
+    } catch {
+      /* capture may not be held */
+    }
+    state.explorerWidthPx = clampExplorerWidthPx(shellWidthNow());
+    setExplorerWidthCss(state.explorerWidthPx);
+    saveDashboardView();
+  }
+
+  handle.addEventListener("pointerdown", onPointerDown);
+  handle.addEventListener("pointermove", onPointerMove);
+  handle.addEventListener("pointerup", onPointerUp);
+  handle.addEventListener("pointercancel", onPointerUp);
+}
 
 document.getElementById("toggle-explorer").addEventListener("click", toggleExplorerPanel);
 window.addEventListener("keydown", onExplorerHotkey);
 syncExplorerPanel();
+wireSidebarResize();
 
 await refreshTree();
 
 if (state.currentPath != null) {
   await openVexFile(state.currentPath, { resetFunctionIndex: false });
 }
+
+function scheduleReloadFromWatch() {
+  if (watchReloadTimer != null) {
+    clearTimeout(watchReloadTimer);
+  }
+  watchReloadTimer = window.setTimeout(async () => {
+    watchReloadTimer = null;
+    await refreshTree();
+    if (state.currentPath != null) {
+      await openVexFile(state.currentPath, { resetFunctionIndex: false });
+    }
+  }, 220);
+}
+
+function onWatchSocketMessage(ev) {
+  let payload;
+  try {
+    payload = JSON.parse(ev.data);
+  } catch {
+    return;
+  }
+  if (payload?.type !== "vexFilesChanged") {
+    return;
+  }
+  scheduleReloadFromWatch();
+}
+
+function connectProjectWatch() {
+  const proto = location.protocol === "https:" ? "wss:" : "ws:";
+  const ws = new WebSocket(`${proto}//${location.host}/api/watch`);
+  ws.addEventListener("message", onWatchSocketMessage);
+  ws.addEventListener("close", () => {
+    window.setTimeout(connectProjectWatch, 2600);
+  });
+  ws.addEventListener("error", () => {
+    ws.close();
+  });
+}
+
+connectProjectWatch();
+
+initAssistantPanel({ saveDashboardView, state });
