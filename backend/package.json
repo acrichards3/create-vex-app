@@ -35,6 +35,6 @@
     "eslint-plugin-perfectionist": "^5",
     "eslint-plugin-sonarjs": "^4",
     "eslint-plugin-unicorn": "56",
-    "typescript": "^5.9.0"
+    "typescript": "^6.0.0"
   }
 }

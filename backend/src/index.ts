@@ -15,11 +15,11 @@ import { users } from "./db/schema/users";
 
 const app = new Hono<{ Variables: { db: typeof db } }>();
 
-const resolveOrigin = (origin: string): string | null => {
+const resolveOrigin = (origin: string): string => {
   if (env.ENVIRONMENT !== "development") {
-    return origin === env.FRONTEND_URL ? origin : null;
+    return origin === env.FRONTEND_URL ? origin : "";
   }
-  return /^https?:\/\/localhost(:\d+)?$/.test(origin) ? origin : null;
+  return /^https?:\/\/localhost(:\d+)?$/.test(origin) ? origin : "";
 };
 
 app.use(

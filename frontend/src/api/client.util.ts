@@ -9,19 +9,27 @@ const errorResponseSchema = z.object({
 const CSRF_COOKIE_NAMES = ["csrf-token", "XSRF-TOKEN", "_csrf", "csrfToken"];
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-const getCookie = (name: string): string | undefined => {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${name}=`))
-    ?.split("=")[1];
+const getCookie = (name: string): string => {
+  let value = "";
+  const rows = document.cookie.split("; ");
+  const row = rows.find((r) => r.startsWith(`${name}=`));
+  if (row != null) {
+    const eq = row.indexOf("=");
+    if (eq >= 0) {
+      value = row.slice(eq + 1);
+    }
+  }
+  return value;
 };
 
-const getCsrfToken = (): string | undefined => {
-  const found = CSRF_COOKIE_NAMES.map(getCookie).find((v) => v != null);
-  if (found == null) {
-    return undefined;
+const getCsrfToken = (): string => {
+  for (const cookieName of CSRF_COOKIE_NAMES) {
+    const raw = getCookie(cookieName);
+    if (raw !== "") {
+      return decodeURIComponent(raw);
+    }
   }
-  return decodeURIComponent(found);
+  return "";
 };
 
 const buildHeaders = (init: RequestInit | undefined, method: string): Headers => {
@@ -32,7 +40,7 @@ const buildHeaders = (init: RequestInit | undefined, method: string): Headers =>
 
   if (MUTATION_METHODS.has(method)) {
     const token = getCsrfToken();
-    if (token != null && !headers.has("X-CSRF-Token")) {
+    if (token !== "" && !headers.has("X-CSRF-Token")) {
       headers.set("X-CSRF-Token", token);
     }
   }

@@ -13,10 +13,10 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    "types": ["node"],
     "paths": {
       "@vex-app/lib": ["../lib/dist/index.d.ts"],
-      "~/*": ["src/*"]
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src", "vite.config.ts"],

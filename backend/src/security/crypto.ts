@@ -8,11 +8,7 @@ export const hashToken = (value: string): string => {
   return new Bun.CryptoHasher("sha256").update(value).digest("hex");
 };
 
-export const getEncryptionKeyFromEnv = (keyString: string | undefined): EncryptionKey | undefined => {
-  if (!keyString) {
-    return undefined;
-  }
-
+const keyBufferFromString = (keyString: string): Buffer => {
   let buf: Buffer | undefined;
   const isHex = /^[A-Fa-f0-9]+$/.test(keyString) && keyString.length >= 64 && keyString.length % 2 === 0;
   if (isHex) {
@@ -35,8 +31,11 @@ export const getEncryptionKeyFromEnv = (keyString: string | undefined): Encrypti
   } else if (buf.length > 32) {
     buf = buf.subarray(0, 32);
   }
-  return { key: buf };
+  return buf;
 };
+
+export const getEncryptionKeyFromEnv = (keyString: string | undefined): EncryptionKey | undefined =>
+  keyString ? { key: keyBufferFromString(keyString) } : undefined;
 
 export const encryptString = (plainText: string, encKey: EncryptionKey | undefined): string => {
   if (!encKey) {
