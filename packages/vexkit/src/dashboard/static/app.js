@@ -28,6 +28,7 @@ const state = {
   vexSource: "",
   workflow: { approvalsByPath: {}, currentVexPath: "", phase: "spec" },
   workflowSelectedStep: 0,
+  hasSpokenToAssistant: false,
 };
 
 function clampExplorerWidthPx(w) {
@@ -78,6 +79,9 @@ function loadDashboardView() {
     if (typeof parsed.workflowSelectedStep === "number" && Number.isFinite(parsed.workflowSelectedStep)) {
       state.workflowSelectedStep = Math.max(0, Math.min(5, Math.floor(parsed.workflowSelectedStep)));
     }
+    if (typeof parsed.hasSpokenToAssistant === "boolean") {
+      state.hasSpokenToAssistant = parsed.hasSpokenToAssistant;
+    }
   } catch {
     /* ignore corrupt or unavailable storage */
   }
@@ -88,6 +92,35 @@ function setWorkflowStatus(text, isErr) {
   el.hidden = text.length === 0;
   el.textContent = text;
   el.classList.toggle("err", Boolean(isErr));
+}
+
+function syncLogicCanvasSpecEditClass() {
+  const viewport = document.getElementById("logic-canvas-viewport");
+  const logicTree = document.getElementById("logic-tree");
+  const canvasHint = document.querySelector(".logic-canvas-hint");
+  if (viewport == null || logicTree == null || logicTree.hidden) {
+    return;
+  }
+  const specOk = state.parseResult?.ok === true;
+  const canSpecEdit = state.workflow.phase === "spec" && specOk && state.hasSpokenToAssistant;
+  viewport.classList.toggle("logic-canvas--spec-edit", canSpecEdit);
+  if (canvasHint != null && specOk) {
+    const doc = state.parseResult?.document;
+    const fn = doc?.functions?.[state.selectedFnIndex];
+    if (fn != null) {
+      const hasWhens = Array.isArray(fn.whens) && fn.whens.length > 0;
+      if (hasWhens) {
+        if (state.workflow.phase === "spec" && state.hasSpokenToAssistant) {
+          canvasHint.textContent = "Click a node to edit its label · scroll to zoom · drag empty space to pan";
+        } else if (state.workflow.phase === "spec") {
+          canvasHint.textContent =
+            "Use the assistant to describe work across .vex files · scroll to zoom · drag empty space to pan";
+        } else {
+          canvasHint.textContent = "Scroll to zoom · drag empty space to pan";
+        }
+      }
+    }
+  }
 }
 
 async function fetchWorkflow() {
@@ -124,7 +157,10 @@ async function postWorkflow(body) {
 }
 
 function computeWorkflowProgressIdx(input) {
-  const { allApproved, pathOk, phase } = input;
+  const { allApproved, hasSpokenToAssistant, pathOk, phase } = input;
+  if (phase === "spec" && !hasSpokenToAssistant) {
+    return 0;
+  }
   if (!pathOk) {
     return 0;
   }
@@ -151,6 +187,7 @@ function computeWorkflowProgressFromState() {
   const allApproved = fnNames.length > 0 && fnNames.every((n) => approved.has(n));
   return computeWorkflowProgressIdx({
     allApproved,
+    hasSpokenToAssistant: state.hasSpokenToAssistant,
     pathOk,
     phase: state.workflow.phase,
   });
@@ -382,32 +419,27 @@ function renderWorkflowApprovals(fnNames) {
 }
 
 function renderWorkflowBar() {
+  if (state.workflow.phase === "spec" && !state.hasSpokenToAssistant) {
+    state.workflowSelectedStep = 0;
+  }
   const pathOk = state.currentPath != null && state.currentPath.length > 0;
   const doc = state.parseResult != null && state.parseResult.ok ? state.parseResult.document : null;
   const fnNames = doc != null && Array.isArray(doc.functions) ? doc.functions.map((f) => f.name) : [];
   const approved = new Set(state.workflow.approvalsByPath[state.currentPath ?? ""] ?? []);
   const allApproved = fnNames.length > 0 && fnNames.every((n) => approved.has(n));
   const phase = state.workflow.phase;
-  const progressIdx = computeWorkflowProgressIdx({ allApproved, pathOk, phase });
+  const progressIdx = computeWorkflowProgressIdx({
+    allApproved,
+    hasSpokenToAssistant: state.hasSpokenToAssistant,
+    pathOk,
+    phase,
+  });
 
   renderWorkflowStepper(progressIdx);
   renderWorkflowActions(fnNames, allApproved);
   renderWorkflowApprovals(fnNames);
-
-  const editorWrap = document.getElementById("workflow-editor-wrap");
-  const ta = document.getElementById("vex-source-editor");
-  const saveBtn = document.getElementById("vex-save-btn");
-  if (!pathOk || doc == null) {
-    editorWrap.hidden = true;
-    applyWorkflowPanelVisibility();
-    return;
-  }
-  editorWrap.hidden = false;
-  ta.value = state.vexSource;
-  const allowEdit = phase === "spec";
-  ta.disabled = !allowEdit;
-  saveBtn.disabled = !allowEdit;
   applyWorkflowPanelVisibility();
+  syncLogicCanvasSpecEditClass();
 }
 
 function saveDashboardView() {
@@ -421,6 +453,7 @@ function saveDashboardView() {
       explorerWidthPx: typeof state.explorerWidthPx === "number" ? state.explorerWidthPx : null,
       selectedFnIndex: state.selectedFnIndex,
       workflowSelectedStep: state.workflowSelectedStep,
+      hasSpokenToAssistant: state.hasSpokenToAssistant,
     };
     localStorage.setItem(DASHBOARD_VIEW_STORAGE_KEY, JSON.stringify(payload));
   } catch {
@@ -430,6 +463,7 @@ function saveDashboardView() {
 
 let graphInteractionAbort = null;
 let watchReloadTimer = null;
+let pendingVexEditPath = null;
 const graphView = {
   applyTransform: () => {},
   scale: 1,
@@ -450,31 +484,178 @@ function kindLabel(kind) {
   return "It";
 }
 
-function branchToTree(body) {
+function branchToTree(body, path) {
   if (body.kind === "it") {
-    return { children: [], kind: "it", label: body.label, line: body.line };
+    return { children: [], kind: "it", label: body.label, line: body.line, vexPath: path };
   }
-  const kids = body.child ? [branchToTree(body.child)] : [];
-  return { children: kids, kind: "and", label: body.label, line: body.line };
+  const kids = body.child ? [branchToTree(body.child, [...path, 0])] : [];
+  return { children: kids, kind: "and", label: body.label, line: body.line, vexPath: path };
 }
 
-function whenToTree(when) {
+function whenToTree(when, fnIndex, whenIndex) {
+  const basePath = [fnIndex, whenIndex];
   return {
-    children: when.branches.map((b) => branchToTree(b)),
+    children: when.branches.map((b, bi) => branchToTree(b, [...basePath, bi])),
     kind: "when",
     label: when.label,
     line: when.line,
+    vexPath: basePath,
   };
 }
 
-function treeDataFromFunction(fn) {
+function treeDataFromFunction(fn, fnIndex) {
   const whens = Array.isArray(fn.whens) ? fn.whens : [];
   return {
-    children: whens.map((w) => whenToTree(w)),
+    children: whens.map((w, wi) => whenToTree(w, fnIndex, wi)),
     kind: "fn",
     label: fn.name,
     line: fn.line,
+    vexPath: [fnIndex],
   };
+}
+
+function cloneVexDocument(doc) {
+  if (typeof structuredClone === "function") {
+    return structuredClone(doc);
+  }
+  return JSON.parse(JSON.stringify(doc));
+}
+
+function updateBodyLabel(body, tail, newLabel) {
+  if (tail.length === 0) {
+    return { ...body, label: newLabel };
+  }
+  if (body.kind === "it") {
+    return body;
+  }
+  const [t0, ...trest] = tail;
+  if (t0 !== 0 || body.child == null) {
+    return body;
+  }
+  return { ...body, child: updateBodyLabel(body.child, trest, newLabel) };
+}
+
+function updateBranchesAt(branches, path, newLabel) {
+  const [b, ...tail] = path;
+  return branches.map((body, idx) => {
+    if (idx !== b) {
+      return body;
+    }
+    return updateBodyLabel(body, tail, newLabel);
+  });
+}
+
+function updateNodeLabel(doc, segments, newLabel) {
+  if (segments.length === 1) {
+    const fi = segments[0];
+    return {
+      ...doc,
+      functions: doc.functions.map((f, i) => (i === fi ? { ...f, name: newLabel } : f)),
+    };
+  }
+  if (segments.length === 2) {
+    const [fi, wi] = segments;
+    return {
+      ...doc,
+      functions: doc.functions.map((f, i) => {
+        if (i !== fi) {
+          return f;
+        }
+        return {
+          ...f,
+          whens: f.whens.map((w, j) => (j === wi ? { ...w, label: newLabel } : w)),
+        };
+      }),
+    };
+  }
+  const [fi, wi, ...rest] = segments;
+  return {
+    ...doc,
+    functions: doc.functions.map((f, i) => {
+      if (i !== fi) {
+        return f;
+      }
+      return {
+        ...f,
+        whens: f.whens.map((w, j) => {
+          if (j !== wi) {
+            return w;
+          }
+          return { ...w, branches: updateBranchesAt(w.branches, rest, newLabel) };
+        }),
+      };
+    }),
+  };
+}
+
+function closeVexNodeEditDialog() {
+  const overlay = document.getElementById("vex-node-edit-overlay");
+  if (overlay != null) {
+    overlay.hidden = true;
+  }
+  pendingVexEditPath = null;
+}
+
+function openVexNodeEditDialog(data) {
+  const overlay = document.getElementById("vex-node-edit-overlay");
+  const input = document.getElementById("vex-node-edit-input");
+  const titleEl = document.getElementById("vex-node-edit-title");
+  if (overlay == null || input == null || titleEl == null) {
+    return;
+  }
+  if (!Array.isArray(data.vexPath)) {
+    return;
+  }
+  pendingVexEditPath = data.vexPath;
+  input.value = data.label;
+  titleEl.textContent = `Edit ${kindLabel(data.kind)}`;
+  overlay.hidden = false;
+  input.focus();
+  input.select();
+}
+
+function onLogicNodeHitClick(data) {
+  if (state.workflow.phase !== "spec" || !state.hasSpokenToAssistant) {
+    return;
+  }
+  if (state.currentPath == null || state.parseResult?.ok !== true) {
+    return;
+  }
+  if (!Array.isArray(data.vexPath)) {
+    return;
+  }
+  openVexNodeEditDialog(data);
+}
+
+async function commitVexNodeEdit() {
+  const path = pendingVexEditPath;
+  const input = document.getElementById("vex-node-edit-input");
+  if (path == null || state.currentPath == null || input == null) {
+    return;
+  }
+  const raw = input.value.trim();
+  if (raw.length === 0) {
+    setWorkflowStatus("Label cannot be empty.", true);
+    return;
+  }
+  const doc = state.parseResult?.document;
+  if (doc == null || state.parseResult?.ok !== true) {
+    return;
+  }
+  const nextDoc = updateNodeLabel(cloneVexDocument(doc), path, raw);
+  const res = await fetch("/api/document", {
+    body: JSON.stringify({ document: nextDoc, path: state.currentPath }),
+    headers: { "Content-Type": "application/json" },
+    method: "PUT",
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    setWorkflowStatus(typeof payload.message === "string" ? payload.message : "Save failed.", true);
+    return;
+  }
+  setWorkflowStatus("Updated .vex");
+  closeVexNodeEditDialog();
+  await openVexFile(state.currentPath, { resetFunctionIndex: false });
 }
 
 function measureNodeWidth(d) {
@@ -778,6 +959,11 @@ function drawNodes(nodesLayer, hierarchyRoot) {
     const tip = document.createElementNS(NS, "title");
     tip.textContent = `${d.data.label} (line ${String(d.data.line)})`;
 
+    hit.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      onLogicNodeHitClick(d.data);
+    });
+
     const lineEl = document.createElementNS(NS, "text");
     lineEl.setAttribute("fill", "#8b9cb3");
     lineEl.setAttribute("font-size", "10px");
@@ -794,6 +980,10 @@ function drawNodes(nodesLayer, hierarchyRoot) {
 function renderLogicGraph(fn) {
   const svg = document.getElementById("logic-canvas-svg");
   const viewport = document.getElementById("logic-canvas-viewport");
+  viewport.classList.toggle(
+    "logic-canvas--spec-edit",
+    state.workflow.phase === "spec" && state.parseResult?.ok === true && state.hasSpokenToAssistant,
+  );
   svg.replaceChildren();
   const defs = document.createElementNS(NS, "defs");
   const marker = document.createElementNS(NS, "marker");
@@ -815,7 +1005,7 @@ function renderLogicGraph(fn) {
   panRoot.append(linksLayer, nodesLayer);
   svg.append(defs, panRoot);
 
-  const data = treeDataFromFunction(fn);
+  const data = treeDataFromFunction(fn, state.selectedFnIndex);
   const hierarchyRoot = layoutHierarchy(data);
   hierarchyRoot.each((d) => {
     measureNodeWidth(d);
@@ -966,9 +1156,18 @@ function updateMainPanel() {
     const fn = doc.functions[state.selectedFnIndex];
     if (canvasHint != null) {
       const hasWhens = Array.isArray(fn.whens) && fn.whens.length > 0;
-      canvasHint.textContent = hasWhens
-        ? "Scroll to zoom · drag empty space to pan"
-        : "No WHEN blocks under this function.";
+      if (hasWhens) {
+        if (state.workflow.phase === "spec" && state.hasSpokenToAssistant) {
+          canvasHint.textContent = "Click a node to edit its label · scroll to zoom · drag empty space to pan";
+        } else if (state.workflow.phase === "spec") {
+          canvasHint.textContent =
+            "Use the assistant to describe work across .vex files · scroll to zoom · drag empty space to pan";
+        } else {
+          canvasHint.textContent = "Scroll to zoom · drag empty space to pan";
+        }
+      } else {
+        canvasHint.textContent = "No WHEN blocks under this function.";
+      }
     }
     renderLogicGraph(fn);
   } finally {
@@ -1002,31 +1201,15 @@ async function openVexFile(relPath, options) {
     await fetchWorkflow();
   }
   if (pathChanged) {
-    state.workflowSelectedStep = computeWorkflowProgressFromState();
+    if (state.hasSpokenToAssistant) {
+      state.workflowSelectedStep = computeWorkflowProgressFromState();
+    } else {
+      state.workflowSelectedStep = 0;
+    }
+    saveDashboardView();
   }
   updateMainPanel();
   renderFileTree();
-}
-
-function onVexSaveClick() {
-  void (async () => {
-    if (state.currentPath == null) {
-      return;
-    }
-    const ta = document.getElementById("vex-source-editor");
-    const res = await fetch("/api/document", {
-      body: JSON.stringify({ path: state.currentPath, source: ta.value }),
-      headers: { "Content-Type": "application/json" },
-      method: "PUT",
-    });
-    const payload = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      setWorkflowStatus(typeof payload.message === "string" ? payload.message : "Save failed.", true);
-      return;
-    }
-    setWorkflowStatus("Saved .vex");
-    await openVexFile(state.currentPath, { resetFunctionIndex: false });
-  })();
 }
 
 document.getElementById("collapse-all-folders").addEventListener("click", collapseAllExplorerFolders);
@@ -1066,7 +1249,35 @@ function onExplorerHotkey(e) {
 loadDashboardView();
 applyExplorerWidthFromState();
 
-document.getElementById("vex-save-btn").addEventListener("click", onVexSaveClick);
+const vexNodeEditForm = document.getElementById("vex-node-edit-form");
+const vexNodeEditCancel = document.getElementById("vex-node-edit-cancel");
+const vexNodeEditOverlay = document.getElementById("vex-node-edit-overlay");
+if (vexNodeEditForm != null) {
+  vexNodeEditForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    void commitVexNodeEdit();
+  });
+}
+if (vexNodeEditCancel != null) {
+  vexNodeEditCancel.addEventListener("click", () => {
+    closeVexNodeEditDialog();
+  });
+}
+if (vexNodeEditOverlay != null) {
+  vexNodeEditOverlay.addEventListener("click", (e) => {
+    if (e.target === vexNodeEditOverlay) {
+      closeVexNodeEditDialog();
+    }
+  });
+}
+document.addEventListener("keydown", (e) => {
+  if (vexNodeEditOverlay == null || vexNodeEditOverlay.hidden) {
+    return;
+  }
+  if (e.key === "Escape") {
+    closeVexNodeEditDialog();
+  }
+});
 
 function wireSidebarResize() {
   const handle = document.getElementById("sidebar-resize-handle");
@@ -1183,6 +1394,15 @@ initAssistantPanel({
       currentVexPath: state.workflow.currentVexPath,
       workflowPhase: state.workflow.phase,
     };
+  },
+  onUserMessageSent() {
+    if (state.hasSpokenToAssistant) {
+      return;
+    }
+    state.hasSpokenToAssistant = true;
+    saveDashboardView();
+    state.workflowSelectedStep = computeWorkflowProgressFromState();
+    renderWorkflowBar();
   },
   saveDashboardView,
   state,

@@ -267,39 +267,65 @@
         color: var(--text);
         font-size: 0.75rem;
       }
-      .workflow-editor-wrap {
+      .vex-node-edit-overlay {
+        align-items: center;
+        background: rgb(0 0 0 / 0.55);
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        padding: 1rem;
+        position: fixed;
+        z-index: 200;
+      }
+      .vex-node-edit-overlay[hidden] {
+        display: none;
+      }
+      .vex-node-edit-dialog {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        max-width: min(100%, 24rem);
+        padding: 1rem;
+        width: 100%;
+      }
+      .vex-node-edit-title {
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+      .vex-node-edit-field {
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
       }
-      .workflow-editor-label {
+      .vex-node-edit-label {
         color: var(--muted);
         font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
       }
-      .workflow-vex-editor {
-        background: rgba(255, 255, 255, 0.04);
+      .vex-node-edit-input {
+        background: rgb(255 255 255 / 0.04);
         border: 1px solid var(--border);
         border-radius: 6px;
         color: var(--text);
-        font-family: ui-monospace, monospace;
-        font-size: 0.75rem;
-        line-height: 1.4;
-        min-height: 6rem;
+        font: inherit;
+        font-size: 0.875rem;
         padding: 0.45rem 0.5rem;
-        resize: vertical;
         width: 100%;
       }
-      .workflow-vex-editor:focus {
+      .vex-node-edit-input:focus {
         border-color: var(--accent);
         outline: none;
       }
-      .workflow-vex-editor:disabled {
-        opacity: 0.55;
-      }
-      .workflow-editor-actions {
+      .vex-node-edit-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem;
+        justify-content: flex-end;
       }
       .workflow-status {
         color: var(--muted);
@@ -680,6 +706,9 @@
       .logic-canvas-viewport.logic-canvas-grabbing {
         cursor: grabbing;
       }
+      .logic-canvas-viewport.logic-canvas--spec-edit .logic-node-hit {
+        cursor: pointer;
+      }
       .logic-canvas-svg {
         display: block;
         height: 100%;
@@ -780,8 +809,9 @@
         <div aria-labelledby="workflow-tab-0" class="workflow-step-panel" id="workflow-tabpanel-0" role="tabpanel">
           <div class="workflow-panel-title">Describe</div>
           <p class="workflow-panel-lead">
-            Tell the assistant what you want—new feature, change to existing behavior, or edge cases to cover. When you
-            are ready, move to Spec so the model can shape the <code class="workflow-code">.vex</code> trees.
+            Tell the assistant what you want—one iteration can touch several <code class="workflow-code">.vex</code>
+            files. After you send your first message, the workflow moves to Spec so the model can shape the trees. Open
+            files in the sidebar as needed; the current file is just the focused tree.
           </p>
         </div>
         <div
@@ -793,22 +823,10 @@
         >
           <div class="workflow-panel-title">Spec</div>
           <p class="workflow-panel-lead">
-            Source of truth for decision trees. Edits here stay in sync with the graph; in the build phase this editor
-            is read-only for the agent (you can still edit on disk if needed).
+            The graph is the source of truth. In spec phase, click any node in the tree to edit its label; changes are
+            saved to the <code class="workflow-code">.vex</code> file. In build phase the agent cannot edit
+            <code class="workflow-code">.vex</code> (you can still edit on disk if needed).
           </p>
-          <div class="workflow-editor-wrap" hidden id="workflow-editor-wrap">
-            <label class="workflow-editor-label" for="vex-source-editor">.vex source</label>
-            <textarea
-              autocomplete="off"
-              class="workflow-vex-editor"
-              id="vex-source-editor"
-              rows="8"
-              spellcheck="false"
-            ></textarea>
-            <div class="workflow-editor-actions">
-              <button class="workflow-btn" id="vex-save-btn" type="button">Save .vex</button>
-            </div>
-          </div>
         </div>
         <div
           aria-labelledby="workflow-tab-2"
@@ -976,6 +994,26 @@
           </form>
         </div>
       </div>
+    </div>
+    <div
+      aria-labelledby="vex-node-edit-title"
+      aria-modal="true"
+      class="vex-node-edit-overlay"
+      hidden
+      id="vex-node-edit-overlay"
+      role="dialog"
+    >
+      <form class="vex-node-edit-dialog" id="vex-node-edit-form" novalidate>
+        <div class="vex-node-edit-title" id="vex-node-edit-title">Edit node</div>
+        <div class="vex-node-edit-field">
+          <label class="vex-node-edit-label" for="vex-node-edit-input">Label</label>
+          <input autocomplete="off" class="vex-node-edit-input" id="vex-node-edit-input" type="text" />
+        </div>
+        <div class="vex-node-edit-actions">
+          <button class="workflow-btn" id="vex-node-edit-cancel" type="button">Cancel</button>
+          <button class="workflow-btn" id="vex-node-edit-save" type="submit">Save</button>
+        </div>
+      </form>
     </div>
     <script src="/app.js" type="module"></script>
   </body>

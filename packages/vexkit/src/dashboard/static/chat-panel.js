@@ -126,7 +126,7 @@ function renderChatMessages(container, messages) {
 }
 
 export function initAssistantPanel(input) {
-  const { getChatExtraFields, saveDashboardView, state } = input;
+  const { getChatExtraFields, onUserMessageSent, saveDashboardView, state } = input;
   const messages = [];
   const listEl = document.getElementById("assistant-messages");
   const form = document.getElementById("assistant-form");
@@ -179,6 +179,9 @@ export function initAssistantPanel(input) {
     inputEl.value = "";
     messages.push({ content: text, role: "user" });
     renderChatMessages(listEl, messages);
+    if (typeof onUserMessageSent === "function") {
+      onUserMessageSent();
+    }
     void sendChatRequest(buildPayload());
   }
 
