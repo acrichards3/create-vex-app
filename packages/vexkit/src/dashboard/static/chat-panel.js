@@ -5,6 +5,19 @@ import { finalizeAssistantVisibleText } from "./strip-assistant-visible-text.js?
 const ASSISTANT_WIDTH_MIN = 260;
 const ASSISTANT_WIDTH_MAX = 560;
 
+const DEFAULT_CHAT_MODEL_PRESETS = [
+  "auto",
+  "composer-2",
+  "composer-2-fast",
+  "composer-1",
+  "gpt-5.2",
+  "gpt-4o",
+  "claude-4.5-sonnet",
+  "claude-4.5-opus",
+  "claude-4.6-sonnet",
+  "claude-4.6-opus",
+];
+
 marked.setOptions({
   breaks: true,
   gfm: true,
@@ -46,6 +59,17 @@ function wrapAssistantQuestionsSectionHtml(html) {
     }
   }
   return out;
+}
+
+function humanizeCursorErrorInAssistantText(text) {
+  if (typeof text !== "string") {
+    return text;
+  }
+  const lower = text.toLowerCase();
+  if (lower.includes("resource_exhausted")) {
+    return "Cursor hit a usage or quota limit (resource_exhausted). Try another model, wait a few minutes, or check usage at cursor.com/dashboard.";
+  }
+  return text;
 }
 
 function parseNdjsonErrorMessage(errText) {
@@ -228,14 +252,153 @@ export function initAssistantPanel(input) {
   const form = document.getElementById("assistant-form");
   const inputEl = document.getElementById("assistant-input");
   const sendBtn = document.getElementById("assistant-send");
+  const modelBtn = document.getElementById("assistant-model-btn");
+  const modelMenu = document.getElementById("assistant-model-menu");
+  const composerBarEl = document.getElementById("assistant-composer-bar");
+  const modelLabelEl = document.getElementById("assistant-model-btn-label");
   const composerWrapEl = document.getElementById("assistant-composer-wrap");
   const doneWrapEl = document.getElementById("assistant-done-wrap");
   const startNewBtn = document.getElementById("assistant-start-new");
   const statusEl = document.getElementById("assistant-status");
   const activityRowEl = document.getElementById("assistant-activity-row");
+  const modelConfirmEl = document.getElementById("assistant-model-confirm");
 
   applyAssistantWidthFromState(state);
   syncAssistantPanel(state);
+
+  let chatModelPresets = [];
+
+  function presetList() {
+    return chatModelPresets.length > 0 ? chatModelPresets : DEFAULT_CHAT_MODEL_PRESETS;
+  }
+
+  function effectiveModelId() {
+    const list = presetList();
+    const cur = typeof state.assistantChatModel === "string" ? state.assistantChatModel : "";
+    if (cur.length > 0 && list.includes(cur)) {
+      return cur;
+    }
+    return list[0] ?? "auto";
+  }
+
+  function renderModelMenu() {
+    if (modelMenu == null) {
+      return;
+    }
+    modelMenu.replaceChildren();
+    const active = effectiveModelId();
+    presetList().forEach((id) => {
+      const li = document.createElement("li");
+      li.setAttribute("role", "none");
+      const opt = document.createElement("button");
+      opt.type = "button";
+      opt.className = "assistant-model-option";
+      if (id === active) {
+        opt.classList.add("assistant-model-option--active");
+      }
+      opt.setAttribute("role", "option");
+      opt.setAttribute("aria-selected", id === active ? "true" : "false");
+      opt.textContent = id;
+      opt.dataset.modelId = id;
+      li.append(opt);
+      modelMenu.append(li);
+    });
+  }
+
+  function syncModelLabelAndState() {
+    const id = effectiveModelId();
+    const prev = state.assistantChatModel;
+    state.assistantChatModel = id;
+    if (modelLabelEl != null) {
+      modelLabelEl.textContent = id;
+    }
+    renderModelMenu();
+    if (prev !== id) {
+      saveDashboardView();
+    }
+  }
+
+  function closeModelMenu() {
+    if (modelMenu != null) {
+      modelMenu.hidden = true;
+    }
+    if (modelBtn != null) {
+      modelBtn.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function openModelMenu() {
+    if (modelMenu != null) {
+      modelMenu.hidden = false;
+    }
+    if (modelBtn != null) {
+      modelBtn.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  function onModelMenuClick(ev) {
+    const raw = ev.target;
+    const el = raw instanceof Element ? raw : null;
+    const btn = el != null ? el.closest("button.assistant-model-option") : null;
+    if (!(btn instanceof HTMLButtonElement)) {
+      return;
+    }
+    const id = btn.dataset.modelId;
+    if (typeof id !== "string" || id.length === 0) {
+      return;
+    }
+    state.assistantChatModel = id;
+    saveDashboardView();
+    if (modelLabelEl != null) {
+      modelLabelEl.textContent = id;
+    }
+    renderModelMenu();
+    closeModelMenu();
+  }
+
+  function onDocumentPointerDownForModel(ev) {
+    if (composerBarEl == null || modelMenu == null || modelMenu.hidden) {
+      return;
+    }
+    const t = ev.target;
+    if (t instanceof Node && composerBarEl.contains(t)) {
+      return;
+    }
+    closeModelMenu();
+  }
+
+  function onDocumentKeydownForModel(ev) {
+    if (ev.key !== "Escape") {
+      return;
+    }
+    closeModelMenu();
+  }
+
+  function onModelBtnClick(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (modelBtn != null && modelBtn.disabled) {
+      return;
+    }
+    if (modelMenu == null || modelBtn == null) {
+      return;
+    }
+    if (modelMenu.hidden) {
+      renderModelMenu();
+      openModelMenu();
+    } else {
+      closeModelMenu();
+    }
+  }
+
+  if (modelMenu != null) {
+    modelMenu.addEventListener("click", onModelMenuClick);
+  }
+  if (modelBtn != null) {
+    modelBtn.addEventListener("click", onModelBtnClick);
+  }
+  document.addEventListener("pointerdown", onDocumentPointerDownForModel, true);
+  document.addEventListener("keydown", onDocumentKeydownForModel, true);
 
   let thinkingTimer = null;
 
@@ -322,8 +485,12 @@ export function initAssistantPanel(input) {
       if (data.mcpConfigured) {
         parts.push("MCP configured");
       }
+      if (Array.isArray(data.chatModelPresets)) {
+        chatModelPresets = data.chatModelPresets.filter((x) => typeof x === "string" && x.length > 0);
+      }
       cachedStatusLine = parts.join(" · ");
       setStatus(cachedStatusLine);
+      syncModelLabelAndState();
     } catch {
       setStatusError("Could not load assistant status.");
     }
@@ -348,6 +515,9 @@ export function initAssistantPanel(input) {
     const locked = step === 3 || step === 4;
     inputEl.disabled = locked;
     sendBtn.disabled = locked;
+    if (modelBtn != null) {
+      modelBtn.disabled = locked;
+    }
     inputEl.placeholder = locked
       ? step === 3
         ? "Chat disabled during build…"
@@ -358,6 +528,7 @@ export function initAssistantPanel(input) {
   function buildPayload() {
     return {
       messages: messages.map((m) => ({ content: m.content, role: m.role })),
+      model: effectiveModelId(),
       step: currentStep(),
     };
   }
@@ -457,9 +628,17 @@ export function initAssistantPanel(input) {
             } catch {
               return;
             }
+            if (ev.type === "meta" && typeof ev.model === "string" && modelConfirmEl != null) {
+              modelConfirmEl.hidden = false;
+              modelConfirmEl.textContent = `This request: ${ev.model}. Replies may say Auto as the agent name; latency still reflects the model id you chose if the CLI honors it.`;
+            }
             if (ev.type === "delta" && typeof ev.text === "string") {
               if (!sawAssistantOutput) {
                 sawAssistantOutput = true;
+                clearThinkingAnimation();
+                setActivityBusy(false);
+                statusEl.classList.remove("assistant-status--error");
+                statusEl.textContent = cachedStatusLine.length > 0 ? cachedStatusLine : "Cursor agent ready";
               }
               acc += ev.text;
               messages[assistantIdx].content = finalizeAssistantVisibleText(acc);
@@ -469,12 +648,19 @@ export function initAssistantPanel(input) {
               sawStreamError = true;
               if (!sawAssistantOutput) {
                 sawAssistantOutput = true;
+                clearThinkingAnimation();
+                setActivityBusy(false);
               }
-              acc += `\n${ev.message}`;
+              const errLine = humanizeCursorErrorInAssistantText(ev.message);
+              acc += `\n${errLine}`;
               messages[assistantIdx].content = finalizeAssistantVisibleText(acc);
               messages[assistantIdx].error = true;
               renderChatMessages(listEl, messages);
-              chatStatusError("Assistant reported an error.");
+              if (errLine !== ev.message) {
+                chatStatusError("Usage or quota limit. Try another model or check cursor.com/dashboard.");
+              } else {
+                chatStatusError("Assistant reported an error.");
+              }
             }
             if (ev.type === "step_change" && typeof ev.step === "number") {
               console.log("[vexkit-chat] received step_change event:", ev.step);
@@ -493,6 +679,16 @@ export function initAssistantPanel(input) {
               );
             }
           });
+        }
+        if (acc.length > 0) {
+          const humanized = humanizeCursorErrorInAssistantText(acc);
+          if (humanized !== acc) {
+            acc = humanized;
+            messages[assistantIdx].content = finalizeAssistantVisibleText(acc);
+            messages[assistantIdx].error = true;
+            renderChatMessages(listEl, messages);
+            chatStatusError("Usage or quota limit. Try another model or check cursor.com/dashboard.");
+          }
         }
       } catch (readErr) {
         sawStreamError = true;
@@ -614,6 +810,7 @@ export function initAssistantPanel(input) {
     });
   }
   wireAssistantResize(state, saveDashboardView);
+  syncModelLabelAndState();
   void refreshStatus();
   syncWorkflowComposer();
 

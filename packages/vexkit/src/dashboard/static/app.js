@@ -1,13 +1,18 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm";
-import { initAssistantPanel } from "./chat-panel.js?v=12";
+import { initAssistantPanel } from "./chat-panel.js?v=19";
 
 const NS = "http://www.w3.org/2000/svg";
-const NODE_H = 68;
-const NODE_MIN_W = 120;
 const NODE_MAX_W = 248;
+const NODE_KIND_BASELINE = 16;
+const NODE_LABEL_FIRST_BASELINE = 38;
+const NODE_LABEL_LINE_H = 14;
+const NODE_LABEL_MAX_LINES = 14;
+const NODE_LABEL_BOTTOM_PAD = 12;
+const NODE_INNER_PAD_X = 12;
+const NODE_LABEL_CHAR_W = 6.2;
 const NODE_LEVEL_GAP_X = 16;
 const TREE_LEAF_SPACING_X = 58;
-const TREE_DEPTH_PER_LEVEL = 112;
+const TREE_DEPTH_PER_LEVEL = 132;
 const TREE_LAYOUT_MIN_DEPTH_PX = 168;
 const TREE_LAYOUT_MIN_BREADTH = 340;
 
@@ -71,6 +76,7 @@ const EXPLORER_WIDTH_MAX = 640;
 
 const state = {
   approvalsByPath: {},
+  assistantChatModel: null,
   assistantCollapsed: false,
   assistantWidthPx: null,
   currentPath: null,
@@ -128,6 +134,9 @@ function loadDashboardView() {
     }
     if (typeof parsed.assistantWidthPx === "number" && Number.isFinite(parsed.assistantWidthPx)) {
       state.assistantWidthPx = Math.min(560, Math.max(260, Math.round(parsed.assistantWidthPx)));
+    }
+    if (typeof parsed.assistantChatModel === "string" && parsed.assistantChatModel.length > 0) {
+      state.assistantChatModel = parsed.assistantChatModel;
     }
     if (typeof parsed.workflowStep === "number" && Number.isFinite(parsed.workflowStep)) {
       state.workflowStep = Math.max(0, Math.min(5, Math.floor(parsed.workflowStep)));
@@ -428,6 +437,7 @@ function saveDashboardView() {
   try {
     const payload = {
       approvalsByPath: state.approvalsByPath,
+      assistantChatModel: typeof state.assistantChatModel === "string" ? state.assistantChatModel : null,
       assistantCollapsed: state.assistantCollapsed,
       assistantWidthPx: typeof state.assistantWidthPx === "number" ? state.assistantWidthPx : null,
       currentPath: state.currentPath,
@@ -640,13 +650,58 @@ async function commitVexNodeEdit() {
   await openVexFile(state.currentPath, { resetFunctionIndex: false });
 }
 
-function measureNodeWidth(d) {
+function splitLongToken(token, maxLen) {
+  if (token.length <= maxLen) {
+    return [token];
+  }
+  const parts = [];
+  for (let i = 0; i < token.length; i += maxLen) {
+    parts.push(token.slice(i, i + maxLen));
+  }
+  return parts;
+}
+
+function wrapLabelToLines(text, maxWidthPx) {
+  const maxChars = Math.max(4, Math.floor(maxWidthPx / NODE_LABEL_CHAR_W));
+  const words = text.split(/\s+/).filter((w) => w.length > 0);
+  const tokens = words.flatMap((w) => splitLongToken(w, maxChars));
+  if (tokens.length === 0) {
+    return [""];
+  }
+  const lines = [];
+  let line = tokens[0];
+  for (let i = 1; i < tokens.length; i += 1) {
+    const t = tokens[i];
+    const next = `${line} ${t}`;
+    if (next.length <= maxChars) {
+      line = next;
+    } else {
+      lines.push(line);
+      line = t;
+    }
+  }
+  lines.push(line);
+  return lines;
+}
+
+function capLabelLines(lines) {
+  if (lines.length <= NODE_LABEL_MAX_LINES) {
+    return lines;
+  }
+  const out = lines.slice(0, NODE_LABEL_MAX_LINES);
+  const last = out[NODE_LABEL_MAX_LINES - 1];
+  out[NODE_LABEL_MAX_LINES - 1] = `${last}…`;
+  return out;
+}
+
+function measureNode(d) {
   const raw = d.data.label;
-  const ell = raw.length > 44 ? `${raw.slice(0, 42)}…` : raw;
-  d.displayLabel = ell;
-  const w = Math.round(Math.min(NODE_MAX_W, Math.max(NODE_MIN_W, ell.length * 6.2 + 48)));
-  d.nodeWidth = w;
-  return w;
+  const innerW = NODE_MAX_W - NODE_INNER_PAD_X * 2;
+  const lines = capLabelLines(wrapLabelToLines(raw, innerW));
+  d.labelLines = lines;
+  d.nodeWidth = NODE_MAX_W;
+  const lineCount = Math.max(1, lines.length);
+  d.nodeHeight = NODE_LABEL_FIRST_BASELINE + (lineCount - 1) * NODE_LABEL_LINE_H + NODE_LABEL_BOTTOM_PAD;
 }
 
 function resolveNodeOverlapX(hierarchyRoot) {
@@ -715,10 +770,11 @@ function graphBounds(hierarchyRoot) {
   let maxY = -Infinity;
   hierarchyRoot.each((d) => {
     const w = d.nodeWidth;
+    const h = d.nodeHeight;
     minX = Math.min(minX, d.px - w / 2 - 12);
     maxX = Math.max(maxX, d.px + w / 2 + 12);
-    minY = Math.min(minY, d.py - NODE_H / 2 - 12);
-    maxY = Math.max(maxY, d.py + NODE_H / 2 + 12);
+    minY = Math.min(minY, d.py - h / 2 - 12);
+    maxY = Math.max(maxY, d.py + h / 2 + 12);
   });
   return { maxX, maxY, minX, minY };
 }
@@ -871,12 +927,10 @@ function drawLinks(linksLayer, hierarchyRoot) {
   for (const link of hierarchyRoot.links()) {
     const s = link.source;
     const t = link.target;
-    const sw = s.nodeWidth;
-    const tw = t.nodeWidth;
     const sx = s.px;
-    const sy = s.py + NODE_H / 2;
+    const sy = s.py + s.nodeHeight / 2;
     const tx = t.px;
-    const ty = t.py - NODE_H / 2;
+    const ty = t.py - t.nodeHeight / 2;
     const dPath = curvedLinkPath(sx, sy, tx, ty);
     const p = document.createElementNS(NS, "path");
     p.setAttribute("d", dPath);
@@ -898,6 +952,8 @@ const NODE_THEME = {
 function drawNodes(nodesLayer, hierarchyRoot) {
   hierarchyRoot.each((d) => {
     const w = d.nodeWidth;
+    const h = d.nodeHeight;
+    const lines = d.labelLines;
     const theme = NODE_THEME[d.data.kind] ?? NODE_THEME.fn;
     const g = document.createElementNS(NS, "g");
     g.setAttribute("transform", `translate(${String(d.px)},${String(d.py)})`);
@@ -905,21 +961,21 @@ function drawNodes(nodesLayer, hierarchyRoot) {
     const hit = document.createElementNS(NS, "rect");
     hit.setAttribute("class", "logic-node-hit");
     hit.setAttribute("fill", "transparent");
-    hit.setAttribute("height", String(NODE_H + 8));
+    hit.setAttribute("height", String(h + 8));
     hit.setAttribute("width", String(w + 8));
     hit.setAttribute("x", String(-(w + 8) / 2));
-    hit.setAttribute("y", String(-(NODE_H + 8) / 2));
+    hit.setAttribute("y", String(-(h + 8) / 2));
 
     const rect = document.createElementNS(NS, "rect");
     rect.setAttribute("class", "logic-node-rect");
     rect.setAttribute("fill", theme.fill);
-    rect.setAttribute("height", String(NODE_H));
+    rect.setAttribute("height", String(h));
     rect.setAttribute("rx", "7");
     rect.setAttribute("stroke", theme.stroke);
     rect.setAttribute("stroke-width", "1.75");
     rect.setAttribute("width", String(w));
     rect.setAttribute("x", String(-w / 2));
-    rect.setAttribute("y", String(-NODE_H / 2));
+    rect.setAttribute("y", String(-h / 2));
 
     const kindEl = document.createElementNS(NS, "text");
     kindEl.setAttribute("fill", theme.kind);
@@ -927,7 +983,7 @@ function drawNodes(nodesLayer, hierarchyRoot) {
     kindEl.setAttribute("font-weight", "700");
     kindEl.setAttribute("text-anchor", "middle");
     kindEl.setAttribute("x", "0");
-    kindEl.setAttribute("y", String(-NODE_H / 2 + 16));
+    kindEl.setAttribute("y", String(-h / 2 + NODE_KIND_BASELINE));
     kindEl.textContent = kindLabel(d.data.kind);
 
     const lab = document.createElementNS(NS, "text");
@@ -935,26 +991,26 @@ function drawNodes(nodesLayer, hierarchyRoot) {
     lab.setAttribute("font-size", "11px");
     lab.setAttribute("text-anchor", "middle");
     lab.setAttribute("x", "0");
-    lab.setAttribute("y", "4");
-    lab.textContent = d.displayLabel;
+    lab.setAttribute("y", String(-h / 2 + NODE_LABEL_FIRST_BASELINE));
+    lines.forEach((line, i) => {
+      const ts = document.createElementNS(NS, "tspan");
+      ts.setAttribute("x", "0");
+      if (i > 0) {
+        ts.setAttribute("dy", String(NODE_LABEL_LINE_H));
+      }
+      ts.textContent = line;
+      lab.append(ts);
+    });
 
     const tip = document.createElementNS(NS, "title");
-    tip.textContent = `${d.data.label} (line ${String(d.data.line)})`;
+    tip.textContent = d.data.label;
 
     hit.addEventListener("click", (ev) => {
       ev.stopPropagation();
       onLogicNodeHitClick(d.data);
     });
 
-    const lineEl = document.createElementNS(NS, "text");
-    lineEl.setAttribute("fill", "#8b9cb3");
-    lineEl.setAttribute("font-size", "9px");
-    lineEl.setAttribute("text-anchor", "middle");
-    lineEl.setAttribute("x", "0");
-    lineEl.setAttribute("y", String(NODE_H / 2 - 9));
-    lineEl.textContent = `Line ${String(d.data.line)}`;
-
-    g.append(hit, rect, kindEl, lab, lineEl, tip);
+    g.append(hit, rect, kindEl, lab, tip);
     nodesLayer.append(g);
   });
 }
@@ -990,7 +1046,7 @@ function renderLogicGraph(fn) {
   const data = treeDataFromFunction(fn, state.selectedFnIndex);
   const hierarchyRoot = layoutHierarchy(data);
   hierarchyRoot.each((d) => {
-    measureNodeWidth(d);
+    measureNode(d);
   });
   resolveNodeOverlapX(hierarchyRoot);
 
@@ -1338,11 +1394,6 @@ let assistantControls = null;
 
 function handleStepChange(newStep) {
   setWorkflowStep(newStep);
-  if (newStep === 1) {
-    if (assistantControls != null) {
-      setTimeout(() => assistantControls.autoPrompt(), 100);
-    }
-  }
   if (newStep === 4 && assistantControls != null) {
     assistantControls.triggerVerify();
   }

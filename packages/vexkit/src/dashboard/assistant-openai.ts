@@ -1,5 +1,6 @@
 type NdjsonChatEvent =
   | { message: string; type: "error" }
+  | { model: string; type: "meta" }
   | { reason: string; type: "spec_change_request" }
   | { step: number; type: "step_change" }
   | { text: string; type: "delta" }

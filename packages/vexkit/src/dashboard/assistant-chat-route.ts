@@ -1,4 +1,6 @@
 import { tryCatchAsync } from "@vex-app/lib";
+import { formatCursorAgentErrorForUser } from "./assistant-cursor-error.js";
+import { parseChatModelFieldFromBody, VEXKIT_DASHBOARD_CHAT_MODEL_PRESETS } from "./assistant-chat-model.js";
 import { ndjsonLine } from "./assistant-openai.js";
 import { isCursorAgentConfigured, runCursorAcpPrompt } from "./cursor-acp-session.js";
 import { isRecord, jsonResponse } from "./dashboard-helpers.js";
@@ -7,7 +9,6 @@ import {
   DESCRIBE_CONFIRM_PHRASE,
   SIGNAL_BUILD_DONE,
   SIGNAL_NEED_SPEC_CHANGE,
-  SIGNAL_SCOPE_READY,
   buildStepPrompt,
 } from "./workflow-scripts.js";
 
@@ -20,6 +21,7 @@ export function setAssistantProjectContext(path: string): void {
 export function getAssistantStatusResponse(): Response {
   return jsonResponse(
     {
+      chatModelPresets: [...VEXKIT_DASHBOARD_CHAT_MODEL_PRESETS],
       cursorConfigured: isCursorAgentConfigured(),
       mcpConfigured: isMcpConfiguredInEnv(),
     },
@@ -68,6 +70,14 @@ function parseChatBody(data: unknown): ParsedChat {
 
 function transcriptFromMessages(messages: IncomingMsg[]): string {
   return messages.map((m) => `${m.role}: ${m.content}`).join("\n\n");
+}
+
+function modelDisplayFromField(model: string | null): string {
+  if (model == null) {
+    return "auto";
+  }
+  const t = model.trim();
+  return t.length > 0 ? t : "auto";
 }
 
 function ndjsonErrorResponse(message: string, status: number): Response {
@@ -125,14 +135,6 @@ function countQuestionMarks(text: string): number {
   return count;
 }
 
-function describeHeuristicShouldAdvance(visibleText: string): boolean {
-  if (visibleText.trim().length < 20) {
-    return false;
-  }
-  const withoutConfirm = visibleText.replace(DESCRIBE_CONFIRM_PHRASE, "");
-  return countQuestionMarks(withoutConfirm) === 0;
-}
-
 function noQuestionsHeuristic(visibleText: string): boolean {
   if (visibleText.trim().length < 20) {
     return false;
@@ -153,13 +155,6 @@ function detectSignalEvents(fullText: string, step: number): Uint8Array[] {
     `detectSignalEvents — step=${String(step)}, visibleLen=${String(visible.length)}, qMarks=${String(countQuestionMarks(visible))}`,
   );
   logDebug(`  last120chars=${JSON.stringify(visible.slice(-120))}`);
-
-  const describeReady =
-    step === 0 && [visible.includes(SIGNAL_SCOPE_READY), describeHeuristicShouldAdvance(visible)].some(Boolean);
-  if (describeReady) {
-    logDebug("  -> emitting step_change to SPEC (step 1)");
-    events.push(enc.encode(ndjsonLine({ step: 1, type: "step_change" })));
-  }
 
   if (step === 1) {
     logDebug("  -> SPEC complete, emitting step_change to APPROVE (step 2)");
@@ -190,7 +185,12 @@ function detectSignalEvents(fullText: string, step: number): Uint8Array[] {
   return events;
 }
 
-function ndjsonCursorStreamResponse(input: { messages: IncomingMsg[]; rootAbs: string; step: number }): Response {
+function ndjsonCursorStreamResponse(input: {
+  messages: IncomingMsg[];
+  model: string | null;
+  rootAbs: string;
+  step: number;
+}): Response {
   const enc = new TextEncoder();
   return new Response(
     new ReadableStream({
@@ -219,6 +219,8 @@ function ndjsonCursorStreamResponse(input: { messages: IncomingMsg[]; rootAbs: s
           }
           streamEnded = true;
         }
+        const modelLabel = modelDisplayFromField(input.model);
+        safeEnqueue(enc.encode(ndjsonLine({ model: modelLabel, type: "meta" })));
         const systemPrompt = buildStepPrompt(input.step, input.rootAbs);
         const transcript = transcriptFromMessages(input.messages);
         const promptText = `${systemPrompt}\n\n${transcript}`;
@@ -227,6 +229,7 @@ function ndjsonCursorStreamResponse(input: { messages: IncomingMsg[]; rootAbs: s
         }, 10_000);
         const [run, err] = await tryCatchAsync(async () =>
           runCursorAcpPrompt({
+            model: input.model,
             onDelta: (t) => {
               safeEnqueue(enc.encode(ndjsonLine({ text: t, type: "delta" })));
             },
@@ -237,13 +240,13 @@ function ndjsonCursorStreamResponse(input: { messages: IncomingMsg[]; rootAbs: s
         );
         clearInterval(keepalive);
         if (err != null) {
-          safeEnqueue(enc.encode(ndjsonLine({ message: err.message, type: "error" })));
+          safeEnqueue(enc.encode(ndjsonLine({ message: formatCursorAgentErrorForUser(err.message), type: "error" })));
           safeEnqueue(enc.encode(ndjsonLine({ type: "done" })));
           safeClose();
           return;
         }
         if (!run.ok) {
-          safeEnqueue(enc.encode(ndjsonLine({ message: run.message, type: "error" })));
+          safeEnqueue(enc.encode(ndjsonLine({ message: formatCursorAgentErrorForUser(run.message), type: "error" })));
           safeEnqueue(enc.encode(ndjsonLine({ type: "done" })));
           safeClose();
           return;
@@ -316,8 +319,10 @@ function isDescribeConfirmReply(messages: IncomingMsg[], step: number): boolean 
   return isAffirmativeReply(lastUser.content.trim());
 }
 
-function ndjsonImmediateAdvanceResponse(nextStep: number): Response {
+function ndjsonImmediateAdvanceResponse(nextStep: number, model: string | null): Response {
+  const modelLabel = modelDisplayFromField(model);
   const body = [
+    ndjsonLine({ model: modelLabel, type: "meta" }),
     ndjsonLine({ text: "Moving on.", type: "delta" }),
     ndjsonLine({ step: nextStep, type: "step_change" }),
     ndjsonLine({ type: "done" }),
@@ -343,9 +348,14 @@ export async function postAssistantChat(req: Request): Promise<Response> {
     return jsonResponse({ message: "Invalid chat messages." }, 400);
   }
 
+  const modelField = parseChatModelFieldFromBody(rawBody);
+  if (modelField.error != null) {
+    return jsonResponse({ message: modelField.error }, 400);
+  }
+
   if (isDescribeConfirmReply(parsed.messages, parsed.step)) {
     logDebug("Describe confirm reply detected — short-circuiting to SPEC");
-    return ndjsonImmediateAdvanceResponse(1);
+    return ndjsonImmediateAdvanceResponse(1, modelField.model);
   }
 
   if (!isCursorAgentConfigured()) {
@@ -357,6 +367,7 @@ export async function postAssistantChat(req: Request): Promise<Response> {
 
   return ndjsonCursorStreamResponse({
     messages: parsed.messages,
+    model: modelField.model,
     rootAbs: assistantProjectRoot,
     step: parsed.step,
   });

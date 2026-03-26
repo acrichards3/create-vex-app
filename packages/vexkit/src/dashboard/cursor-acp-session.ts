@@ -2,7 +2,9 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { which } from "bun";
 import { tryCatch, tryCatchAsync } from "@vex-app/lib";
+import { formatCursorAgentErrorForUser } from "./assistant-cursor-error.js";
 import { isRecord } from "./dashboard-helpers.js";
+import { trySetSessionModelFromAcpConfig } from "./cursor-acp-model-config.js";
 import { buildPermissionResult, shouldAllowPermission } from "./workflow-access.js";
 
 function isNonTextContentBlockType(t: unknown): boolean {
@@ -82,6 +84,18 @@ function getCursorAgentBin(): string {
 export function isCursorAgentConfigured(): boolean {
   const key = Bun.env.CURSOR_API_KEY;
   return typeof key === "string" && key.length > 0;
+}
+
+function buildCursorAgentAcpArgs(model: string | null | undefined): string[] {
+  const args: string[] = [];
+  if (typeof model === "string" && model.length > 0) {
+    const trimmed = model.trim();
+    if (trimmed.length > 0 && trimmed.toLowerCase() !== "auto") {
+      args.push("--model", trimmed);
+    }
+  }
+  args.push("acp");
+  return args;
 }
 
 type PendingMap = Map<number, { reject: (e: Error) => void; resolve: (v: unknown) => void }>;
@@ -182,13 +196,16 @@ function processAcpLine(trimmed: string, pending: PendingMap, ctx: StreamCtx): v
 }
 
 export async function runCursorAcpPrompt(input: {
+  model?: string | null;
   onDelta?: (text: string) => void;
   promptText: string;
   rootAbs: string;
   step: number;
 }): Promise<{ fullText: string; ok: true } | { message: string; ok: false }> {
   const bin = getCursorAgentBin();
-  const child = spawn(bin, ["acp"], {
+  const acpArgs = buildCursorAgentAcpArgs(input.model);
+  logAcp(`spawn ${bin} ${acpArgs.join(" ")}`);
+  const child = spawn(bin, acpArgs, {
     cwd: input.rootAbs,
     env: { ...process.env },
     stdio: ["pipe", "pipe", "pipe"],
@@ -247,13 +264,13 @@ export async function runCursorAcpPrompt(input: {
   );
   if (initErr != null) {
     child.kill();
-    return { message: initErr.message, ok: false };
+    return { message: formatCursorAgentErrorForUser(initErr.message), ok: false };
   }
 
   const [, authErr] = await tryCatchAsync(async () => sendRequest("authenticate", { methodId: "cursor_login" }));
   if (authErr != null) {
     child.kill();
-    return { message: authErr.message, ok: false };
+    return { message: formatCursorAgentErrorForUser(authErr.message), ok: false };
   }
 
   const [sessionResult, sessionErr] = await tryCatchAsync(async () =>
@@ -261,13 +278,22 @@ export async function runCursorAcpPrompt(input: {
   );
   if (sessionErr != null) {
     child.kill();
-    return { message: sessionErr.message, ok: false };
+    return { message: formatCursorAgentErrorForUser(sessionErr.message), ok: false };
   }
   if (!isRecord(sessionResult) || typeof sessionResult.sessionId !== "string") {
     child.kill();
     return { message: "ACP session/new returned invalid session.", ok: false };
   }
   const sessionId = sessionResult.sessionId;
+
+  const modelWanted = typeof input.model === "string" && input.model.trim().length > 0 ? input.model.trim() : null;
+  await trySetSessionModelFromAcpConfig({
+    log: logAcp,
+    modelWanted,
+    sendRequest,
+    sessionId,
+    sessionResult,
+  });
 
   logAcp(`sending session/prompt (step=${String(input.step)})...`);
   const [, promptErr] = await tryCatchAsync(async () =>
@@ -279,7 +305,7 @@ export async function runCursorAcpPrompt(input: {
   if (promptErr != null) {
     logAcp(`session/prompt error: ${promptErr.message}`);
     child.kill();
-    return { message: promptErr.message, ok: false };
+    return { message: formatCursorAgentErrorForUser(promptErr.message), ok: false };
   }
   logAcp(`session/prompt resolved, accumulated=${String(streamCtx.accumulated.length)} chars`);
 
@@ -302,7 +328,7 @@ export async function runCursorAcpPrompt(input: {
       }),
   );
   if (exitErr != null) {
-    return { message: exitErr.message, ok: false };
+    return { message: formatCursorAgentErrorForUser(exitErr.message), ok: false };
   }
   if (code !== 0 && streamCtx.accumulated.length === 0) {
     return { message: `Cursor agent exited with code ${String(code)}.`, ok: false };

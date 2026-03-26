@@ -36,13 +36,21 @@
       * {
         box-sizing: border-box;
       }
+      html {
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+      }
       body {
-        font-family: ui-sans-serif, system-ui, sans-serif;
         background: var(--bg);
         color: var(--text);
-        height: 100vh;
         display: flex;
         flex-direction: column;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        height: 100%;
+        margin: 0;
+        max-height: 100%;
+        min-height: 0;
         overflow: hidden;
       }
       .workflow-strip {
@@ -51,11 +59,15 @@
         flex-shrink: 0;
         gap: 0.5rem;
       }
-      #assistant-panel .workflow-strip {
+      #assistant-panel .workflow-stepper-bar {
         --stepper-node-size: 2.85rem;
         border-bottom: 1px solid var(--border);
         flex-shrink: 0;
         padding: 0.35rem 0.85rem 0.45rem;
+      }
+      #assistant-panel .workflow-strip {
+        flex-shrink: 0;
+        padding: 0.35rem 0.85rem 0.55rem;
       }
       #assistant-panel .stepper-node {
         font-size: 0.5rem;
@@ -476,16 +488,19 @@
         text-decoration: underline;
       }
       #layout {
-        flex: 1;
         display: flex;
+        flex: 1;
         min-height: 0;
+        overflow: hidden;
       }
       .sidebar-shell {
+        align-self: stretch;
         border-right: 1px solid var(--border);
         display: flex;
         flex-direction: row;
         flex-shrink: 0;
         min-height: 0;
+        overflow: hidden;
         transition:
           border-color 0.2s ease,
           opacity 0.15s ease,
@@ -500,11 +515,13 @@
           opacity 0.15s ease;
       }
       .assistant-shell {
+        align-self: stretch;
         border-left: 1px solid var(--border);
         display: flex;
         flex-direction: row;
         flex-shrink: 0;
         min-height: 0;
+        overflow: hidden;
         transition:
           border-color 0.2s ease,
           opacity 0.15s ease,
@@ -544,21 +561,28 @@
         flex-direction: column;
         gap: 0.5rem;
         min-height: 0;
+        min-width: 0;
         overflow-x: hidden;
         overflow-y: auto;
+        width: 100%;
       }
       .assistant-messages {
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
         gap: 0.65rem;
+        min-width: 0;
         padding: 0 0.65rem 0.5rem;
+        width: 100%;
       }
       .assistant-msg {
+        align-self: stretch;
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
         gap: 0.2rem;
+        max-width: 100%;
+        min-width: 0;
       }
       .assistant-msg-label {
         color: var(--muted);
@@ -571,7 +595,11 @@
         color: var(--text);
         font-size: 0.8125rem;
         line-height: 1.45;
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
         white-space: pre-wrap;
+        word-break: break-word;
       }
       .assistant-msg-body.assistant-msg-body--md {
         overflow-x: hidden;
@@ -685,6 +713,100 @@
         flex-shrink: 0;
         gap: 0.4rem;
       }
+      .assistant-composer-bar {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: space-between;
+        position: relative;
+        width: 100%;
+      }
+      .assistant-model-wrap {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+      }
+      .assistant-model-btn {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--muted);
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        flex-shrink: 0;
+        font: inherit;
+        font-size: 0.72rem;
+        gap: 0.35rem;
+        max-width: min(100%, 18rem);
+        padding: 0.35rem 0.5rem;
+      }
+      .assistant-model-btn:hover {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+      .assistant-model-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      .assistant-model-btn-label {
+        min-width: 0;
+        overflow: hidden;
+        text-align: start;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .assistant-model-btn-caret {
+        flex-shrink: 0;
+        font-size: 0.65rem;
+        opacity: 0.85;
+      }
+      .assistant-model-menu {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        bottom: calc(100% + 0.25rem);
+        box-shadow: 0 -8px 24px rgb(0 0 0 / 0.35);
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        left: 0;
+        list-style: none;
+        max-height: min(40vh, 16rem);
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 0.25rem 0;
+        position: absolute;
+        right: 0;
+        z-index: 30;
+      }
+      .assistant-model-menu[hidden] {
+        display: none;
+      }
+      .assistant-model-option {
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
+        text-align: start;
+        white-space: nowrap;
+        width: 100%;
+      }
+      .assistant-model-option:hover {
+        background: rgba(91, 159, 212, 0.15);
+      }
+      .assistant-model-option--active {
+        background: rgba(91, 159, 212, 0.22);
+        color: var(--accent);
+      }
       .assistant-composer-wrap[hidden] {
         display: none;
       }
@@ -739,7 +861,6 @@
         opacity: 0.5;
       }
       .assistant-send {
-        align-self: flex-end;
         background: rgba(91, 159, 212, 0.2);
         border: 1px solid var(--accent);
         border-radius: 6px;
@@ -814,6 +935,13 @@
         50% {
           opacity: 1;
         }
+      }
+      .assistant-model-confirm {
+        color: var(--muted);
+        flex-shrink: 0;
+        font-size: 0.62rem;
+        line-height: 1.35;
+        padding: 0 0.65rem 0.35rem;
       }
       .assistant-status--thinking {
         animation: assistant-thinking-breathe 1.15s ease-in-out infinite;
@@ -913,9 +1041,10 @@
         color: var(--text);
       }
       #main {
-        flex: 1;
         display: flex;
+        flex: 1;
         flex-direction: column;
+        min-height: 0;
         min-width: 0;
         overflow: hidden;
       }
@@ -1206,18 +1335,15 @@
         ></div>
         <div id="assistant-panel">
           <div class="assistant-panel-head">Assistant</div>
+          <section aria-label="Workflow steps" class="workflow-stepper-bar">
+            <div class="stepper-shell">
+              <div class="stepper-track">
+                <nav aria-label="Spec workflow steps" class="stepper-nodes" id="workflow-stepper" role="tablist"></nav>
+              </div>
+            </div>
+          </section>
           <div class="assistant-scroll" id="assistant-scroll">
             <section aria-label="Workflow" class="workflow-strip" id="workflow-strip">
-              <div class="stepper-shell">
-                <div class="stepper-track">
-                  <nav
-                    aria-label="Spec workflow steps"
-                    class="stepper-nodes"
-                    id="workflow-stepper"
-                    role="tablist"
-                  ></nav>
-                </div>
-              </div>
               <div class="workflow-panels" id="workflow-panels">
                 <div
                   aria-labelledby="workflow-tab-0"
@@ -1316,6 +1442,7 @@
             <span aria-hidden="true" class="assistant-activity-dot" id="assistant-activity-dot"></span>
             <p class="assistant-status" id="assistant-status"></p>
           </div>
+          <p class="assistant-model-confirm" hidden id="assistant-model-confirm"></p>
           <form autocomplete="off" class="assistant-form" id="assistant-form">
             <div class="assistant-composer-wrap" id="assistant-composer-wrap">
               <textarea
@@ -1325,7 +1452,22 @@
                 placeholder="Ask about your spec…"
                 rows="3"
               ></textarea>
-              <button class="assistant-send" id="assistant-send" type="submit">Send</button>
+              <div class="assistant-composer-bar" id="assistant-composer-bar">
+                <ul class="assistant-model-menu" hidden id="assistant-model-menu" role="listbox"></ul>
+                <div class="assistant-model-wrap" id="assistant-model-wrap">
+                  <button
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                    class="assistant-model-btn"
+                    id="assistant-model-btn"
+                    type="button"
+                  >
+                    <span class="assistant-model-btn-label" id="assistant-model-btn-label">Model</span>
+                    <span aria-hidden="true" class="assistant-model-btn-caret">▾</span>
+                  </button>
+                </div>
+                <button class="assistant-send" id="assistant-send" type="submit">Send</button>
+              </div>
             </div>
             <div class="assistant-done-wrap" hidden id="assistant-done-wrap">
               <p class="assistant-done-hint">This feature is complete. Start a new workflow when you are ready.</p>
@@ -1384,6 +1526,6 @@
         </div>
       </form>
     </div>
-    <script src="/app.js?v=7" type="module"></script>
+    <script src="/app.js?v=19" type="module"></script>
   </body>
 </html>
