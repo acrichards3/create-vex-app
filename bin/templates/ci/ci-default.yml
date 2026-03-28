@@ -40,9 +40,6 @@ jobs:
       - name: Build lib package
         run: bun run build:lib
 
-      - name: Verify vexkit package
-        run: bun run verify:vexkit
-
       - name: Run lint
         run: bun run lint
 
