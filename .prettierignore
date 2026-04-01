@@ -1,3 +1,5 @@
 frontend/src/routeTree.gen.ts
 packages/cursor-feature-workflow/media/*.js
+packages/cursor-vex-panel/extension.js
+packages/cursor-vex-panel/media/editor-visual.js
 packages/vexkit/scripts/bundle-dashboard.mjs

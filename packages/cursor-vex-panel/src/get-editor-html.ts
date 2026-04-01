@@ -1,4 +1,6 @@
-function getEditorVisualHtml(webview, scriptUri) {
+import type { Uri, Webview } from "vscode";
+
+export function getEditorVisualHtml(webview: Webview, scriptUri: Uri): string {
   const csp = [
     "default-src 'none'",
     `style-src ${webview.cspSource} 'unsafe-inline'`,
@@ -20,6 +22,7 @@ function getEditorVisualHtml(webview, scriptUri) {
       box-sizing: border-box;
     }
     body {
+      height: 100vh;
       font-family: var(--vscode-font-family), system-ui, sans-serif;
       font-size: 12px;
       color: var(--vscode-foreground);
@@ -33,6 +36,7 @@ function getEditorVisualHtml(webview, scriptUri) {
       flex-direction: column;
       flex: 1;
       min-height: 0;
+      overflow: hidden;
     }
     .vex-ed-toolbar {
       display: flex;
@@ -127,33 +131,36 @@ function getEditorVisualHtml(webview, scriptUri) {
       flex-direction: column;
       flex: 1;
       min-height: 0;
+      position: relative;
     }
     .vex-ed-viewport {
-      flex: 1;
+      flex: 1 1 auto;
       min-height: 120px;
-      overflow: hidden;
+      overflow: auto;
       cursor: grab;
+      overscroll-behavior: contain;
       touch-action: none;
       position: relative;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
+      user-select: none;
     }
     .vex-ed-viewport--dragging {
       cursor: grabbing;
     }
     .vex-ed-pan {
-      display: inline-block;
-      padding: 48px;
-      transform: translate(0px, 0px) scale(1);
-      transform-origin: center center;
-      will-change: transform;
+      box-sizing: content-box;
+      display: block;
+      min-width: 100%;
+      overflow: visible;
+      padding: 50vh 50vw;
+      width: max-content;
     }
     .vex-ed-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      box-sizing: border-box;
+      display: inline-block;
+      max-width: none;
+      min-width: 0;
+      vertical-align: top;
+      width: max-content;
     }
     .vex-ed-placeholder {
       opacity: 0.8;
@@ -186,5 +193,3 @@ function getEditorVisualHtml(webview, scriptUri) {
 </body>
 </html>`;
 }
-
-module.exports = { getEditorVisualHtml };

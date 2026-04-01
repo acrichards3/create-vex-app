@@ -1,49 +1,55 @@
-const vscode = require("vscode");
-const { createVexTreeEditorProvider } = require("./vex-tree-editor-provider.js");
+var __create = Object.create;
+var __getProtoOf = Object.getPrototypeOf;
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __toESM = (mod, isNodeMode, target) => {
+  target = mod != null ? __create(__getProtoOf(mod)) : {};
+  const to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target;
+  for (let key of __getOwnPropNames(mod))
+    if (!__hasOwnProp.call(to, key))
+      __defProp(to, key, {
+        get: () => mod[key],
+        enumerable: true
+      });
+  return to;
+};
+var __moduleCache = /* @__PURE__ */ new WeakMap;
+var __toCommonJS = (from) => {
+  var entry = __moduleCache.get(from), desc;
+  if (entry)
+    return entry;
+  entry = __defProp({}, "__esModule", { value: true });
+  if (from && typeof from === "object" || typeof from === "function")
+    __getOwnPropNames(from).map((key) => !__hasOwnProp.call(entry, key) && __defProp(entry, key, {
+      get: () => from[key],
+      enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+    }));
+  __moduleCache.set(from, entry);
+  return entry;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, {
+      get: all[name],
+      enumerable: true,
+      configurable: true,
+      set: (newValue) => all[name] = () => newValue
+    });
+};
 
-const VIEW_ID = "vex.panel.stepper";
-const VEX_TREE_VIEW_TYPE = "vex.tree";
+// src/extension.ts
+var exports_extension = {};
+__export(exports_extension, {
+  deactivate: () => deactivate,
+  activate: () => activate
+});
+module.exports = __toCommonJS(exports_extension);
+var vscode3 = __toESM(require("vscode"));
 
-const STEPS = [
-  { label: "Describe" },
-  { label: "Spec" },
-  { label: "Approve" },
-  { label: "Build" },
-  { label: "Verify" },
-  { label: "Done" },
-];
-
-function buildStepperHtml() {
-  const segments = [];
-  STEPS.forEach((step, index) => {
-    const n = index + 1;
-    const isActive = index === 0;
-    const nodeClass = isActive ? "vex-node vex-node--active" : "vex-node vex-node--pending";
-    const ariaCurrent = isActive ? ' aria-current="step"' : "";
-    segments.push(`<div class="vex-step-outer" role="listitem">
-    <button type="button" class="vex-step"${ariaCurrent} data-step-index="${String(index)}" title="${escapeAttr(step.label)}">
-    <span class="vex-node-wrap">
-    <span class="${nodeClass}">
-      <span class="vex-node-num">${String(n)}</span>
-    </span>
-    </span>
-    <span class="vex-label">${escapeHtml(step.label)}</span>
-    </button>
-  </div>`);
-    if (index < STEPS.length - 1) {
-      segments.push(`<div class="vex-connector" aria-hidden="true"><span class="vex-connector-line"></span></div>`);
-    }
-  });
-  const trackInner = segments.join("\n");
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vex</title>
-  <style>
+// src/stepper-css.ts
+var VEX_STEPPER_INLINE_CSS = `
     :root {
       --vex-purple-300: #c4b5fd;
       --vex-surface: rgba(88, 28, 135, 0.22);
@@ -287,6 +293,55 @@ function buildStepperHtml() {
       background: linear-gradient(90deg, rgba(167, 139, 250, 0.15), rgba(167, 139, 250, 0.85), rgba(167, 139, 250, 0.15));
       opacity: 0.85;
     }
+`;
+
+// src/stepper-html.ts
+var STEPS = [
+  { label: "Describe" },
+  { label: "Spec" },
+  { label: "Approve" },
+  { label: "Build" },
+  { label: "Verify" },
+  { label: "Done" }
+];
+function escapeHtml(text) {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+function escapeAttr(text) {
+  return escapeHtml(text).replaceAll(`
+`, " ");
+}
+function buildStepperHtml() {
+  const segments = [];
+  STEPS.forEach((step, index) => {
+    const n = index + 1;
+    const isActive = index === 0;
+    const nodeClass = isActive ? "vex-node vex-node--active" : "vex-node vex-node--pending";
+    const ariaCurrent = isActive ? ' aria-current="step"' : "";
+    segments.push(`<div class="vex-step-outer" role="listitem">
+    <button type="button" class="vex-step"${ariaCurrent} data-step-index="${String(index)}" title="${escapeAttr(step.label)}">
+    <span class="vex-node-wrap">
+    <span class="${nodeClass}">
+      <span class="vex-node-num">${String(n)}</span>
+    </span>
+    </span>
+    <span class="vex-label">${escapeHtml(step.label)}</span>
+    </button>
+  </div>`);
+    if (index < STEPS.length - 1) {
+      segments.push(`<div class="vex-connector" aria-hidden="true"><span class="vex-connector-line"></span></div>`);
+    }
+  });
+  const trackInner = segments.join(`
+`);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vex</title>
+  <style>${VEX_STEPPER_INLINE_CSS}
   </style>
 </head>
 <body>
@@ -346,61 +401,686 @@ ${trackInner}
 </html>`;
 }
 
-function escapeHtml(text) {
-  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+// src/vex-tree-editor-provider.ts
+var vscode2 = __toESM(require("vscode"));
+
+// src/get-editor-html.ts
+function getEditorVisualHtml(webview, scriptUri) {
+  const csp = [
+    "default-src 'none'",
+    `style-src ${webview.cspSource} 'unsafe-inline'`,
+    `script-src ${webview.cspSource}`
+  ].join("; ");
+  const scriptUrl = String(scriptUri);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="${csp}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vex</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      height: 100vh;
+      font-family: var(--vscode-font-family), system-ui, sans-serif;
+      font-size: 12px;
+      color: var(--vscode-foreground);
+      background: var(--vscode-editor-background);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .vex-ed-root {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .vex-ed-toolbar {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(167, 139, 250, 0.25);
+      flex-shrink: 0;
+    }
+    .vex-ed-zoom {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .vex-ed-zoom-btn {
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      background: rgba(15, 23, 42, 0.35);
+      color: inherit;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.2;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .vex-ed-zoom-btn:hover {
+      background: rgba(124, 58, 237, 0.35);
+    }
+    .vex-ed-zoom-btn:focus-visible {
+      outline: 2px solid var(--vscode-focusBorder);
+      outline-offset: 2px;
+    }
+    .vex-ed-zoom-label {
+      font-size: 10px;
+      font-weight: 600;
+      min-width: 36px;
+      text-align: center;
+      opacity: 0.9;
+    }
+    .vex-ed-title {
+      font-size: 12px;
+      font-weight: 600;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .vex-ed-tabs {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .vex-ed-tab {
+      margin: 0;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(167, 139, 250, 0.45);
+      background: rgba(15, 23, 42, 0.35);
+      color: inherit;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .vex-ed-tab--active {
+      background: rgba(124, 58, 237, 0.45);
+      border-color: rgba(196, 181, 253, 0.55);
+    }
+    .vex-ed-idle {
+      padding: 20px 16px;
+      opacity: 0.9;
+    }
+    .vex-ed-error {
+      padding: 16px;
+      color: var(--vscode-errorForeground);
+    }
+    .vex-ed-error ul {
+      padding-left: 20px;
+    }
+    .vex-ed-main {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+    .vex-ed-viewport {
+      flex: 1 1 auto;
+      min-height: 120px;
+      overflow: auto;
+      cursor: grab;
+      overscroll-behavior: contain;
+      touch-action: none;
+      position: relative;
+      user-select: none;
+    }
+    .vex-ed-viewport--dragging {
+      cursor: grabbing;
+    }
+    .vex-ed-pan {
+      box-sizing: content-box;
+      display: block;
+      min-width: 100%;
+      overflow: visible;
+      padding: 50vh 50vw;
+      width: max-content;
+    }
+    .vex-ed-content {
+      box-sizing: border-box;
+      display: inline-block;
+      max-width: none;
+      min-width: 0;
+      vertical-align: top;
+      width: max-content;
+    }
+    .vex-ed-placeholder {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="vex-ed-root" class="vex-ed-root">
+    <header class="vex-ed-toolbar">
+      <span id="vex-ed-title" class="vex-ed-title">Vex</span>
+      <div class="vex-ed-zoom" role="group" aria-label="Zoom">
+        <button type="button" class="vex-ed-zoom-btn" id="vex-ed-zoom-out" title="Zoom out">−</button>
+        <span id="vex-ed-zoom-pct" class="vex-ed-zoom-label">100%</span>
+        <button type="button" class="vex-ed-zoom-btn" id="vex-ed-zoom-in" title="Zoom in">+</button>
+        <button type="button" class="vex-ed-zoom-btn" id="vex-ed-zoom-reset" title="Reset view">⊙</button>
+      </div>
+      <div id="vex-ed-tabs" class="vex-ed-tabs"></div>
+    </header>
+    <div id="vex-ed-idle" class="vex-ed-idle" hidden></div>
+    <div id="vex-ed-error" class="vex-ed-error" hidden></div>
+    <div id="vex-ed-main" class="vex-ed-main" hidden>
+      <div id="vex-ed-viewport" class="vex-ed-viewport">
+        <div id="vex-ed-pan" class="vex-ed-pan">
+          <div id="vex-ed-content" class="vex-ed-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="${scriptUrl}"></script>
+</body>
+</html>`;
 }
 
-function escapeAttr(text) {
-  return escapeHtml(text).replaceAll("\n", " ");
+// src/vex-parse/stack-and-lines.ts
+function countLeadingSpaces(rawLine) {
+  const match = /^ */u.exec(rawLine);
+  return match?.[0].length ?? 0;
+}
+function parseDescribeHeaderFromLine(content) {
+  const trimmed = content.trimStart();
+  const lower = trimmed.toLowerCase();
+  if (!lower.startsWith("describe")) {
+    return { label: null };
+  }
+  const afterKeyword = trimmed.slice(8).trimStart();
+  if (!afterKeyword.startsWith(":")) {
+    return { label: null };
+  }
+  const label = afterKeyword.slice(1).trim();
+  return { label: label.length > 0 ? label : null };
+}
+function labelAfterKeywordPrefix(trimmed, keywordLen) {
+  const after = trimmed.slice(keywordLen).trimStart();
+  if (!after.startsWith(":")) {
+    return [false, ""];
+  }
+  return [true, after.slice(1).trim()];
+}
+function parseListLineParts(content) {
+  const trimmed = content.trimStart();
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("when")) {
+    const [ok, label] = labelAfterKeywordPrefix(trimmed, 4);
+    if (ok) {
+      return { keyword: "WHEN", label };
+    }
+  }
+  if (lower.startsWith("and")) {
+    const [ok, label] = labelAfterKeywordPrefix(trimmed, 3);
+    if (ok) {
+      return { keyword: "AND", label };
+    }
+  }
+  if (lower.startsWith("it")) {
+    const [ok, label] = labelAfterKeywordPrefix(trimmed, 2);
+    if (ok) {
+      return { keyword: "IT", label };
+    }
+  }
+  return { keyword: null, label: "" };
+}
+function popDeeperThan(stack, leadingSpaces) {
+  while (stack.length > 0) {
+    const top = stack.at(-1);
+    if (top == null) {
+      break;
+    }
+    if (top.indent <= leadingSpaces) {
+      break;
+    }
+    stack.pop();
+  }
+}
+function popSiblingDescribesAtIndent(stack, describeIndent) {
+  while (stack.length > 0) {
+    const top = stack.at(-1);
+    if (top == null) {
+      break;
+    }
+    if (top.indent !== describeIndent) {
+      break;
+    }
+    if (top.kind !== "describe") {
+      break;
+    }
+    stack.pop();
+  }
+}
+function popWhenSiblingsAtIndent(stack, whenIndent) {
+  while (stack.length > 0) {
+    const top = stack.at(-1);
+    if (top == null) {
+      break;
+    }
+    if (top.indent !== whenIndent) {
+      break;
+    }
+    if (top.kind !== "when") {
+      break;
+    }
+    stack.pop();
+  }
+}
+function popCompletedListSiblingsAtIndent(stack, leadingSpaces, onError, lineNo) {
+  while (stack.length > 0) {
+    const top = stack.at(-1);
+    if (top == null) {
+      break;
+    }
+    if (top.indent !== leadingSpaces) {
+      break;
+    }
+    if (top.kind === "it") {
+      stack.pop();
+      continue;
+    }
+    if (top.kind === "and") {
+      if (top.node.child == null) {
+        onError(lineNo, "Complete this AND with a nested AND or IT before a sibling branch at the same indent.");
+        return false;
+      }
+      stack.pop();
+      continue;
+    }
+    break;
+  }
+  return true;
+}
+function popStackForListLine(stack, leadingSpaces, keyword, onError, lineNo) {
+  popDeeperThan(stack, leadingSpaces);
+  if (keyword === "WHEN") {
+    popWhenSiblingsAtIndent(stack, leadingSpaces);
+    return true;
+  }
+  return popCompletedListSiblingsAtIndent(stack, leadingSpaces, onError, lineNo);
+}
+function peekStack(stack) {
+  const parent = stack.at(-1);
+  if (parent == null) {
+    return { parent: null };
+  }
+  return { parent };
+}
+function pushError(ctx, line, message) {
+  ctx.errors.push({ line, message });
 }
 
-async function openVexTreeEditorForActiveFile() {
-  const doc = vscode.window.activeTextEditor?.document;
-  const fsPath = doc && doc.uri.fsPath ? doc.uri.fsPath.toLowerCase() : "";
-  const isVex = doc && (doc.languageId === "vex" || fsPath.endsWith(".vex"));
-  if (!isVex) {
-    await vscode.window.showInformationMessage("Open a .vex file first.");
+// src/vex-parse/statement-handlers.ts
+function processDescribeDeclarationLine(input) {
+  const { content, ctx, leadingSpaces, lineNo } = input;
+  const { label } = parseDescribeHeaderFromLine(content);
+  if (label == null) {
+    pushError(ctx, lineNo, 'Expected a line like "describe: Label" (describe may be upper or lower case).');
     return;
   }
-  await vscode.commands.executeCommand("vscode.openWith", doc.uri, VEX_TREE_VIEW_TYPE, vscode.ViewColumn.Active);
+  popDeeperThan(ctx.stack, leadingSpaces);
+  popSiblingDescribesAtIndent(ctx.stack, leadingSpaces);
+  const block = { label, line: lineNo, nestedDescribes: [], whens: [] };
+  if (leadingSpaces === 0) {
+    ctx.document.describes.push(block);
+    ctx.stack.length = 0;
+    const frame2 = { indent: 0, kind: "describe", node: block };
+    ctx.stack.push(frame2);
+    return;
+  }
+  const { parent } = peekStack(ctx.stack);
+  if (parent == null || parent.kind !== "describe") {
+    pushError(ctx, lineNo, "Nested describe must be indented under a describe block.");
+    return;
+  }
+  if (leadingSpaces !== parent.indent + 4) {
+    pushError(ctx, lineNo, "describe must be indented one level (4 spaces) deeper than its parent describe.");
+    return;
+  }
+  parent.node.nestedDescribes.push(block);
+  const frame = { indent: leadingSpaces, kind: "describe", node: block };
+  ctx.stack.push(frame);
+}
+function processWhenLine(input) {
+  const { ctx, label, leadingSpaces, lineNo, parent } = input;
+  if (parent == null || parent.kind !== "describe") {
+    pushError(ctx, lineNo, "when must appear directly under a describe block (4 spaces under the describe line).");
+    return;
+  }
+  if (leadingSpaces !== parent.indent + 4) {
+    pushError(ctx, lineNo, "when must be indented 4 spaces under its parent describe.");
+    return;
+  }
+  const whenNode = { branches: [], label, line: lineNo };
+  parent.node.whens.push(whenNode);
+  const frame = { indent: leadingSpaces, kind: "when", node: whenNode };
+  ctx.stack.push(frame);
+}
+function processAndLine(input) {
+  const { ctx, label, leadingSpaces, lineNo, parent } = input;
+  if (parent == null) {
+    pushError(ctx, lineNo, "and must appear under a when or another and.");
+    return;
+  }
+  if (parent.kind === "describe" || parent.kind === "it") {
+    pushError(ctx, lineNo, "and must appear under a when or another and.");
+    return;
+  }
+  if (leadingSpaces !== parent.indent + 4) {
+    pushError(ctx, lineNo, "and must be indented one level (4 spaces) deeper than its parent.");
+    return;
+  }
+  if (parent.kind === "when") {
+    const and2 = { child: undefined, kind: "and", label, line: lineNo };
+    parent.node.branches.push(and2);
+    const frame2 = { indent: leadingSpaces, kind: "and", node: and2 };
+    ctx.stack.push(frame2);
+    return;
+  }
+  if (parent.node.child != null) {
+    pushError(ctx, lineNo, "This and already has a child; use a nested and for deeper branches.");
+    return;
+  }
+  const and = { child: undefined, kind: "and", label, line: lineNo };
+  parent.node.child = and;
+  const frame = { indent: leadingSpaces, kind: "and", node: and };
+  ctx.stack.push(frame);
+}
+function processItLine(input) {
+  const { ctx, label, leadingSpaces, lineNo, parent } = input;
+  const it = { kind: "it", label, line: lineNo };
+  if (parent == null) {
+    pushError(ctx, lineNo, "it must appear under a when or and.");
+    return;
+  }
+  if (leadingSpaces !== parent.indent + 4) {
+    pushError(ctx, lineNo, "it must be indented one level (4 spaces) deeper than its parent.");
+    return;
+  }
+  if (parent.kind === "describe") {
+    pushError(ctx, lineNo, "it must appear under a when or and, not directly under a describe.");
+    return;
+  }
+  if (parent.kind === "when") {
+    parent.node.branches.push(it);
+    const frame = { indent: leadingSpaces, kind: "it", node: it };
+    ctx.stack.push(frame);
+    return;
+  }
+  if (parent.kind === "and") {
+    if (parent.node.child != null) {
+      pushError(ctx, lineNo, "This and already has a child.");
+      return;
+    }
+    parent.node.child = it;
+    const frame = { indent: leadingSpaces, kind: "it", node: it };
+    ctx.stack.push(frame);
+    return;
+  }
+  pushError(ctx, lineNo, "it cannot appear nested under another it.");
 }
 
+// src/vex-parse/list-and-document.ts
+function processListLine(input) {
+  const { content, ctx, leadingSpaces, lineNo } = input;
+  const { keyword, label } = parseListLineParts(content);
+  if (keyword == null) {
+    pushError(ctx, lineNo, 'Expected a line starting with "when:", "and:", or "it:" (case-insensitive).');
+    return;
+  }
+  if (label === "") {
+    pushError(ctx, lineNo, "Missing text after the colon; add a non-empty label.");
+    return;
+  }
+  const popped = popStackForListLine(ctx.stack, leadingSpaces, keyword, (line, message) => {
+    pushError(ctx, line, message);
+  }, lineNo);
+  if (!popped) {
+    return;
+  }
+  const { parent } = peekStack(ctx.stack);
+  if (keyword === "WHEN") {
+    processWhenLine({ ctx, label, leadingSpaces, lineNo, parent });
+    return;
+  }
+  if (keyword === "AND") {
+    processAndLine({ ctx, label, leadingSpaces, lineNo, parent });
+    return;
+  }
+  processItLine({ ctx, label, leadingSpaces, lineNo, parent });
+}
+function processVexLine(input) {
+  const { ctx, line } = input;
+  const { lineNo, rawLine } = line;
+  if (rawLine.trim() === "") {
+    return;
+  }
+  if (rawLine.includes("\t")) {
+    pushError(ctx, lineNo, "Tabs are not allowed; use spaces for indentation.");
+    return;
+  }
+  const leadingSpaces = countLeadingSpaces(rawLine);
+  const content = rawLine.slice(leadingSpaces);
+  if (leadingSpaces !== 0 && leadingSpaces % 4 !== 0) {
+    pushError(ctx, lineNo, "Indentation must use a multiple of 4 spaces.");
+    return;
+  }
+  const { keyword } = parseListLineParts(content);
+  if (keyword != null) {
+    if (leadingSpaces === 0) {
+      pushError(ctx, lineNo, "when, and, it lines must be indented under a describe block (multiples of 4 spaces).");
+      return;
+    }
+    if (leadingSpaces < 4) {
+      pushError(ctx, lineNo, "The first when under a describe must be indented with at least 4 spaces.");
+      return;
+    }
+    processListLine({ content, ctx, leadingSpaces, lineNo });
+    return;
+  }
+  const { label: describeLabel } = parseDescribeHeaderFromLine(content);
+  if (describeLabel != null) {
+    processDescribeDeclarationLine({ content, ctx, leadingSpaces, lineNo });
+    return;
+  }
+  if (leadingSpaces === 0) {
+    pushError(ctx, lineNo, 'Expected a top-level line starting with "describe:".');
+    return;
+  }
+  pushError(ctx, lineNo, 'Expected a line starting with "describe:", "when:", "and:", or "it:" (case-insensitive) at the correct indent.');
+}
+function parseVexDocument(source) {
+  const errors = [];
+  const document = { describes: [] };
+  const ctx = { document, errors, stack: [] };
+  const lines = source.split(/\r?\n/u);
+  let lineNo = 0;
+  lines.forEach((rawLine) => {
+    lineNo += 1;
+    processVexLine({ ctx, line: { lineNo, rawLine } });
+  });
+  if (document.describes.length === 0 && errors.length === 0) {
+    pushError(ctx, 1, 'Expected at least one describe block (a line like "describe: Label").');
+  }
+  const ok = errors.length === 0;
+  const documentOut = ok ? document : undefined;
+  return { document: documentOut, errors, ok };
+}
+// src/vex-tree-custom-document.ts
+class VexTreeCustomDocument {
+  uri;
+  constructor(uri) {
+    this.uri = uri;
+  }
+  dispose() {}
+}
+
+// src/vex-tree-load-text.ts
+var vscode = __toESM(require("vscode"));
+async function loadVexFileText(uri) {
+  try {
+    const doc = await vscode.workspace.openTextDocument(uri);
+    return doc.getText();
+  } catch {
+    const bytes = await vscode.workspace.fs.readFile(uri);
+    return new TextDecoder().decode(bytes);
+  }
+}
+
+// src/vex-tree-editor-provider.ts
+var DEBOUNCE_MS = 150;
+function resolveVexTreeEditor(input) {
+  const { context, document, token, webviewPanel } = input;
+  if (token.isCancellationRequested) {
+    return;
+  }
+  const extensionUri = context.extensionUri;
+  const mediaRootUri = vscode2.Uri.joinPath(extensionUri, "media");
+  const scriptOnDisk = vscode2.Uri.joinPath(mediaRootUri, "editor-visual.js");
+  webviewPanel.webview.options = {
+    enableScripts: true,
+    localResourceRoots: [extensionUri, mediaRootUri]
+  };
+  const scriptUri = webviewPanel.webview.asWebviewUri(scriptOnDisk);
+  webviewPanel.webview.html = getEditorVisualHtml(webviewPanel.webview, scriptUri);
+  let debounceTimer;
+  const pushState = async () => {
+    const text = await loadVexFileText(document.uri);
+    const result = parseVexDocument(text);
+    if (!result.ok) {
+      webviewPanel.webview.postMessage({
+        payload: { errors: result.errors, fileName: document.uri.fsPath, kind: "parseError" },
+        type: "vexVisual"
+      });
+      return;
+    }
+    if (result.document == null) {
+      return;
+    }
+    webviewPanel.webview.postMessage({
+      payload: { document: result.document, fileName: document.uri.fsPath, kind: "document" },
+      type: "vexVisual"
+    });
+  };
+  const subReady = webviewPanel.webview.onDidReceiveMessage((message) => {
+    if (message.type === "vexVisualReady") {
+      pushState();
+    }
+  });
+  const subDoc = vscode2.workspace.onDidChangeTextDocument((e) => {
+    if (e.document.uri.toString() !== document.uri.toString()) {
+      return;
+    }
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(() => {
+      debounceTimer = undefined;
+      pushState();
+    }, DEBOUNCE_MS);
+  });
+  webviewPanel.onDidDispose(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    subReady.dispose();
+    subDoc.dispose();
+  });
+}
+function createVexTreeEditorProvider(context) {
+  return {
+    async openCustomDocument(uri, _openContext, token) {
+      if (token.isCancellationRequested) {
+        throw new vscode2.CancellationError;
+      }
+      await loadVexFileText(uri);
+      return new VexTreeCustomDocument(uri);
+    },
+    resolveCustomEditor(document, webviewPanel, token) {
+      return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          if (token.isCancellationRequested) {
+            resolve();
+            return;
+          }
+          try {
+            resolveVexTreeEditor({ context, document, token, webviewPanel });
+            resolve();
+          } catch (err) {
+            reject(err instanceof Error ? err : new Error(String(err)));
+          }
+        }, 0);
+      });
+    }
+  };
+}
+
+// src/extension.ts
+var VIEW_ID = "vex.panel.stepper";
+var VEX_TREE_VIEW_TYPE = "vex.tree";
+async function openVexTreeEditorForActiveFile() {
+  const doc = vscode3.window.activeTextEditor?.document;
+  if (doc == null) {
+    await vscode3.window.showInformationMessage("Open a .vex file first.");
+    return;
+  }
+  const fsPath = doc.uri.fsPath.toLowerCase();
+  const isVex = doc.languageId === "vex" ? true : fsPath.endsWith(".vex");
+  if (!isVex) {
+    await vscode3.window.showInformationMessage("Open a .vex file first.");
+    return;
+  }
+  await vscode3.commands.executeCommand("vscode.openWith", doc.uri, VEX_TREE_VIEW_TYPE, {
+    viewColumn: vscode3.ViewColumn.Active
+  });
+}
 function activate(context) {
   const vexTreeProvider = createVexTreeEditorProvider(context);
-
-  context.subscriptions.push(
-    vscode.window.registerCustomEditorProvider(VEX_TREE_VIEW_TYPE, vexTreeProvider, {
-      webviewOptions: {
-        retainContextWhenHidden: true,
-      },
-      supportsMultipleEditorsPerDocument: false,
-    }),
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand("vex.panel.openEditorVisual", () => {
-      return openVexTreeEditorForActiveFile();
-    }),
-  );
-
+  context.subscriptions.push(vscode3.window.registerCustomEditorProvider(VEX_TREE_VIEW_TYPE, vexTreeProvider, {
+    supportsMultipleEditorsPerDocument: false,
+    webviewOptions: {
+      retainContextWhenHidden: false
+    }
+  }));
+  context.subscriptions.push(vscode3.commands.registerCommand("vex.panel.openEditorVisual", () => {
+    return openVexTreeEditorForActiveFile();
+  }));
   const provider = {
     resolveWebviewView(webviewView) {
       webviewView.webview.options = {
-        enableScripts: true,
+        enableScripts: true
       };
       webviewView.webview.html = buildStepperHtml();
-
       webviewView.webview.onDidReceiveMessage((message) => {
-        if (message && message.type === "openEditorVisual") {
-          void openVexTreeEditorForActiveFile();
+        if (message.type === "openEditorVisual") {
+          openVexTreeEditorForActiveFile();
         }
       });
-    },
+    }
   };
-
-  context.subscriptions.push(vscode.window.registerWebviewViewProvider(VIEW_ID, provider));
+  context.subscriptions.push(vscode3.window.registerWebviewViewProvider(VIEW_ID, provider));
 }
-
 function deactivate() {}
-
-module.exports = { activate, deactivate };

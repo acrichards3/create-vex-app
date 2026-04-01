@@ -1,0 +1,44 @@
+describe: Calculator
+    describe: Display
+        when: the app opens
+            it: Shows the digit 0 on the screen
+        when: a new result is ready
+            it: Replaces the display with the result
+    describe: Number entry
+        when: the user taps digits
+            it: Appends digits to the current number
+        when: the user taps backspace
+            it: Deletes the last digit or clears to zero
+    describe: Operations
+        when: the user taps an operator
+            it: Stores the operator and waits for the next operand
+        when: the user taps equals
+            it: Pops operands from the internal stack
+            and: the operation is defined for those operands
+                it: Computes and shows the result in the display
+        when: the user taps equals on an invalid expression
+            it: Parses the pending expression
+            and: parsing finds a divide by zero
+                it: Shows an error instead of a numeric result
+        when: the user taps all clear
+            it: Resets the current entry and pending operation
+
+describe: Memory
+    when: the user taps M+
+        it: Adds the displayed value to the stored memory
+    when: the user taps M-
+        it: Subtracts the displayed value from memory
+    when: the user taps MR
+        it: Recalls memory into the current entry
+    when: the user taps MC
+        it: Clears the stored memory to zero
+
+describe: Scientific mode
+    when: the user taps sin
+        it: Replaces the entry with the sine of the angle in radians
+    when: the user taps sqrt
+        it: The entry is non-negative
+        and: the user confirms complex results are disabled
+            it: Replaces the entry with the square root
+    when: the user toggles deg instead of rad
+        it: Interprets trig input as degrees until toggled back

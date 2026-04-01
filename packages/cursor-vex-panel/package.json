@@ -1,5 +1,5 @@
 {
-  "name": "cursor-vex-panel",
+  "name": "@vex-app/cursor-vex-panel",
   "displayName": "Vex Panel",
   "description": "Vex bottom panel (workflow stepper) and tree view for .vex files in the editor area.",
   "version": "0.0.3",
@@ -13,6 +13,7 @@
   ],
   "main": "extension.js",
   "activationEvents": [
+    "onStartupFinished",
     "onView:vex.panel.stepper",
     "onCommand:vex.panel.openEditorVisual",
     "onCustomEditor:vex.tree"
@@ -57,6 +58,21 @@
     }
   },
   "scripts": {
-    "lint": "node --check extension.js && node --check vex-tree-editor-provider.js && node --check vex-parse.js && node --check get-editor-html.js && node --check media/editor-visual.js"
+    "build": "bun run build:extension && bun run build:webview",
+    "build:extension": "bun build ./src/extension.ts --outfile=./extension.js --target=node --format=cjs --external=vscode",
+    "build:webview": "bun build ./src/webview/editor-visual.ts --outfile=./media/editor-visual.js --target=browser --minify",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.84.0",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^9",
+    "eslint-plugin-perfectionist": "^5",
+    "eslint-plugin-sonarjs": "^4",
+    "eslint-plugin-unicorn": "56",
+    "typescript": "^6.0.0"
   }
 }
