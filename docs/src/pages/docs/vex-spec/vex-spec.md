@@ -1,8 +1,8 @@
 # Vex spec (.vex)
 
-Vex spec is a small, line-oriented language for writing structured specifications. Files use the `.vex` extension. The workspace ships a VS Code/Cursor extension (`packages/vex-language`) for syntax highlighting, and **vexkit** parses and validates the same grammar for tooling (validation UI, codegen, and tests).
+Vex spec is a small, line-oriented language for writing structured specifications. Files use the `.vex` extension. The VS Code/Cursor extension (`packages/vex-language`) provides syntax highlighting **and** the same parse/validate logic used for diagnostics (see `vex-parse.js` in that package).
 
-This page describes the **language** as implemented by the parser in `packages/vexkit/src/vex/`. If your file does not match these rules, you will get parse or validation errors.
+This page describes the **language** as implemented by that parser. If your file does not match these rules, you will get parse or validation errors.
 
 ## What a file expresses
 
@@ -15,7 +15,7 @@ Conceptually:
 - **and** — adds a sub-condition or an extra branch; can chain to more **and** or end in **it**.
 - **it** — the leaf: the concrete expectation or example for that path.
 
-The AST types in code are `VexDocument` → `VexDescribeBlock` → `VexWhen` → branches of `VexAnd` | `VexIt` (see `packages/vexkit/src/vex/ast.ts`).
+The AST shape is `VexDocument` → `VexDescribeBlock` → `VexWhen` → branches of `VexAnd` | `VexIt` (see the object shapes built in `packages/vex-language/vex-parse.js`).
 
 ## Lines and indentation
 
@@ -102,14 +102,11 @@ describe: Calculator
 
 ## Editor support
 
-The TextMate grammar in `packages/vex-language/syntaxes/vex.tmLanguage.json` highlights comments (`#` to end of line), **describe** / **when** / **and** / **it** lines, and labels. The semantic rules above come from vexkit; the highlighter is best-effort and may not flag invalid files.
+The TextMate grammar in `packages/vex-language/syntaxes/vex.tmLanguage.json` highlights comments (`#` to end of line), **describe** / **when** / **and** / **it** lines, and labels. The semantic rules above come from `vex-parse.js`; the highlighter is best-effort and may not flag invalid files.
 
 ## Related code
 
-| Area                     | Location                                                             |
-| ------------------------ | -------------------------------------------------------------------- |
-| AST types                | `packages/vexkit/src/vex/ast.ts`                                     |
-| Line parsing             | `packages/vexkit/src/vex/parse-vex-line.ts`, `parse-vex-handlers.ts` |
-| Indent / stack           | `packages/vexkit/src/vex/parse-vex-stack.ts`                         |
-| Validation               | `packages/vexkit/src/vex/validate-vex-document.ts`                   |
-| VS Code/Cursor extension | `packages/vex-language/`                                             |
+| Area                         | Location                             |
+| ---------------------------- | ------------------------------------ |
+| Parse + validate (extension) | `packages/vex-language/vex-parse.js` |
+| VS Code/Cursor extension     | `packages/vex-language/`             |

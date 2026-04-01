@@ -1,91 +1,16 @@
 const vscode = require("vscode");
-const { spawnSync } = require("child_process");
-const path = require("path");
-const fs = require("fs");
+const { parseAndValidateVexDocument } = require("./vex-parse.js");
 
 const DIAGNOSTIC_SOURCE = "vex-language";
 const VALIDATION_DEBOUNCE_MS = 300;
 
 /**
- * @param {string} workspaceRoot
- * @returns {string | null}
- */
-function resolveVexkitCli(workspaceRoot) {
-  const candidate = path.join(workspaceRoot, "packages", "vexkit", "src", "cli.ts");
-  return fs.existsSync(candidate) ? candidate : null;
-}
-
-/**
- * @param {string} text
- * @param {string} workspaceRoot
- * @param {string} cliPath
- * @returns {{ ok: true, document: unknown } | { ok: false, errors: { line: number, message: string }[] }}
- */
-function runVexkitParseJson(text, workspaceRoot, cliPath) {
-  const result = spawnSync("bun", [cliPath, "parse", "--json", "-"], {
-    cwd: workspaceRoot,
-    encoding: "utf8",
-    input: text,
-    maxBuffer: 10 * 1024 * 1024,
-  });
-
-  if (result.error) {
-    return {
-      errors: [
-        {
-          line: 1,
-          message: `vex-language: could not run Bun (${result.error.message}). Install Bun and ensure it is on PATH.`,
-        },
-      ],
-      ok: false,
-    };
-  }
-
-  const out = result.stdout ?? "";
-  try {
-    const parsed = JSON.parse(out);
-    if (parsed && typeof parsed === "object" && "ok" in parsed) {
-      if (parsed.ok === true) {
-        return { document: parsed.document, ok: true };
-      }
-
-      if (Array.isArray(parsed.errors)) {
-        return { errors: parsed.errors, ok: false };
-      }
-    }
-  } catch {
-    const errTail = (result.stderr ?? "").slice(0, 200);
-    return {
-      errors: [
-        {
-          line: 1,
-          message: `vex-language: invalid JSON from vexkit (exit ${String(result.status ?? 0)}). stdout: ${out.slice(0, 120)} stderr: ${errTail}`,
-        },
-      ],
-      ok: false,
-    };
-  }
-
-  return {
-    errors: [
-      {
-        line: 1,
-        message: `vex-language: unexpected vexkit output (exit ${String(result.status ?? 0)}).`,
-      },
-    ],
-    ok: false,
-  };
-}
-
-/**
  * @param {vscode.TextDocument} doc
- * @param {string} workspaceRoot
- * @param {string} cliPath
  * @returns {vscode.Diagnostic[]}
  */
-function getDiagnostics(doc, workspaceRoot, cliPath) {
+function getDiagnostics(doc) {
   const text = doc.getText();
-  const parsed = runVexkitParseJson(text, workspaceRoot, cliPath);
+  const parsed = parseAndValidateVexDocument(text);
   if (parsed.ok) {
     return [];
   }
@@ -136,32 +61,7 @@ function activate(context) {
       return;
     }
 
-    const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
-    if (!folder) {
-      const w = new vscode.Diagnostic(
-        new vscode.Range(0, 0, 0, 0),
-        "vex-language: open a folder workspace so packages/vexkit can be found.",
-        vscode.DiagnosticSeverity.Warning,
-      );
-      w.source = DIAGNOSTIC_SOURCE;
-      collection.set(doc.uri, [w]);
-      return;
-    }
-
-    const root = folder.uri.fsPath;
-    const cli = resolveVexkitCli(root);
-    if (!cli) {
-      const w = new vscode.Diagnostic(
-        new vscode.Range(0, 0, 0, 0),
-        "vex-language: packages/vexkit/src/cli.ts not found in this workspace.",
-        vscode.DiagnosticSeverity.Warning,
-      );
-      w.source = DIAGNOSTIC_SOURCE;
-      collection.set(doc.uri, [w]);
-      return;
-    }
-
-    collection.set(doc.uri, getDiagnostics(doc, root, cli));
+    collection.set(doc.uri, getDiagnostics(doc));
   };
 
   /**

@@ -1,8 +1,8 @@
 {
   "name": "cursor-vex-panel",
   "displayName": "Vex Panel",
-  "description": "Adds a Vex tab to the bottom panel with the workflow progress stepper.",
-  "version": "0.0.1",
+  "description": "Vex bottom panel (workflow stepper) and tree view for .vex files in the editor area.",
+  "version": "0.0.3",
   "private": true,
   "publisher": "vex-app",
   "engines": {
@@ -13,9 +13,30 @@
   ],
   "main": "extension.js",
   "activationEvents": [
-    "onView:vex.panel.stepper"
+    "onView:vex.panel.stepper",
+    "onCommand:vex.panel.openEditorVisual",
+    "onCustomEditor:vex.tree"
   ],
   "contributes": {
+    "customEditors": [
+      {
+        "viewType": "vex.tree",
+        "displayName": "Vex tree",
+        "selector": [
+          {
+            "filenamePattern": "*.vex"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "vex.panel.openEditorVisual",
+        "title": "Open Vex tree (current .vex file)",
+        "category": "Vex"
+      }
+    ],
     "viewsContainers": {
       "panel": [
         {
@@ -36,6 +57,6 @@
     }
   },
   "scripts": {
-    "lint": "node --check extension.js"
+    "lint": "node --check extension.js && node --check vex-tree-editor-provider.js && node --check vex-parse.js && node --check get-editor-html.js && node --check media/editor-visual.js"
   }
 }

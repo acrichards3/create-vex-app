@@ -1,8 +1,8 @@
 {
   "name": "vex-spec",
   "displayName": "Vex spec (.vex)",
-  "description": "Syntax highlighting and live validation for .vex specification files (uses workspace vexkit + Bun).",
-  "version": "0.0.3",
+  "description": "Syntax highlighting and live validation for .vex specification files (self-contained parser).",
+  "version": "0.0.4",
   "private": true,
   "publisher": "vex-app",
   "engines": {
@@ -50,6 +50,6 @@
     ]
   },
   "scripts": {
-    "lint": "node --check extension.js"
+    "lint": "node --check extension.js && node --check vex-parse.js"
   }
 }
