@@ -37,7 +37,7 @@ describe: Scientific mode
     when: the user taps sin
         it: Replaces the entry with the sine of the angle in radians
     when: the user taps sqrt
-        it: The entry is non-negative
+        it: Shows the entry is non-negative
         and: the user confirms complex results are disabled
             it: Replaces the entry with the square root
     when: the user toggles deg instead of rad

@@ -1,5 +1,6 @@
 import {
   parseDescribeHeaderFromLine,
+  parseDescribeLabelSpanInContent,
   peekStack,
   popDeeperThan,
   popSiblingDescribesAtIndent,
@@ -9,6 +10,7 @@ import type {
   AndNode,
   DescribeBlock,
   ItNode,
+  LabelSpan,
   ParseContext,
   StackFrame,
   StackFrameAnd,
@@ -23,11 +25,13 @@ type DescribeInput = {
   ctx: ParseContext;
   leadingSpaces: number;
   lineNo: number;
+  lineStartOffset: number;
 };
 
 type WhenInput = {
   ctx: ParseContext;
   label: string;
+  labelSpan: LabelSpan;
   leadingSpaces: number;
   lineNo: number;
   parent: StackFrame | null;
@@ -36,23 +40,36 @@ type WhenInput = {
 type AndItInput = {
   ctx: ParseContext;
   label: string;
+  labelSpan: LabelSpan;
   leadingSpaces: number;
   lineNo: number;
   parent: StackFrame | null;
 };
 
 export function processDescribeDeclarationLine(input: DescribeInput): void {
-  const { content, ctx, leadingSpaces, lineNo } = input;
+  const { content, ctx, leadingSpaces, lineNo, lineStartOffset } = input;
   const { label } = parseDescribeHeaderFromLine(content);
   if (label == null) {
     pushError(ctx, lineNo, 'Expected a line like "describe: Label" (describe may be upper or lower case).');
     return;
   }
 
+  const spanParsed = parseDescribeLabelSpanInContent(content);
+  if (spanParsed.span == null) {
+    pushError(ctx, lineNo, "Could not locate describe label text in this line.");
+    return;
+  }
+
+  const spanLocal = spanParsed.span;
+  const labelSpan: LabelSpan = {
+    end: lineStartOffset + leadingSpaces + spanLocal.end,
+    start: lineStartOffset + leadingSpaces + spanLocal.start,
+  };
+
   popDeeperThan(ctx.stack, leadingSpaces);
   popSiblingDescribesAtIndent(ctx.stack, leadingSpaces);
 
-  const block: DescribeBlock = { label, line: lineNo, nestedDescribes: [], whens: [] };
+  const block: DescribeBlock = { label, labelSpan, line: lineNo, nestedDescribes: [], whens: [] };
 
   if (leadingSpaces === 0) {
     ctx.document.describes.push(block);
@@ -79,7 +96,7 @@ export function processDescribeDeclarationLine(input: DescribeInput): void {
 }
 
 export function processWhenLine(input: WhenInput): void {
-  const { ctx, label, leadingSpaces, lineNo, parent } = input;
+  const { ctx, label, labelSpan, leadingSpaces, lineNo, parent } = input;
   if (parent == null || parent.kind !== "describe") {
     pushError(ctx, lineNo, "when must appear directly under a describe block (4 spaces under the describe line).");
     return;
@@ -90,14 +107,14 @@ export function processWhenLine(input: WhenInput): void {
     return;
   }
 
-  const whenNode: WhenNode = { branches: [], label, line: lineNo };
+  const whenNode: WhenNode = { branches: [], label, labelSpan, line: lineNo };
   parent.node.whens.push(whenNode);
   const frame: StackFrameWhen = { indent: leadingSpaces, kind: "when", node: whenNode };
   ctx.stack.push(frame);
 }
 
 export function processAndLine(input: AndItInput): void {
-  const { ctx, label, leadingSpaces, lineNo, parent } = input;
+  const { ctx, label, labelSpan, leadingSpaces, lineNo, parent } = input;
   if (parent == null) {
     pushError(ctx, lineNo, "and must appear under a when or another and.");
     return;
@@ -114,7 +131,7 @@ export function processAndLine(input: AndItInput): void {
   }
 
   if (parent.kind === "when") {
-    const and: AndNode = { child: undefined, kind: "and", label, line: lineNo };
+    const and: AndNode = { child: undefined, kind: "and", label, labelSpan, line: lineNo };
     parent.node.branches.push(and);
     const frame: StackFrameAnd = { indent: leadingSpaces, kind: "and", node: and };
     ctx.stack.push(frame);
@@ -126,15 +143,15 @@ export function processAndLine(input: AndItInput): void {
     return;
   }
 
-  const and: AndNode = { child: undefined, kind: "and", label, line: lineNo };
+  const and: AndNode = { child: undefined, kind: "and", label, labelSpan, line: lineNo };
   parent.node.child = and;
   const frame: StackFrameAnd = { indent: leadingSpaces, kind: "and", node: and };
   ctx.stack.push(frame);
 }
 
 export function processItLine(input: AndItInput): void {
-  const { ctx, label, leadingSpaces, lineNo, parent } = input;
-  const it: ItNode = { kind: "it", label, line: lineNo };
+  const { ctx, label, labelSpan, leadingSpaces, lineNo, parent } = input;
+  const it: ItNode = { kind: "it", label, labelSpan, line: lineNo };
 
   if (parent == null) {
     pushError(ctx, lineNo, "it must appear under a when or and.");

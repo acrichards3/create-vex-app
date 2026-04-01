@@ -165,6 +165,12 @@ export function getEditorVisualHtml(webview: Webview, scriptUri: Uri): string {
     .vex-ed-placeholder {
       opacity: 0.8;
     }
+    .vex-node-card {
+      cursor: pointer;
+    }
+    .vex-node-card:hover {
+      outline: 1px solid rgba(167, 139, 250, 0.45);
+    }
   </style>
 </head>
 <body>

@@ -302,6 +302,12 @@ function setupPan(): void {
     if (!(t instanceof Node) || !vp.contains(t)) {
       return;
     }
+    if (t instanceof SVGElement) {
+      const card = t.closest("rect.vex-node-card");
+      if (card != null) {
+        return;
+      }
+    }
     e.preventDefault();
     panDragging = true;
     dragPointerId = e.pointerId;
@@ -483,6 +489,40 @@ window.addEventListener("message", function (event: MessageEvent) {
   renderPayload(data.payload);
 });
 
+function setupNodeLabelClick(): void {
+  if (!contentEl) {
+    return;
+  }
+  contentEl.addEventListener("click", function onNodeCardClick(e: MouseEvent): void {
+    const t = e.target;
+    if (!(t instanceof SVGElement)) {
+      return;
+    }
+    const card = t.closest("rect.vex-node-card");
+    if (!card) {
+      return;
+    }
+    const startAttr = card.getAttribute("data-label-start");
+    const endAttr = card.getAttribute("data-label-end");
+    if (startAttr == null || endAttr == null) {
+      return;
+    }
+    const start = Number(startAttr);
+    const end = Number(endAttr);
+    if (!Number.isFinite(start)) {
+      return;
+    }
+    if (!Number.isFinite(end)) {
+      return;
+    }
+    if (start > end) {
+      return;
+    }
+    vscode.postMessage({ end, start, type: "vexEditLabelRequest" });
+  });
+}
+
 setupPan();
 setupZoomControls();
+setupNodeLabelClick();
 vscode.postMessage({ type: "vexVisualReady" });

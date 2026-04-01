@@ -1,6 +1,12 @@
+export type LabelSpan = {
+  end: number;
+  start: number;
+};
+
 export type ItNode = {
   kind: "it";
   label: string;
+  labelSpan: LabelSpan;
   line: number;
 };
 
@@ -8,6 +14,7 @@ export type AndNode = {
   child: BranchNode | undefined;
   kind: "and";
   label: string;
+  labelSpan: LabelSpan;
   line: number;
 };
 
@@ -16,11 +23,13 @@ export type BranchNode = ItNode | AndNode;
 export type WhenNode = {
   branches: BranchNode[];
   label: string;
+  labelSpan: LabelSpan;
   line: number;
 };
 
 export type DescribeBlock = {
   label: string;
+  labelSpan: LabelSpan;
   line: number;
   nestedDescribes: DescribeBlock[];
   whens: WhenNode[];

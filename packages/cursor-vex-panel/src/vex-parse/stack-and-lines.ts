@@ -27,6 +27,49 @@ export function labelAfterKeywordPrefix(trimmed: string, keywordLen: number): [b
   return [true, after.slice(1).trim()];
 }
 
+export type LabelSpanInLine = {
+  end: number;
+  start: number;
+};
+
+export type LabelSpanParseResult = { span: LabelSpanInLine | null };
+
+export function parseDescribeLabelSpanInContent(content: string): LabelSpanParseResult {
+  const trimmed = content.trimStart();
+  const m = /^describe\s*:\s*/iu.exec(trimmed);
+  if (m == null) {
+    return { span: null };
+  }
+  const rest = trimmed.slice(m[0].length);
+  const prefixOffset = content.length - trimmed.length;
+  const startInTrimmed = m[0].length + (rest.length - rest.trimStart().length);
+  const endInTrimmed = m[0].length + rest.trimEnd().length;
+  return {
+    span: {
+      end: prefixOffset + endInTrimmed,
+      start: prefixOffset + startInTrimmed,
+    },
+  };
+}
+
+export function parseListLabelSpanInContent(content: string): LabelSpanParseResult {
+  const trimmed = content.trimStart();
+  const m = /^(when|and|it)\s*:\s*/iu.exec(trimmed);
+  if (m == null) {
+    return { span: null };
+  }
+  const rest = trimmed.slice(m[0].length);
+  const prefixOffset = content.length - trimmed.length;
+  const startInTrimmed = m[0].length + (rest.length - rest.trimStart().length);
+  const endInTrimmed = m[0].length + rest.trimEnd().length;
+  return {
+    span: {
+      end: prefixOffset + endInTrimmed,
+      start: prefixOffset + startInTrimmed,
+    },
+  };
+}
+
 export function parseListLineParts(content: string): { keyword: null | string; label: string } {
   const trimmed = content.trimStart();
   const lower = trimmed.toLowerCase();

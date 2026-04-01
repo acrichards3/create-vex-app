@@ -1,3 +1,5 @@
+import type { LabelSpan } from "../vex-parse/types";
+
 export const SVG_NS = "http://www.w3.org/2000/svg";
 
 export const NODE_W = 200;
@@ -26,6 +28,7 @@ export type SizedNode = {
   kids: SizedNode[];
   kind: TreeKind;
   label: string;
+  labelSpan: LabelSpan;
   line: number;
   w: number;
 };

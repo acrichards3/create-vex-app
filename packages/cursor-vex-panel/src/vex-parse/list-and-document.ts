@@ -1,21 +1,23 @@
 import {
   countLeadingSpaces,
   parseDescribeHeaderFromLine,
+  parseListLabelSpanInContent,
   parseListLineParts,
   peekStack,
   popStackForListLine,
   pushError,
 } from "./stack-and-lines";
 import { processAndLine, processDescribeDeclarationLine, processItLine, processWhenLine } from "./statement-handlers";
-import type { ParseContext, ParseError, VexDocument } from "./types";
+import type { LabelSpan, ParseContext, ParseError, VexDocument } from "./types";
 
 export function processListLine(input: {
   content: string;
   ctx: ParseContext;
   leadingSpaces: number;
   lineNo: number;
+  lineStartOffset: number;
 }): void {
-  const { content, ctx, leadingSpaces, lineNo } = input;
+  const { content, ctx, leadingSpaces, lineNo, lineStartOffset } = input;
   const { keyword, label } = parseListLineParts(content);
   if (keyword == null) {
     pushError(ctx, lineNo, 'Expected a line starting with "when:", "and:", or "it:" (case-insensitive).');
@@ -26,6 +28,18 @@ export function processListLine(input: {
     pushError(ctx, lineNo, "Missing text after the colon; add a non-empty label.");
     return;
   }
+
+  const spanParsed = parseListLabelSpanInContent(content);
+  if (spanParsed.span == null) {
+    pushError(ctx, lineNo, "Could not locate label text in this line.");
+    return;
+  }
+
+  const spanLocal = spanParsed.span;
+  const labelSpan: LabelSpan = {
+    end: lineStartOffset + leadingSpaces + spanLocal.end,
+    start: lineStartOffset + leadingSpaces + spanLocal.start,
+  };
 
   const popped = popStackForListLine(
     ctx.stack,
@@ -43,21 +57,24 @@ export function processListLine(input: {
   const { parent } = peekStack(ctx.stack);
 
   if (keyword === "WHEN") {
-    processWhenLine({ ctx, label, leadingSpaces, lineNo, parent });
+    processWhenLine({ ctx, label, labelSpan, leadingSpaces, lineNo, parent });
     return;
   }
 
   if (keyword === "AND") {
-    processAndLine({ ctx, label, leadingSpaces, lineNo, parent });
+    processAndLine({ ctx, label, labelSpan, leadingSpaces, lineNo, parent });
     return;
   }
 
-  processItLine({ ctx, label, leadingSpaces, lineNo, parent });
+  processItLine({ ctx, label, labelSpan, leadingSpaces, lineNo, parent });
 }
 
-export function processVexLine(input: { ctx: ParseContext; line: { lineNo: number; rawLine: string } }): void {
+export function processVexLine(input: {
+  ctx: ParseContext;
+  line: { lineNo: number; lineStartOffset: number; rawLine: string };
+}): void {
   const { ctx, line } = input;
-  const { lineNo, rawLine } = line;
+  const { lineNo, lineStartOffset, rawLine } = line;
   if (rawLine.trim() === "") {
     return;
   }
@@ -87,13 +104,13 @@ export function processVexLine(input: { ctx: ParseContext; line: { lineNo: numbe
       return;
     }
 
-    processListLine({ content, ctx, leadingSpaces, lineNo });
+    processListLine({ content, ctx, leadingSpaces, lineNo, lineStartOffset });
     return;
   }
 
   const { label: describeLabel } = parseDescribeHeaderFromLine(content);
   if (describeLabel != null) {
-    processDescribeDeclarationLine({ content, ctx, leadingSpaces, lineNo });
+    processDescribeDeclarationLine({ content, ctx, leadingSpaces, lineNo, lineStartOffset });
     return;
   }
 
@@ -120,10 +137,15 @@ export function parseVexDocument(source: string): {
 
   const lines = source.split(/\r?\n/u);
   let lineNo = 0;
+  let lineStartOffset = 0;
 
-  lines.forEach((rawLine) => {
+  lines.forEach((rawLine, lineIndex) => {
     lineNo += 1;
-    processVexLine({ ctx, line: { lineNo, rawLine } });
+    processVexLine({ ctx, line: { lineNo, lineStartOffset, rawLine } });
+    lineStartOffset += rawLine.length;
+    if (lineIndex < lines.length - 1) {
+      lineStartOffset += 1;
+    }
   });
 
   if (document.describes.length === 0 && errors.length === 0) {

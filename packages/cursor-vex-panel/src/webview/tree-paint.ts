@@ -36,6 +36,7 @@ function appendCenteredLine(
   attrs: Record<string, string>,
 ): void {
   const lineG = document.createElementNS(SVG_NS, "g");
+  lineG.setAttribute("pointer-events", "none");
   lineG.setAttribute("transform", `translate(${String(cx)}, ${String(baselineY)})`);
   lineG.appendChild(
     elSvg(
@@ -43,6 +44,7 @@ function appendCenteredLine(
       {
         ...attrs,
         "dominant-baseline": "middle",
+        "pointer-events": "none",
         "text-anchor": "middle",
         x: "0",
         y: "0",
@@ -63,6 +65,9 @@ function drawCard(g: SVGElement, n: SizedNode, x: number, y: number, cardH: numb
     elSvg(
       "rect",
       {
+        class: "vex-node-card",
+        "data-label-end": String(n.labelSpan.end),
+        "data-label-start": String(n.labelSpan.start),
         fill: NODE_FILL,
         height: String(cardH),
         rx: "8",

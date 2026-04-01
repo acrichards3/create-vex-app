@@ -5,6 +5,7 @@ export type {
   BranchNode,
   DescribeBlock,
   ItNode,
+  LabelSpan,
   ParseError,
   StackFrame,
   VexDocument,

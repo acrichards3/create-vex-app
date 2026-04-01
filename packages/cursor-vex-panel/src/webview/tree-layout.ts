@@ -9,6 +9,7 @@ function sizeIt(node: ItNode): SizedNode {
     kids: [],
     kind: "it",
     label: node.label,
+    labelSpan: node.labelSpan,
     line: node.line,
     w,
   };
@@ -25,11 +26,12 @@ function sizeAnd(node: AndNode): SizedNode {
       kids: [ch],
       kind: "and",
       label: node.label,
+      labelSpan: node.labelSpan,
       line: node.line,
       w: Math.max(w, ch.w),
     };
   }
-  return { h, kids: [], kind: "and", label: node.label, line: node.line, w };
+  return { h, kids: [], kind: "and", label: node.label, labelSpan: node.labelSpan, line: node.line, w };
 }
 
 function sizeBranch(branch: BranchNode): SizedNode {
@@ -45,7 +47,7 @@ function sizeWhen(node: WhenNode): SizedNode {
   const h = base.h;
   const kids = node.branches.map(sizeBranch);
   if (kids.length === 0) {
-    return { h, kids: [], kind: "when", label: node.label, line: node.line, w };
+    return { h, kids: [], kind: "when", label: node.label, labelSpan: node.labelSpan, line: node.line, w };
   }
   if (kids.length === 1) {
     const k = kids[0];
@@ -54,6 +56,7 @@ function sizeWhen(node: WhenNode): SizedNode {
       kids,
       kind: "when",
       label: node.label,
+      labelSpan: node.labelSpan,
       line: node.line,
       w: Math.max(w, k.w),
     };
@@ -72,6 +75,7 @@ function sizeWhen(node: WhenNode): SizedNode {
     kids,
     kind: "when",
     label: node.label,
+    labelSpan: node.labelSpan,
     line: node.line,
     w: Math.max(w, rowW),
   };
@@ -89,7 +93,7 @@ export function sizeDescribe(block: DescribeBlock): SizedNode {
     kids.push(sizeWhen(when));
   });
   if (kids.length === 0) {
-    return { h, kids: [], kind: "describe", label: block.label, line: block.line, w };
+    return { h, kids: [], kind: "describe", label: block.label, labelSpan: block.labelSpan, line: block.line, w };
   }
   if (kids.length === 1) {
     const kk = kids[0];
@@ -98,6 +102,7 @@ export function sizeDescribe(block: DescribeBlock): SizedNode {
       kids,
       kind: "describe",
       label: block.label,
+      labelSpan: block.labelSpan,
       line: block.line,
       w: Math.max(w, kk.w),
     };
@@ -116,6 +121,7 @@ export function sizeDescribe(block: DescribeBlock): SizedNode {
     kids,
     kind: "describe",
     label: block.label,
+    labelSpan: block.labelSpan,
     line: block.line,
     w: Math.max(w, rw),
   };
