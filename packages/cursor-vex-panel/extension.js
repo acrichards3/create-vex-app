@@ -572,9 +572,25 @@ function getEditorVisualHtml(webview, scriptUri) {
     }
     .vex-node-card {
       cursor: pointer;
+      transition: filter 0.16s ease, stroke-width 0.16s ease;
     }
     .vex-node-card:hover {
-      outline: 1px solid rgba(167, 139, 250, 0.45);
+      stroke-width: 2.75;
+      filter: drop-shadow(0 0 4px rgba(196, 181, 253, 0.5))
+        drop-shadow(0 0 12px rgba(167, 139, 250, 0.22));
+    }
+    .vex-inline-edit-inner {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .vex-inline-edit-inner textarea {
+      user-select: text;
+    }
+    .vex-inline-edit-fo textarea:focus {
+      box-shadow: inset 0 0 0 2px rgba(167, 139, 250, 0.65);
     }
   </style>
 </head>
@@ -999,19 +1015,22 @@ var vscode = __toESM(require("vscode"));
 function isRecord(value) {
   return typeof value === "object" && value !== null;
 }
-function isVexEditLabelRequest(value) {
+function isVexApplyLabelEdit(value) {
   if (!isRecord(value)) {
     return false;
   }
-  if (value.type !== "vexEditLabelRequest") {
+  if (value.type !== "vexApplyLabelEdit") {
     return false;
   }
   if (typeof value.start !== "number" || typeof value.end !== "number") {
     return false;
   }
+  if (typeof value.text !== "string") {
+    return false;
+  }
   return value.start <= value.end;
 }
-async function applyVexLabelEdit(uri, start, end) {
+async function applyVexLabelReplace(uri, start, end, text) {
   const doc = await vscode.workspace.openTextDocument(uri);
   const len = doc.getText().length;
   const rangeOk = start >= 0 && end <= len && start <= end;
@@ -1021,16 +1040,19 @@ async function applyVexLabelEdit(uri, start, end) {
   }
   const range = new vscode.Range(doc.positionAt(start), doc.positionAt(end));
   const current = doc.getText(range);
-  const next = await vscode.window.showInputBox({
-    title: "Edit Vex label",
-    value: current
-  });
-  if (typeof next !== "string") {
+  if (current === text) {
     return;
   }
   const edit = new vscode.WorkspaceEdit;
-  edit.replace(uri, range, next);
-  await vscode.workspace.applyEdit(edit);
+  edit.replace(uri, range, text);
+  const applied = await vscode.workspace.applyEdit(edit);
+  if (!applied) {
+    return;
+  }
+  const saved = await doc.save();
+  if (!saved) {
+    await vscode.window.showErrorMessage("Could not save the .vex file to disk.");
+  }
 }
 
 // src/vex-tree-custom-document.ts
@@ -1090,8 +1112,8 @@ function resolveVexTreeEditor(input) {
     });
   };
   const subReady = webviewPanel.webview.onDidReceiveMessage((message) => {
-    if (isVexEditLabelRequest(message)) {
-      applyVexLabelEdit(document.uri, message.start, message.end);
+    if (isVexApplyLabelEdit(message)) {
+      applyVexLabelReplace(document.uri, message.start, message.end, message.text);
       return;
     }
     if (typeof message === "object" && message !== null && "type" in message && message.type === "vexVisualReady") {

@@ -1,4 +1,5 @@
 import type { ParseError, VexDocument } from "../vex-parse/types";
+import { clearInlineEditorFromContent, isInlineEditorTarget, setupInlineLabelEditing } from "./inline-label-editor";
 import { renderDescribeBlock } from "./tree-paint";
 
 declare function acquireVsCodeApi(): {
@@ -299,6 +300,9 @@ function setupPan(): void {
       return;
     }
     const t = e.target;
+    if (isInlineEditorTarget(t)) {
+      return;
+    }
     if (!(t instanceof Node) || !vp.contains(t)) {
       return;
     }
@@ -358,6 +362,7 @@ function renderDocument(vexDoc: VexDocument, viewportOptions: { resetViewport?: 
   if (!contentEl) {
     return;
   }
+  clearInlineEditorFromContent(contentEl);
   const resetViewport = viewportOptions?.resetViewport === true;
   const describes = vexDoc.describes;
   if (describes.length === 0) {
@@ -489,40 +494,7 @@ window.addEventListener("message", function (event: MessageEvent) {
   renderPayload(data.payload);
 });
 
-function setupNodeLabelClick(): void {
-  if (!contentEl) {
-    return;
-  }
-  contentEl.addEventListener("click", function onNodeCardClick(e: MouseEvent): void {
-    const t = e.target;
-    if (!(t instanceof SVGElement)) {
-      return;
-    }
-    const card = t.closest("rect.vex-node-card");
-    if (!card) {
-      return;
-    }
-    const startAttr = card.getAttribute("data-label-start");
-    const endAttr = card.getAttribute("data-label-end");
-    if (startAttr == null || endAttr == null) {
-      return;
-    }
-    const start = Number(startAttr);
-    const end = Number(endAttr);
-    if (!Number.isFinite(start)) {
-      return;
-    }
-    if (!Number.isFinite(end)) {
-      return;
-    }
-    if (start > end) {
-      return;
-    }
-    vscode.postMessage({ end, start, type: "vexEditLabelRequest" });
-  });
-}
-
 setupPan();
 setupZoomControls();
-setupNodeLabelClick();
+setupInlineLabelEditing({ contentEl, vscode });
 vscode.postMessage({ type: "vexVisualReady" });

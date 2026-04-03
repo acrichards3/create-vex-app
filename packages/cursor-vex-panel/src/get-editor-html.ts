@@ -167,9 +167,25 @@ export function getEditorVisualHtml(webview: Webview, scriptUri: Uri): string {
     }
     .vex-node-card {
       cursor: pointer;
+      transition: filter 0.16s ease, stroke-width 0.16s ease;
     }
     .vex-node-card:hover {
-      outline: 1px solid rgba(167, 139, 250, 0.45);
+      stroke-width: 2.75;
+      filter: drop-shadow(0 0 4px rgba(196, 181, 253, 0.5))
+        drop-shadow(0 0 12px rgba(167, 139, 250, 0.22));
+    }
+    .vex-inline-edit-inner {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .vex-inline-edit-inner textarea {
+      user-select: text;
+    }
+    .vex-inline-edit-fo textarea:focus {
+      box-shadow: inset 0 0 0 2px rgba(167, 139, 250, 0.65);
     }
   </style>
 </head>

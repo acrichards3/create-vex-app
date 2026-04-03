@@ -8,7 +8,7 @@ import type {
 import * as vscode from "vscode";
 import { getEditorVisualHtml } from "./get-editor-html";
 import { parseVexDocument } from "./vex-parse";
-import { applyVexLabelEdit, isVexEditLabelRequest } from "./vex-edit-label";
+import { applyVexLabelReplace, isVexApplyLabelEdit } from "./vex-edit-label";
 import { VexTreeCustomDocument } from "./vex-tree-custom-document";
 import { loadVexFileText } from "./vex-tree-load-text";
 
@@ -62,8 +62,8 @@ function resolveVexTreeEditor(input: ResolveVexTreeInput): void {
   };
 
   const subReady = webviewPanel.webview.onDidReceiveMessage((message: unknown) => {
-    if (isVexEditLabelRequest(message)) {
-      void applyVexLabelEdit(document.uri, message.start, message.end);
+    if (isVexApplyLabelEdit(message)) {
+      void applyVexLabelReplace(document.uri, message.start, message.end, message.text);
       return;
     }
     if (typeof message === "object" && message !== null && "type" in message && message.type === "vexVisualReady") {

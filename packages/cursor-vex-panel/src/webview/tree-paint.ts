@@ -66,6 +66,7 @@ function drawCard(g: SVGElement, n: SizedNode, x: number, y: number, cardH: numb
       "rect",
       {
         class: "vex-node-card",
+        "data-label-enc": encodeURIComponent(n.label),
         "data-label-end": String(n.labelSpan.end),
         "data-label-start": String(n.labelSpan.start),
         fill: NODE_FILL,
