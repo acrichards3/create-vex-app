@@ -35,6 +35,3 @@ coverage/
 
 # Misc
 .cache/
-
-# Spec-first workflow state — managed automatically by hooks
-.spec-pending

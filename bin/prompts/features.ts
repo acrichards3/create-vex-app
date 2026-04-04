@@ -16,7 +16,3 @@ export const promptIncludeGithub = async (): ReturnType<typeof askYesNo> => {
 export const promptIncludeDeploy = async (): ReturnType<typeof askYesNo> => {
   return askYesNo("Include Vex App quick deploy setup?", true);
 };
-
-export const promptIncludeSpecFirst = async (): ReturnType<typeof askYesNo> => {
-  return askYesNo("Use AI spec-first workflow? (AI writes test paths, you approve, AI builds)", true);
-};

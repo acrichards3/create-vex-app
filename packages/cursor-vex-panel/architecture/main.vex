@@ -1,6 +1,0 @@
-describe: The entire spec-first workflow
-    describe: The bottom vex panel
-        when: the user opens the panel
-            it: Shows the progress stepper visual with the default step being the "Descibe" step, and the "Enable spec-first workflow" toggle is on by default
-    describe: The Vex visual editor
-    

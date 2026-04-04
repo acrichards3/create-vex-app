@@ -11,7 +11,7 @@ body:
     id: page
     attributes:
       label: Which page or section?
-      description: Link to the page or describe the section (e.g. "Testing / Spec-First Workflow").
+      description: Link to the page or describe the section.
       placeholder: "https://vexapp.io/introduction/... or 'AI Integration > Hooks'"
     validations:
       required: true

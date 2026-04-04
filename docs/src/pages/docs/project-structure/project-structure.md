@@ -18,7 +18,6 @@ my-app/
 ├── .cursor/hooks/     # Post-write and pre-write enforcement hooks
 ├── .github/workflows/ # CI/CD pipeline
 ├── docker-compose.test.yml  # PostgreSQL container for running backend tests
-├── .spec-pending      # Spec-first workflow state (git-ignored, managed by hooks)
 ├── package.json       # Root workspace config & scripts
 ├── tsconfig.json      # TypeScript project references
 ├── .prettierrc        # Prettier config
@@ -141,14 +140,13 @@ import { raise, tryCatch } from "@vex-app/lib";
 
 ## Root Configuration
 
-| File              | Purpose                                                                                                                                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `package.json`    | Workspace definitions, root scripts (`dev`, `build`, `lint`, `format`, `db:*`)                                                                                                                                    |
-| `tsconfig.json`   | TypeScript project references to `frontend`, `lib`, and `backend`                                                                                                                                                 |
-| `.prettierrc`     | Code formatting rules shared across all packages                                                                                                                                                                  |
-| `.prettierignore` | Excludes auto-generated files (e.g. `routeTree.gen.ts`) from formatting                                                                                                                                           |
-| `.gitignore`      | Ignores `node_modules`, `dist`, `.env`, build artifacts                                                                                                                                                           |
-| `.spec-pending`   | Spec-first workflow lock file — empty means clear to build, content means specs are awaiting approval. Git-ignored, managed automatically by hooks. Only present if spec-first workflow was enabled during setup. |
+| File              | Purpose                                                                        |
+| ----------------- | ------------------------------------------------------------------------------ |
+| `package.json`    | Workspace definitions, root scripts (`dev`, `build`, `lint`, `format`, `db:*`) |
+| `tsconfig.json`   | TypeScript project references to `frontend`, `lib`, and `backend`              |
+| `.prettierrc`     | Code formatting rules shared across all packages                               |
+| `.prettierignore` | Excludes auto-generated files (e.g. `routeTree.gen.ts`) from formatting        |
+| `.gitignore`      | Ignores `node_modules`, `dist`, `.env`, build artifacts                        |
 
 ## Scripts (`scripts/`)
 
@@ -167,21 +165,14 @@ Included rules guide Cursor AI to follow project conventions:
 - **testing.mdc** — WHEN/AND/it test structure, `.spec.ts` file naming, Bun test runner conventions
 - **verification.mdc** — Run linting, type checking, and builds after every change
 
-If the spec-first workflow is enabled, an additional rule is added:
-
-- **spec-first.mdc** — Enforces the three-step spec → approve → implement workflow for every feature
-
 ## Cursor Hooks (`.cursor/hooks/`)
 
-Shell scripts registered in `.cursor/hooks.json` run on AI file writes and at the end of each agent turn. They enforce code quality, protect critical config files, and support the spec-first workflow.
+Shell scripts registered in `.cursor/hooks.json` run on AI file writes and at the end of each agent turn. They enforce code quality and protect critical config files.
 
 **Pre-write hooks** (`preToolUse` — run before a write and can block it):
 
 - **`eslint-guard.sh`** — Blocks writes to ESLint config and custom rule files
 - **`tsconfig-guard.sh`** — Blocks writes or deletes of `tsconfig*.json` files
-- **`spec-check.sh`** — Blocks implementation when `.spec-pending` has content; blocks markdown outside `docs/` as fake specs; for backend and `lib/src`, requires co-located `.spec.ts` for logical implementation files
-- **`spec-lint.sh`** — Validates spec file structure (one `it` or `it.todo` per `describe`) before the write lands
-- **`spec-delete-guard.sh`** — Requires confirmation before deleting a `.spec.ts` file
 
 **Post-write hooks** (`postToolUse` — run after a write):
 
@@ -189,13 +180,10 @@ Shell scripts registered in `.cursor/hooks.json` run on AI file writes and at th
 - **`eslint.sh`** — Runs ESLint in the relevant workspace
 - **`typecheck.sh`** — Runs TypeScript checks
 - **`jscpd.sh`** — Runs duplicate-code detection
-- **`spec-marker.sh`** — Appends to `.spec-pending` when a `.spec.ts` file is written
 
 **Stop hook** (runs once at the end of every AI turn):
 
 - **`eslint-stop.sh`** — Surfaces ESLint issues, TypeScript errors, Prettier drift, failing tests, and unfilled `it.todo()` before the turn completes
-
-If you enable spec-first during `bun create`, the CLI adds **spec-first.mdc**, creates an empty **`.spec-pending`**, and refreshes the spec-related hook scripts from the generator templates.
 
 ## CI/CD (`.github/workflows/`)
 
