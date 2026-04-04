@@ -3,6 +3,18 @@
   "hooks": {
     "preToolUse": [
       {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Write"
+      },
+      {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Delete"
+      },
+      {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Shell"
+      },
+      {
         "command": ".cursor/hooks/eslint-guard.sh",
         "matcher": "Write"
       },
@@ -12,18 +24,6 @@
       },
       {
         "command": ".cursor/hooks/tsconfig-guard.sh",
-        "matcher": "Delete"
-      },
-      {
-        "command": ".cursor/hooks/spec-check.sh",
-        "matcher": "Write"
-      },
-      {
-        "command": ".cursor/hooks/spec-lint.sh",
-        "matcher": "Write"
-      },
-      {
-        "command": ".cursor/hooks/spec-delete-guard.sh",
         "matcher": "Delete"
       }
     ],
@@ -42,10 +42,6 @@
       },
       {
         "command": ".cursor/hooks/jscpd.sh",
-        "matcher": "Write"
-      },
-      {
-        "command": ".cursor/hooks/spec-marker.sh",
         "matcher": "Write"
       }
     ],

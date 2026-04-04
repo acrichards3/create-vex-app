@@ -1,0 +1,81 @@
+{
+  "name": "vex-studio",
+  "displayName": "Vex Studio",
+  "description": "Workflow stepper and visual tree editor for .vex spec files.",
+  "version": "0.0.3",
+  "private": true,
+  "publisher": "vex-app",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onView:vex.panel.stepper",
+    "onCommand:vex.panel.openEditorVisual",
+    "onCustomEditor:vex.tree"
+  ],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "vex.tree",
+        "displayName": "Vex tree",
+        "selector": [
+          {
+            "filenamePattern": "*.vex"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "vex.panel.openEditorVisual",
+        "title": "Open Vex tree (current .vex file)",
+        "category": "Vex"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "vex-panel",
+          "title": "Vex",
+          "icon": "media/vex-panel.svg"
+        }
+      ]
+    },
+    "views": {
+      "vex-panel": [
+        {
+          "type": "webview",
+          "id": "vex.panel.stepper",
+          "name": "Workflow"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "bun run build:extension && bun run build:webview",
+    "build:extension": "bun build ./src/extension.ts --outfile=./extension.js --target=node --format=cjs --external=vscode",
+    "build:webview": "bun build ./src/webview/editor-visual.ts --outfile=./media/editor-visual.js --target=browser --minify",
+    "vsix": "bun run build && bunx vsce package --no-dependencies --allow-missing-repository --skip-license",
+    "vsix:install": "bun run vsix && cursor --install-extension ./vex-studio-0.0.3.vsix",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.84.0",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9",
+    "eslint-plugin-perfectionist": "^5",
+    "eslint-plugin-sonarjs": "^4",
+    "eslint-plugin-unicorn": "56",
+    "typescript": "^6.0.0"
+  }
+}

@@ -1,6 +1,6 @@
 # AI Integration
 
-Vex App is built for AI-assisted development. Every project ships with a strict ESLint config, Cursor rules, and hooks that work together to keep AI agents writing clean, compliant code. The CLI does not ask whether you want those guardrails; the only optional workflow prompt is **spec-first** (see below).
+Vex App is built for AI-assisted development. Every project ships with a strict ESLint config, Cursor rules, and hooks that work together to keep AI agents writing clean, compliant code.
 
 ## How It Works
 
@@ -44,17 +44,7 @@ Rules use `alwaysApply: true` for general rules or `globs` for file-specific rul
 
 ### Testing Conventions
 
-Cursor rules for every project include testing guidance: structured **WHEN / AND / it** tests with Bun's test runner, co-located `.spec.ts` files, decision-tree structure, and strict setup/assertion/mocking conventions. See the [Testing](/testing) page for the full convention guide. The optional spec-first workflow adds **mechanical** enforcement on top of those rules.
-
-### Spec-First Workflow
-
-If you enable the spec-first workflow during setup ("Use AI spec-first workflow?"), the AI agent follows a strict three-step process for every new feature:
-
-1. **Write the specs** — Creates `.spec.ts` files for every logical layer (controller, actions, service) with `it.todo()` blocks mapping all code paths using the WHEN/AND/it structure. No implementation code is written.
-2. **Stop and ask** — Presents the test structure and asks you to approve, modify, or add paths before proceeding.
-3. **Implement** — Only after you approve does the AI create the implementation files, replace the `it.todo()` blocks with real assertions, and run `bun test` to verify everything passes.
-
-This workflow is enforced mechanically through hooks (including `spec-check`, `spec-marker`, and `spec-lint`) and a `.spec-pending` marker file — not just through rules. See the [Testing](/testing) page for how it works in detail.
+Cursor rules for every project include testing guidance: structured **WHEN / AND / it** tests with Bun's test runner, co-located `.spec.ts` files, decision-tree structure, and strict setup/assertion/mocking conventions. See the [Testing](/testing) page for the full convention guide.
 
 ## Hooks
 
@@ -66,9 +56,6 @@ These run before every file write and can block it entirely:
 
 - **`eslint-guard.sh`** — Blocks writes to ESLint config files and custom rule files unless you allow them.
 - **`tsconfig-guard.sh`** — Blocks writes or deletes targeting `tsconfig*.json` files.
-- **`spec-check.sh`** — If `.spec-pending` has content, blocks implementation writes while specs await approval. Also blocks markdown outside `docs/` used as fake "specs", and (for backend and `lib/src`) requires a co-located `.spec.ts` before certain implementation files.
-- **`spec-lint.sh`** — Parses incoming spec file content and blocks the write if a single `describe` contains more than one `it` or `it.todo`. Enforces one leaf test per `describe`.
-- **`spec-delete-guard.sh`** — Requires confirmation before the AI deletes a `.spec.ts` file.
 
 ### Post-Write Hooks (`postToolUse`)
 
@@ -78,7 +65,6 @@ These run after a file is written:
 - **`eslint.sh`** — Runs ESLint for the touched workspace context.
 - **`typecheck.sh`** — Runs TypeScript checking.
 - **`jscpd.sh`** — Runs duplicate-code detection.
-- **`spec-marker.sh`** — When a `.spec.ts` file is written, appends its path to `.spec-pending` so you know specs need approval before implementation.
 
 ### Stop Hook (`eslint-stop.sh`)
 

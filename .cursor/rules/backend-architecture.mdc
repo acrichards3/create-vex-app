@@ -6,8 +6,6 @@ alwaysApply: true
 
 ## Backend Architecture
 
-> **Before creating any of these files, follow `spec-first.mdc`.** Write the `.spec.ts` files for each layer first and wait for explicit user approval. This rule describes *how* to implement — not *when*. Do not create any implementation files until the spec-first workflow is complete.
-
 The backend follows a layered architecture organized by feature. Each feature lives in its own folder under `backend/src/features/`.
 
 **Every feature MUST have all four files: `*.controller.ts`, `*.actions.ts`, `*.service.ts`, and `*.schema.ts`.** Do not collapse layers. Do not put business logic in the controller. Do not put database queries in actions. No exceptions.

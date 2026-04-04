@@ -1,0 +1,55 @@
+{
+  "name": "vex-spec",
+  "displayName": "Vex spec (.vex)",
+  "description": "Syntax highlighting and live validation for .vex specification files (self-contained parser).",
+  "version": "0.0.4",
+  "private": true,
+  "publisher": "vex-app",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "extension.js",
+  "activationEvents": [
+    "onLanguage:vex"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "vex",
+        "aliases": [
+          "Vex specification"
+        ],
+        "extensions": [
+          ".vex"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "./icons/vex-app-logo.png",
+          "light": "./icons/vex-app-logo.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "vex",
+        "path": "./syntaxes/vex.tmLanguage.json",
+        "scopeName": "source.vex"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "vex-spec-file-icons",
+        "path": "./vex-file-icon-theme.json",
+        "extends": {
+          "all": true
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "node --check extension.js && node --check vex-parse.js"
+  }
+}

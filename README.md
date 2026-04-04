@@ -34,7 +34,6 @@ The generator will:
 - Apply the strict ESLint flat configs (`eslint.config.js` per workspace), custom lint rules for tests where applicable, and backend/lib test DB bootstrap files (`docker-compose.test.yml`, `bunfig.toml`, `test-setup.ts`, and related scripts)
 - Optionally include GitHub CI/CD pipeline
 - Optionally include quick deploy setup (when GitHub CI is enabled)
-- Optionally enable the spec-first workflow — adds `spec-first.mdc`, seeds `.spec-pending`, and refreshes spec-related Cursor hooks (see **AI Integration** below)
 - Ask to run `bun install` (workspaces) and optionally build `lib`
 
 ## 📁 Project Structure
@@ -67,7 +66,6 @@ my-app/
 ├── scripts/                 # Dev script (parallel service runner)
 ├── .cursor/rules/           # Cursor AI rules for project conventions
 ├── .cursor/hooks/           # Pre-write and post-write hooks (ESLint, Prettier, tsc, jscpd, spec enforcement)
-├── .spec-pending            # Spec-first workflow lock file (git-ignored, only if spec-first enabled)
 ├── .jscpd.json              # Duplicate code detection config
 ├── .github/workflows/       # CI/CD pipeline
 ├── package.json             # Root workspace config & scripts
@@ -341,14 +339,12 @@ Environment variables are validated at startup with Zod. The backend logs errors
 
 ## 🤖 AI Integration
 
-Every generated project is set up for AI-assisted development. There is no separate "AI settings" prompt: strict ESLint, Cursor rules, hooks, and `.jscpd.json` ship with the template. The only optional step is **spec-first** (see below).
+Every generated project is set up for AI-assisted development. Strict ESLint, Cursor rules, hooks, and `.jscpd.json` ship with the template.
 
 - **Strict ESLint** — The generator ensures each workspace uses the hardened flat config (`eslint.config.js`) with `sonarjs`, `unicorn`, and `perfectionist`, plus stricter rules than a typical starter: explicit return types, no type assertions, immutability, no raw `try/catch` (use `tryCatch` / `tryCatchAsync` from `lib`), complexity limits, and more.
 - **Cursor rules** (`.cursor/rules/`) — `.mdc` files with frontmatter that Cursor injects into context: stack constraints, Tailwind and component layout rules, types, Zod v4, Bun, backend layering, testing conventions, and verification.
-- **Cursor hooks** (`.cursor/hooks/` + `hooks.json`) — Pre-write hooks can block bad writes (for example ESLint/tsconfig edits, spec-first gates, spec file structure). Post-write hooks run **Prettier**, **ESLint**, **TypeScript**, **jscpd**, and **spec-marker** (records pending specs). A **stop** hook (`eslint-stop.sh`) runs at the end of an agent turn to surface lint, type, format, test, and `it.todo()` issues.
+- **Cursor hooks** (`.cursor/hooks/` + `hooks.json`) — Pre-write hooks can block bad writes (for example ESLint/tsconfig edits). Post-write hooks run **Prettier**, **ESLint**, **TypeScript**, and **jscpd**. A **stop** hook (`eslint-stop.sh`) runs at the end of an agent turn to surface lint, type, format, test, and `it.todo()` issues.
 - **Duplicate detection** (`.jscpd.json`) — Copy-paste thresholds for the duplicate checker.
-
-**Spec-first workflow (optional)** — If you answer **yes** to "Use AI spec-first workflow?", the CLI adds **spec-first.mdc**, creates an empty **`.spec-pending`** at the repo root, and refreshes the spec-related hook scripts. That workflow forces the AI to write WHEN/AND/`it.todo()` specs first, get your approval, then implement. If you answer **no**, you still get the same ESLint, rules, and hooks; you simply do not get the extra rule file or the seeded `.spec-pending` from that prompt (hooks that care about `.spec-pending` only block when that file has content).
 
 To drop Cursor integration entirely, remove or rename the `.cursor` directory yourself. To loosen ESLint, edit the workspace `eslint.config.js` files (hook scripts may still discourage changing them).
 

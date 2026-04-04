@@ -36,5 +36,8 @@ coverage/
 # Misc
 .cache/
 
-# Spec-first workflow state — managed automatically by hooks
-.spec-pending
+# Vex Studio (auto-managed by extension)
+.vex-workflow
+.vex-advance
+.cursor/rules/vex-workflow.mdc
+.cursor/hooks/vex-step-guard.sh

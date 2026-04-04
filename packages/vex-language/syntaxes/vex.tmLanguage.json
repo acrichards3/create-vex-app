@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Vex",
+  "patterns": [{ "include": "#vex-root" }],
+  "repository": {
+    "comment": {
+      "match": "#[^\\n]*",
+      "name": "comment.line.number-sign.vex"
+    },
+    "describe-header": {
+      "match": "^(\\s*)([dD][eE][sS][cC][rR][iI][bB][eE])\\s*:\\s*(.*)$",
+      "captures": {
+        "1": { "name": "meta.indent.vex" },
+        "2": { "name": "keyword.control.vex" },
+        "3": { "name": "string.unquoted.description.vex" }
+      }
+    },
+    "list-item": {
+      "match": "^(\\s*)([wW][hH][eE][nN]|[aA][nN][dD]|[iI][tT])(:)(.*)$",
+      "captures": {
+        "1": { "name": "meta.indent.vex" },
+        "2": { "name": "keyword.control.vex" },
+        "3": { "name": "punctuation.separator.key-value.vex" },
+        "4": { "name": "string.unquoted.description.vex" }
+      }
+    },
+    "vex-root": {
+      "patterns": [{ "include": "#comment" }, { "include": "#describe-header" }, { "include": "#list-item" }]
+    }
+  },
+  "scopeName": "source.vex"
+}
