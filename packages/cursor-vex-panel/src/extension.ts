@@ -1,13 +1,13 @@
 import type { ExtensionContext, WebviewView } from "vscode";
 import * as vscode from "vscode";
 import { readComposerState } from "./cursor-state-reader";
-import type { ComposerTabState } from "./cursor-state-reader";
+import type { ComposerState } from "./cursor-state-reader";
 import { buildStepperHtml } from "./stepper-html";
 import { createVexTreeEditorProvider } from "./vex-tree-editor-provider";
 
 const VIEW_ID = "vex.panel.stepper";
 const VEX_TREE_VIEW_TYPE = "vex.tree";
-const POLL_INTERVAL_MS = 2000;
+const POLL_MS = 2000;
 
 async function openVexTreeEditorForActiveFile(): Promise<void> {
   const doc = vscode.window.activeTextEditor?.document;
@@ -26,7 +26,7 @@ async function openVexTreeEditorForActiveFile(): Promise<void> {
   });
 }
 
-function stateChanged(prev: ComposerTabState | null, next: ComposerTabState): boolean {
+function stateChanged(prev: ComposerState | null, next: ComposerState): boolean {
   if (prev == null) {
     return true;
   }
@@ -45,14 +45,6 @@ function stateChanged(prev: ComposerTabState | null, next: ComposerTabState): bo
     }
   }
   return false;
-}
-
-function sendComposerState(webviewView: WebviewView, state: ComposerTabState): void {
-  void webviewView.webview.postMessage({
-    activeId: state.activeId,
-    tabs: state.tabs,
-    type: "composerTabsUpdated",
-  });
 }
 
 export function activate(context: ExtensionContext): void {
@@ -74,17 +66,25 @@ export function activate(context: ExtensionContext): void {
   );
 
   let activeWebviewView: WebviewView | undefined;
-  let lastState: ComposerTabState | null = null;
+  let lastState: ComposerState | null = null;
   let pollTimer: ReturnType<typeof setInterval> | undefined;
 
-  async function pollComposerState(): Promise<void> {
+  function sendState(webviewView: WebviewView, state: ComposerState): void {
+    void webviewView.webview.postMessage({
+      activeId: state.activeId,
+      tabs: state.tabs,
+      type: "composerState",
+    });
+  }
+
+  async function poll(): Promise<void> {
     if (activeWebviewView == null) {
       return;
     }
-    const state = await readComposerState(context);
+    const state = await readComposerState(context).catch((): ComposerState => ({ activeId: null, tabs: [] }));
     if (stateChanged(lastState, state)) {
       lastState = state;
-      sendComposerState(activeWebviewView, state);
+      sendState(activeWebviewView, state);
     }
   }
 
@@ -92,9 +92,10 @@ export function activate(context: ExtensionContext): void {
     if (pollTimer != null) {
       return;
     }
+    void poll();
     pollTimer = setInterval(() => {
-      void pollComposerState();
-    }, POLL_INTERVAL_MS);
+      void poll();
+    }, POLL_MS);
   }
 
   function stopPolling(): void {
@@ -116,8 +117,8 @@ export function activate(context: ExtensionContext): void {
         if (message.type === "openEditorVisual") {
           void openVexTreeEditorForActiveFile();
         }
-        if (message.type === "requestComposerState") {
-          void pollComposerState();
+        if (message.type === "requestState") {
+          void poll();
         }
       });
 
@@ -128,7 +129,6 @@ export function activate(context: ExtensionContext): void {
         }
       });
 
-      void pollComposerState();
       startPolling();
     },
   };

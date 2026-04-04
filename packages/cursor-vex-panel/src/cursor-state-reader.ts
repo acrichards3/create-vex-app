@@ -2,18 +2,14 @@ import { execFile } from "node:child_process";
 import { resolve } from "node:path";
 import type { ExtensionContext } from "vscode";
 
-type ComposerEntry = {
+export type ComposerTab = {
   composerId: string;
-  isArchived: boolean;
-  isDraft: boolean;
-  lastUpdatedAt: number | null;
   name: string;
-  unifiedMode: string;
 };
 
-export type ComposerTabState = {
+export type ComposerState = {
   activeId: string | null;
-  tabs: ComposerEntry[];
+  tabs: ComposerTab[];
 };
 
 type ComposerDataRaw = {
@@ -24,31 +20,6 @@ type ComposerDataRaw = {
 
 function isComposerDataRaw(value: unknown): value is ComposerDataRaw {
   return typeof value === "object" && value !== null;
-}
-
-function isValidComposerRaw(raw: unknown): raw is Record<string, unknown> {
-  if (typeof raw !== "object") {
-    return false;
-  }
-  if (raw === null) {
-    return false;
-  }
-  const obj = raw as Record<string, unknown>;
-  return typeof obj["composerId"] === "string";
-}
-
-function toComposerEntry(obj: Record<string, unknown>): ComposerEntry {
-  const lastUpdated = typeof obj["lastUpdatedAt"] === "number" ? obj["lastUpdatedAt"] : null;
-  const name = typeof obj["name"] === "string" ? obj["name"] : "";
-  const mode = typeof obj["unifiedMode"] === "string" ? obj["unifiedMode"] : "chat";
-  return {
-    composerId: obj["composerId"] as string,
-    isArchived: obj["isArchived"] === true,
-    isDraft: obj["isDraft"] === true,
-    lastUpdatedAt: lastUpdated,
-    name,
-    unifiedMode: mode,
-  };
 }
 
 function resolveDbPath(context: ExtensionContext): string {
@@ -72,8 +43,8 @@ function queryDb(dbPath: string): Promise<string> {
   });
 }
 
-function parseComposerData(raw: string): ComposerTabState {
-  const empty: ComposerTabState = { activeId: null, tabs: [] };
+function parseComposerData(raw: string): ComposerState {
+  const empty: ComposerState = { activeId: null, tabs: [] };
   if (raw.length === 0) {
     return empty;
   }
@@ -86,15 +57,20 @@ function parseComposerData(raw: string): ComposerTabState {
   const allComposers = Array.isArray(parsed.allComposers) ? parsed.allComposers : [];
 
   const selectedSet = new Set(selectedIds);
-  const tabs: ComposerEntry[] = [];
+  const tabs: ComposerTab[] = [];
   allComposers.forEach((c) => {
-    if (!isValidComposerRaw(c)) {
+    if (typeof c !== "object" || c === null) {
       return;
     }
-    if (!selectedSet.has(c["composerId"] as string)) {
+    const obj = c as Record<string, unknown>;
+    if (typeof obj["composerId"] !== "string") {
       return;
     }
-    tabs.push(toComposerEntry(c));
+    if (!selectedSet.has(obj["composerId"])) {
+      return;
+    }
+    const name = typeof obj["name"] === "string" ? obj["name"] : "";
+    tabs.push({ composerId: obj["composerId"], name });
   });
 
   let activeId: string | null = null;
@@ -107,8 +83,8 @@ function parseComposerData(raw: string): ComposerTabState {
   return { activeId, tabs };
 }
 
-export async function readComposerState(context: ExtensionContext): Promise<ComposerTabState> {
-  const empty: ComposerTabState = { activeId: null, tabs: [] };
+export async function readComposerState(context: ExtensionContext): Promise<ComposerState> {
+  const empty: ComposerState = { activeId: null, tabs: [] };
   const dbPath = resolveDbPath(context);
   if (dbPath.length === 0) {
     return empty;

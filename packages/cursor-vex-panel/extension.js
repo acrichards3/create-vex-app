@@ -54,29 +54,6 @@ var import_node_path = require("node:path");
 function isComposerDataRaw(value) {
   return typeof value === "object" && value !== null;
 }
-function isValidComposerRaw(raw) {
-  if (typeof raw !== "object") {
-    return false;
-  }
-  if (raw === null) {
-    return false;
-  }
-  const obj = raw;
-  return typeof obj["composerId"] === "string";
-}
-function toComposerEntry(obj) {
-  const lastUpdated = typeof obj["lastUpdatedAt"] === "number" ? obj["lastUpdatedAt"] : null;
-  const name = typeof obj["name"] === "string" ? obj["name"] : "";
-  const mode = typeof obj["unifiedMode"] === "string" ? obj["unifiedMode"] : "chat";
-  return {
-    composerId: obj["composerId"],
-    isArchived: obj["isArchived"] === true,
-    isDraft: obj["isDraft"] === true,
-    lastUpdatedAt: lastUpdated,
-    name,
-    unifiedMode: mode
-  };
-}
 function resolveDbPath(context) {
   const storageUri = context.storageUri;
   if (storageUri == null) {
@@ -111,13 +88,18 @@ function parseComposerData(raw) {
   const selectedSet = new Set(selectedIds);
   const tabs = [];
   allComposers.forEach((c) => {
-    if (!isValidComposerRaw(c)) {
+    if (typeof c !== "object" || c === null) {
       return;
     }
-    if (!selectedSet.has(c["composerId"])) {
+    const obj = c;
+    if (typeof obj["composerId"] !== "string") {
       return;
     }
-    tabs.push(toComposerEntry(c));
+    if (!selectedSet.has(obj["composerId"])) {
+      return;
+    }
+    const name = typeof obj["name"] === "string" ? obj["name"] : "";
+    tabs.push({ composerId: obj["composerId"], name });
   });
   let activeId = null;
   if (focusedIds.length > 0) {
@@ -336,7 +318,7 @@ var VEX_STEPPER_INLINE_CSS = `
 
 // src/stepper-html.ts
 function buildStepperHtml() {
-  return '<!DOCTYPE html><html lang="en"><head>' + '<meta charset="UTF-8" />' + `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />` + '<meta name="viewport" content="width=device-width, initial-scale=1.0" />' + "<title>Vex</title>" + "<style>" + VEX_STEPPER_INLINE_CSS + "</style></head><body>" + '<div class="vex-shell">' + '<div class="vex-shell-header">' + '<p class="vex-title" id="vex-agent-name">Agent Workflows</p>' + '<div class="vex-shell-header-right">' + '<button type="button" class="vex-open-visual" id="vex-open-visual">Open tree view</button>' + "</div></div>" + '<div id="vex-stepper-area">' + '<p class="vex-no-agents">Waiting for agent data...</p>' + "</div></div>" + "<script>" + INLINE_SCRIPT + "</script></body></html>";
+  return '<!DOCTYPE html><html lang="en"><head>' + '<meta charset="UTF-8" />' + `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />` + '<meta name="viewport" content="width=device-width, initial-scale=1.0" />' + "<title>Vex</title>" + "<style>" + VEX_STEPPER_INLINE_CSS + "</style></head><body>" + '<div class="vex-shell">' + '<div class="vex-shell-header">' + '<p class="vex-title" id="vex-agent-name">Agent Workflows</p>' + '<div class="vex-shell-header-right">' + '<button type="button" class="vex-open-visual" id="vex-open-visual">Open tree view</button>' + "</div></div>" + '<div id="vex-stepper-area"></div>' + "</div>" + "<script>" + INLINE_SCRIPT + "</script></body></html>";
 }
 var INLINE_SCRIPT = [
   "(function () {",
@@ -351,8 +333,8 @@ var INLINE_SCRIPT = [
   "",
   "  function saveState() { vscodeApi.setState({ stepByTabId: stepByTabId }); }",
   "",
-  "  function getStepForTab(tabId) {",
-  "    if (stepByTabId[tabId] != null) return stepByTabId[tabId];",
+  "  function getStep() {",
+  "    if (activeId && stepByTabId[activeId] != null) return stepByTabId[activeId];",
   "    return 0;",
   "  }",
   "",
@@ -373,48 +355,32 @@ var INLINE_SCRIPT = [
   "    return out;",
   "  }",
   "",
-  "  function renderHeader() {",
-  '    var el = document.getElementById("vex-agent-name");',
-  "    if (!el) return;",
-  "    if (activeName && activeName.length > 0) {",
-  "      el.textContent = activeName;",
-  "    } else {",
-  '      el.textContent = "Agent Workflows";',
+  "  function render() {",
+  '    var title = document.getElementById("vex-agent-name");',
+  "    if (title) {",
+  "      title.textContent = (activeName && activeName.length > 0) ? activeName : 'Agent Workflows';",
   "    }",
-  "  }",
-  "",
-  "  function renderStepper() {",
   '    var area = document.getElementById("vex-stepper-area");',
-  "    if (!area) return;",
-  "    if (!activeId) {",
-  `      area.innerHTML = '<p class="vex-no-agents">No agent tabs open</p>';`,
-  "      return;",
+  "    if (area) {",
+  `      area.innerHTML = '<div class="vex-track" role="list" aria-label="Workflow steps">' + buildTrackHtml(getStep()) + "</div>";`,
   "    }",
-  "    var step = getStepForTab(activeId);",
-  `    area.innerHTML = '<div class="vex-track" role="list" aria-label="Workflow steps">' + buildTrackHtml(step) + "</div>";`,
   "  }",
-  "",
-  "  function render() { renderHeader(); renderStepper(); }",
   "",
   "  window.addEventListener('message', function (e) {",
   "    var msg = e.data;",
   "    if (!msg) return;",
-  "    if (msg.type === 'composerTabsUpdated') {",
+  "    if (msg.type === 'composerState') {",
   "      var newId = msg.activeId;",
-  "      if (newId && newId !== activeId) {",
+  "      var tabs = msg.tabs || [];",
+  "      if (newId !== activeId) {",
   "        activeId = newId;",
   "        activeName = '';",
-  "        var tabs = msg.tabs || [];",
   "        for (var i = 0; i < tabs.length; i++) {",
   "          if (tabs[i].composerId === newId) {",
   "            activeName = tabs[i].name || '';",
   "            break;",
   "          }",
   "        }",
-  "        render();",
-  "      } else if (!activeId && msg.tabs && msg.tabs.length > 0) {",
-  "        activeId = msg.tabs[0].composerId;",
-  "        activeName = msg.tabs[0].name || '';",
   "        render();",
   "      }",
   "    }",
@@ -427,11 +393,10 @@ var INLINE_SCRIPT = [
   "      if (!isNaN(stepIdx) && stepIdx >= 0 && stepIdx < STEP_COUNT) {",
   "        stepByTabId[activeId] = stepIdx;",
   "        saveState();",
-  "        renderStepper();",
+  "        render();",
   "      }",
   "      return;",
   "    }",
-  "",
   "    var openBtn = e.target.closest('#vex-open-visual');",
   "    if (openBtn) {",
   '      vscodeApi.postMessage({ type: "openEditorVisual" });',
@@ -440,7 +405,7 @@ var INLINE_SCRIPT = [
   "  });",
   "",
   "  render();",
-  '  vscodeApi.postMessage({ type: "requestComposerState" });',
+  '  vscodeApi.postMessage({ type: "requestState" });',
   "})();"
 ].join(`
 `);
@@ -1224,7 +1189,7 @@ function createVexTreeEditorProvider(context) {
 // src/extension.ts
 var VIEW_ID = "vex.panel.stepper";
 var VEX_TREE_VIEW_TYPE = "vex.tree";
-var POLL_INTERVAL_MS = 2000;
+var POLL_MS = 2000;
 async function openVexTreeEditorForActiveFile() {
   const doc = vscode4.window.activeTextEditor?.document;
   if (doc == null) {
@@ -1261,13 +1226,6 @@ function stateChanged(prev, next) {
   }
   return false;
 }
-function sendComposerState(webviewView, state) {
-  webviewView.webview.postMessage({
-    activeId: state.activeId,
-    tabs: state.tabs,
-    type: "composerTabsUpdated"
-  });
-}
 function activate(context) {
   const vexTreeProvider = createVexTreeEditorProvider(context);
   context.subscriptions.push(vscode4.window.registerCustomEditorProvider(VEX_TREE_VIEW_TYPE, vexTreeProvider, {
@@ -1282,23 +1240,31 @@ function activate(context) {
   let activeWebviewView;
   let lastState = null;
   let pollTimer;
-  async function pollComposerState() {
+  function sendState(webviewView, state) {
+    webviewView.webview.postMessage({
+      activeId: state.activeId,
+      tabs: state.tabs,
+      type: "composerState"
+    });
+  }
+  async function poll() {
     if (activeWebviewView == null) {
       return;
     }
-    const state = await readComposerState(context);
+    const state = await readComposerState(context).catch(() => ({ activeId: null, tabs: [] }));
     if (stateChanged(lastState, state)) {
       lastState = state;
-      sendComposerState(activeWebviewView, state);
+      sendState(activeWebviewView, state);
     }
   }
   function startPolling() {
     if (pollTimer != null) {
       return;
     }
+    poll();
     pollTimer = setInterval(() => {
-      pollComposerState();
-    }, POLL_INTERVAL_MS);
+      poll();
+    }, POLL_MS);
   }
   function stopPolling() {
     if (pollTimer != null) {
@@ -1317,8 +1283,8 @@ function activate(context) {
         if (message.type === "openEditorVisual") {
           openVexTreeEditorForActiveFile();
         }
-        if (message.type === "requestComposerState") {
-          pollComposerState();
+        if (message.type === "requestState") {
+          poll();
         }
       });
       webviewView.onDidDispose(() => {
@@ -1327,7 +1293,6 @@ function activate(context) {
           stopPolling();
         }
       });
-      pollComposerState();
       startPolling();
     }
   };
