@@ -12,14 +12,20 @@ export type ComposerState = {
   tabs: ComposerTab[];
 };
 
-type ComposerDataRaw = {
-  allComposers?: unknown[];
-  lastFocusedComposerIds?: string[];
-  selectedComposerIds?: string[];
-};
+const EMPTY_STATE: ComposerState = { activeId: null, tabs: [] };
 
-function isComposerDataRaw(value: unknown): value is ComposerDataRaw {
-  return typeof value === "object" && value !== null;
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function isValidComposerEntry(raw: unknown): boolean {
+  if (typeof raw !== "object" || raw === null) {
+    return false;
+  }
+  return typeof (raw as Record<string, unknown>)["composerId"] === "string";
 }
 
 function resolveDbPath(context: ExtensionContext): string {
@@ -44,34 +50,28 @@ function queryDb(dbPath: string): Promise<string> {
 }
 
 function parseComposerData(raw: string): ComposerState {
-  const empty: ComposerState = { activeId: null, tabs: [] };
   if (raw.length === 0) {
-    return empty;
+    return EMPTY_STATE;
   }
   const parsed: unknown = JSON.parse(raw);
-  if (!isComposerDataRaw(parsed)) {
-    return empty;
+  if (typeof parsed !== "object" || parsed === null) {
+    return EMPTY_STATE;
   }
-  const selectedIds = Array.isArray(parsed.selectedComposerIds) ? (parsed.selectedComposerIds as string[]) : [];
-  const focusedIds = Array.isArray(parsed.lastFocusedComposerIds) ? (parsed.lastFocusedComposerIds as string[]) : [];
-  const allComposers = Array.isArray(parsed.allComposers) ? parsed.allComposers : [];
+  const data = parsed as Record<string, unknown>;
+  const selectedIds = toStringArray(data["selectedComposerIds"]);
+  const focusedIds = toStringArray(data["lastFocusedComposerIds"]);
+  const allComposers = Array.isArray(data["allComposers"]) ? data["allComposers"] : [];
 
   const selectedSet = new Set(selectedIds);
-  const tabs: ComposerTab[] = [];
-  allComposers.forEach((c) => {
-    if (typeof c !== "object" || c === null) {
-      return;
-    }
-    const obj = c as Record<string, unknown>;
-    if (typeof obj["composerId"] !== "string") {
-      return;
-    }
-    if (!selectedSet.has(obj["composerId"])) {
-      return;
-    }
-    const name = typeof obj["name"] === "string" ? obj["name"] : "";
-    tabs.push({ composerId: obj["composerId"], name });
-  });
+  const tabs: ComposerTab[] = allComposers
+    .filter(isValidComposerEntry)
+    .filter((c) => selectedSet.has((c as Record<string, unknown>)["composerId"] as string))
+    .map((c) => {
+      const obj = c as Record<string, unknown>;
+      const composerId = obj["composerId"] as string;
+      const name = typeof obj["name"] === "string" ? obj["name"] : "";
+      return { composerId, name };
+    });
 
   let activeId: string | null = null;
   if (focusedIds.length > 0) {
@@ -84,10 +84,9 @@ function parseComposerData(raw: string): ComposerState {
 }
 
 export async function readComposerState(context: ExtensionContext): Promise<ComposerState> {
-  const empty: ComposerState = { activeId: null, tabs: [] };
   const dbPath = resolveDbPath(context);
   if (dbPath.length === 0) {
-    return empty;
+    return EMPTY_STATE;
   }
   const raw = await queryDb(dbPath);
   return parseComposerData(raw);

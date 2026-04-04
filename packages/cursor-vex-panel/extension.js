@@ -51,8 +51,18 @@ var vscode4 = __toESM(require("vscode"));
 // src/cursor-state-reader.ts
 var import_node_child_process = require("node:child_process");
 var import_node_path = require("node:path");
-function isComposerDataRaw(value) {
-  return typeof value === "object" && value !== null;
+var EMPTY_STATE = { activeId: null, tabs: [] };
+function toStringArray(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((item) => typeof item === "string");
+}
+function isValidComposerEntry(raw) {
+  if (typeof raw !== "object" || raw === null) {
+    return false;
+  }
+  return typeof raw["composerId"] === "string";
 }
 function resolveDbPath(context) {
   const storageUri = context.storageUri;
@@ -74,32 +84,23 @@ function queryDb(dbPath) {
   });
 }
 function parseComposerData(raw) {
-  const empty = { activeId: null, tabs: [] };
   if (raw.length === 0) {
-    return empty;
+    return EMPTY_STATE;
   }
   const parsed = JSON.parse(raw);
-  if (!isComposerDataRaw(parsed)) {
-    return empty;
+  if (typeof parsed !== "object" || parsed === null) {
+    return EMPTY_STATE;
   }
-  const selectedIds = Array.isArray(parsed.selectedComposerIds) ? parsed.selectedComposerIds : [];
-  const focusedIds = Array.isArray(parsed.lastFocusedComposerIds) ? parsed.lastFocusedComposerIds : [];
-  const allComposers = Array.isArray(parsed.allComposers) ? parsed.allComposers : [];
+  const data = parsed;
+  const selectedIds = toStringArray(data["selectedComposerIds"]);
+  const focusedIds = toStringArray(data["lastFocusedComposerIds"]);
+  const allComposers = Array.isArray(data["allComposers"]) ? data["allComposers"] : [];
   const selectedSet = new Set(selectedIds);
-  const tabs = [];
-  allComposers.forEach((c) => {
-    if (typeof c !== "object" || c === null) {
-      return;
-    }
+  const tabs = allComposers.filter(isValidComposerEntry).filter((c) => selectedSet.has(c["composerId"])).map((c) => {
     const obj = c;
-    if (typeof obj["composerId"] !== "string") {
-      return;
-    }
-    if (!selectedSet.has(obj["composerId"])) {
-      return;
-    }
+    const composerId = obj["composerId"];
     const name = typeof obj["name"] === "string" ? obj["name"] : "";
-    tabs.push({ composerId: obj["composerId"], name });
+    return { composerId, name };
   });
   let activeId = null;
   if (focusedIds.length > 0) {
@@ -110,10 +111,9 @@ function parseComposerData(raw) {
   return { activeId, tabs };
 }
 async function readComposerState(context) {
-  const empty = { activeId: null, tabs: [] };
   const dbPath = resolveDbPath(context);
   if (dbPath.length === 0) {
-    return empty;
+    return EMPTY_STATE;
   }
   const raw = await queryDb(dbPath);
   return parseComposerData(raw);
@@ -192,12 +192,6 @@ var VEX_STEPPER_INLINE_CSS = `
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-    .vex-no-agents {
-      font-size: 10px;
-      color: rgba(196, 181, 253, 0.4);
-      padding: 4px 0;
-      text-align: center;
     }
     .vex-track {
       display: flex;
@@ -661,9 +655,9 @@ function labelAfterKeywordPrefix(trimmed, keywordLen) {
   }
   return [true, after.slice(1).trim()];
 }
-function parseDescribeLabelSpanInContent(content) {
+function parseLabelSpanWithPattern(content, pattern) {
   const trimmed = content.trimStart();
-  const m = /^describe\s*:\s*/iu.exec(trimmed);
+  const m = pattern.exec(trimmed);
   if (m == null) {
     return { span: null };
   }
@@ -678,22 +672,13 @@ function parseDescribeLabelSpanInContent(content) {
     }
   };
 }
+var DESCRIBE_LABEL_PATTERN = /^describe\s*:\s*/iu;
+var LIST_LABEL_PATTERN = /^(when|and|it)\s*:\s*/iu;
+function parseDescribeLabelSpanInContent(content) {
+  return parseLabelSpanWithPattern(content, DESCRIBE_LABEL_PATTERN);
+}
 function parseListLabelSpanInContent(content) {
-  const trimmed = content.trimStart();
-  const m = /^(when|and|it)\s*:\s*/iu.exec(trimmed);
-  if (m == null) {
-    return { span: null };
-  }
-  const rest = trimmed.slice(m[0].length);
-  const prefixOffset = content.length - trimmed.length;
-  const startInTrimmed = m[0].length + (rest.length - rest.trimStart().length);
-  const endInTrimmed = m[0].length + rest.trimEnd().length;
-  return {
-    span: {
-      end: prefixOffset + endInTrimmed,
-      start: prefixOffset + startInTrimmed
-    }
-  };
+  return parseLabelSpanWithPattern(content, LIST_LABEL_PATTERN);
 }
 function parseListLineParts(content) {
   const trimmed = content.trimStart();
@@ -1202,9 +1187,7 @@ async function openVexTreeEditorForActiveFile() {
     await vscode4.window.showInformationMessage("Open a .vex file first.");
     return;
   }
-  const fsPath = doc.uri.fsPath.toLowerCase();
-  const isVex = doc.languageId === "vex" ? true : fsPath.endsWith(".vex");
-  if (!isVex) {
+  if (doc.languageId !== "vex" && !doc.uri.fsPath.toLowerCase().endsWith(".vex")) {
     await vscode4.window.showInformationMessage("Open a .vex file first.");
     return;
   }
@@ -1257,7 +1240,12 @@ function activate(context) {
     if (activeWebviewView == null) {
       return;
     }
-    const state = await readComposerState(context).catch(() => ({ activeId: null, tabs: [] }));
+    let state;
+    try {
+      state = await readComposerState(context);
+    } catch {
+      state = { activeId: null, tabs: [] };
+    }
     if (stateChanged(lastState, state)) {
       lastState = state;
       sendState(activeWebviewView, state);

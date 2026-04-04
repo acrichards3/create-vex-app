@@ -15,9 +15,7 @@ async function openVexTreeEditorForActiveFile(): Promise<void> {
     await vscode.window.showInformationMessage("Open a .vex file first.");
     return;
   }
-  const fsPath = doc.uri.fsPath.toLowerCase();
-  const isVex = doc.languageId === "vex" ? true : fsPath.endsWith(".vex");
-  if (!isVex) {
+  if (doc.languageId !== "vex" && !doc.uri.fsPath.toLowerCase().endsWith(".vex")) {
     await vscode.window.showInformationMessage("Open a .vex file first.");
     return;
   }
@@ -81,7 +79,12 @@ export function activate(context: ExtensionContext): void {
     if (activeWebviewView == null) {
       return;
     }
-    const state = await readComposerState(context).catch((): ComposerState => ({ activeId: null, tabs: [] }));
+    let state: ComposerState;
+    try {
+      state = await readComposerState(context);
+    } catch {
+      state = { activeId: null, tabs: [] };
+    }
     if (stateChanged(lastState, state)) {
       lastState = state;
       sendState(activeWebviewView, state);

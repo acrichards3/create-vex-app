@@ -34,9 +34,9 @@ export type LabelSpanInLine = {
 
 export type LabelSpanParseResult = { span: LabelSpanInLine | null };
 
-export function parseDescribeLabelSpanInContent(content: string): LabelSpanParseResult {
+function parseLabelSpanWithPattern(content: string, pattern: RegExp): LabelSpanParseResult {
   const trimmed = content.trimStart();
-  const m = /^describe\s*:\s*/iu.exec(trimmed);
+  const m = pattern.exec(trimmed);
   if (m == null) {
     return { span: null };
   }
@@ -52,22 +52,15 @@ export function parseDescribeLabelSpanInContent(content: string): LabelSpanParse
   };
 }
 
+const DESCRIBE_LABEL_PATTERN = /^describe\s*:\s*/iu;
+const LIST_LABEL_PATTERN = /^(when|and|it)\s*:\s*/iu;
+
+export function parseDescribeLabelSpanInContent(content: string): LabelSpanParseResult {
+  return parseLabelSpanWithPattern(content, DESCRIBE_LABEL_PATTERN);
+}
+
 export function parseListLabelSpanInContent(content: string): LabelSpanParseResult {
-  const trimmed = content.trimStart();
-  const m = /^(when|and|it)\s*:\s*/iu.exec(trimmed);
-  if (m == null) {
-    return { span: null };
-  }
-  const rest = trimmed.slice(m[0].length);
-  const prefixOffset = content.length - trimmed.length;
-  const startInTrimmed = m[0].length + (rest.length - rest.trimStart().length);
-  const endInTrimmed = m[0].length + rest.trimEnd().length;
-  return {
-    span: {
-      end: prefixOffset + endInTrimmed,
-      start: prefixOffset + startInTrimmed,
-    },
-  };
+  return parseLabelSpanWithPattern(content, LIST_LABEL_PATTERN);
 }
 
 export function parseListLineParts(content: string): { keyword: null | string; label: string } {

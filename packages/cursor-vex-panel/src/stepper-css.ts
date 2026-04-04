@@ -71,12 +71,6 @@ export const VEX_STEPPER_INLINE_CSS = `
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .vex-no-agents {
-      font-size: 10px;
-      color: rgba(196, 181, 253, 0.4);
-      padding: 4px 0;
-      text-align: center;
-    }
     .vex-track {
       display: flex;
       flex-direction: row;

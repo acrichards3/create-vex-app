@@ -4,7 +4,9 @@ import { renderDescribeBlock } from "./tree-paint";
 import { applySvgZoom, createViewportState, fitTreeToViewport, initViewportControls } from "./viewport-controls";
 
 declare function acquireVsCodeApi(): {
+  getState(): unknown;
   postMessage(message: unknown): void;
+  setState(state: unknown): void;
 };
 
 type VexVisualPayload =
@@ -44,8 +46,19 @@ const vscode = acquireVsCodeApi();
 const viewportEl = document.getElementById("vex-ed-viewport");
 const contentEl = document.getElementById("vex-ed-content");
 
-const savedEditorState = vscode.getState() as { selectedTabIndex?: number } | undefined;
-let selectedTabIndex = savedEditorState?.selectedTabIndex ?? 0;
+function restoreTabIndex(): number {
+  const saved: unknown = vscode.getState();
+  if (typeof saved !== "object" || saved === null) {
+    return 0;
+  }
+  const idx = (saved as Record<string, unknown>)["selectedTabIndex"];
+  if (typeof idx !== "number") {
+    return 0;
+  }
+  return idx;
+}
+
+let selectedTabIndex = restoreTabIndex();
 let lastDescribeCount = 0;
 let lastDocument: VexDocument | null = null;
 let hasDoneInitialViewportReset = false;
