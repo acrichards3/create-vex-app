@@ -3,6 +3,18 @@
   "hooks": {
     "preToolUse": [
       {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Write"
+      },
+      {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Delete"
+      },
+      {
+        "command": ".cursor/hooks/vex-step-guard.sh",
+        "matcher": "Shell"
+      },
+      {
         "command": ".cursor/hooks/eslint-guard.sh",
         "matcher": "Write"
       },

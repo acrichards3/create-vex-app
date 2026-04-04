@@ -35,3 +35,9 @@ coverage/
 
 # Misc
 .cache/
+
+# Vex Studio (auto-managed by extension)
+.vex-workflow
+.vex-advance
+.cursor/rules/vex-workflow.mdc
+.cursor/hooks/vex-step-guard.sh
